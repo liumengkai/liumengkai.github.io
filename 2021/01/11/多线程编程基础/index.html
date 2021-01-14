@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Liu&#39;s Blog">
 <meta property="og:description" content="多线程编程基础本文记载了关于多线程编程的一些基础知识，不断补充">
 <meta property="article:published_time" content="2021-01-11T14:56:40.942Z">
-<meta property="article:modified_time" content="2021-01-11T16:03:32.962Z">
+<meta property="article:modified_time" content="2021-01-14T15:47:50.888Z">
 <meta property="article:author" content="MengKai Liu">
 <meta name="twitter:card" content="summary">
 
@@ -354,7 +354,11 @@
 <p>语句 2 不是：先读取 x 的值，再去给 y 赋值</p>
 <p>语句 3 不是：先读取 x 的值再加 1，再赋值给 x</p>
 <p>语句 4：先读取 x 的值再加 1，再重新写回</p>
-<p>我们运行代码在 JVM 上的时候，JVM 是按照我们写代码的顺序进行一行行的执行吗，当然不是，编译器会根据底层硬件等信息对指令执行顺序进行重排，提高效率，JVM 中有一些推导有序性的方法叫做”happens-before”原则，如果两个操作不能通过 happens-before 来进行推导那么就认为两个语句是可以进行重排序的。</p>
+<p>所以上面只有第一个操作是原子性的，剩下三个其实都是原子性操作的组合</p>
+<h4 id="JVM 可见性如何"><a href="#JVM 可见性如何" class="headerlink" title="JVM 可见性如何"></a>JVM 可见性如何</h4><p>  JAVA 通过关键字 volatile 关键字来实现可见性，被 volatile 关键字修饰的共享变量将会在被修改后立刻更新到主存中，并且其他线程如果想读取这个被修改过的共享变量就必须去主存中重新加载一遍。</p>
+<p>​    另外我们上面提到过的 synchronized 关键字和 Lock 关键字都可以保证可见性，但是这种可见性是表现出来的可见性，这两个关键字限制了同时只能有一个线程去访问，修改完成之后将变量重写回主存中之后才会解锁</p>
+<h4 id="JVM 有序性如何"><a href="#JVM 有序性如何" class="headerlink" title="JVM 有序性如何"></a>JVM 有序性如何</h4><p>​    我们提到过 JVM 是允许指令重排的，这个意思就是允许编译器对指令执行顺序进行重新排序以获得更好的性能，但是会带来的问题就是会影响程序的执行效果，那么 JVM 如何来保证多线程中的有序性呢？主要通过三个关键字 volatile 以及 synchronized 和 Lock，后两个很容易理解，因为规定了只能由一个线程访问所以相当于将多线程的问题直接转变成在单线程的情况下运行，自然就不会出现那样的问题，那么第一个关键字主要是通过什么呢？这个我们后面再说。其中 JVM 还规定了一个排序原则：happens-before 原则，这个是 JVM 推断语句变换顺序的时候会不会最终效果一样的准则，如果两个操作不能通过 happens-before 来进行推导那么就认为两个语句是可以进行重排序的。</p>
+<p>​    注意 happens-before 原则适用于推导语句的前后顺序关系，如果语句不能从 happens-beofre 中推导出来，那么就认为这两个语句是无序的，不要搞混了</p>
 <p>下面就来具体介绍下 happens-before 原则（先行发生原则）：</p>
 <ul>
 <li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
@@ -366,9 +370,114 @@
 <li>线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过 Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行</li>
 <li>对象终结规则：一个对象的初始化完成先行发生于他的 finalize()方法的开始</li>
 </ul>
+<p>关于 happens-before 解析详看这篇文章：<a href="https://segmentfault.com/a/1190000011458941" target="_blank" rel="noopener">https://segmentfault.com/a/1190000011458941</a></p>
+<p>后面有时间了我也会详细的看一看，然后总结一下，哭 好忙~</p>
+<h3 id="讲解关于 Volatile 关键字"><a href="# 讲解关于 Volatile 关键字" class="headerlink" title="讲解关于 Volatile 关键字"></a>讲解关于 Volatile 关键字</h3><p>​    还是针对上面三个多线程中讨论的地方：可见性，原子性，有序性，我们来讨论一下 Volatile 关键字如何操作这三方面的</p>
+<h4 id="Volatile 可见性？"><a href="#Volatile 可见性？" class="headerlink" title="Volatile 可见性？"></a>Volatile 可见性？</h4><p>​    Volatile 可以保证可见性嘛？答案是肯定的，被 Volatile 修饰过的变量在被线程 A 修改过后必须马上写回到主存中，所以效果上来看，Volatile 这个关键字是保证了变量的可见性的，这个操作和我们前面提到的缓存一致性协议有着千丝万缕的关系，可以说 Volatile 底层就是缓存一致性协议的实现，具体可以看这篇文章(好文真多)：</p>
+<p><a href="https://blog.csdn.net/mashaokang1314/article/details/96571818" target="_blank" rel="noopener">https://blog.csdn.net/mashaokang1314/article/details/96571818</a></p>
+<p> Volatile 实现内存可见性是通过 store 和 load 指令完成的；也就是对 volatile 变量执行写操作时，会在写操作后加入一条 store 指令，即强迫线程将最新的值刷新到主内存中；而在读操作时，会加入一条 load 指令，即强迫从主内存中读入变量的值。写操作之后紧跟着写回主存的操作，读必须从主存中读取，这个就是 volatile 保证可见性的方法。</p>
+<h4 id="Volatile 原子性？"><a href="#Volatile 原子性？" class="headerlink" title="Volatile 原子性？"></a>Volatile 原子性？</h4><p>​        上面我们知道了 Volatile 是具有可见性的，那我们来查看一下下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 十个线程各自循环 1000 次对一个 volatile 修饰的共享变量来进行自增</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">volatile</span> <span class="keyword">int</span> inc = <span class="number">0</span>;</span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">increase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        inc++;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Test test = <span class="keyword">new</span> Test();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">            <span class="keyword">new</span> Thread()&#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">0</span>;j&lt;<span class="number">1000</span>;j++)</span><br><span class="line">                        test.increase();</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;.start();</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        <span class="keyword">while</span>(Thread.activeCount()&gt;<span class="number">1</span>)  <span class="comment">// 保证前面的线程都执行完</span></span><br><span class="line">            Thread.yield();</span><br><span class="line">        System.out.println(test.inc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    上面的代码我们想当然的会觉得，既然已经被 Volatile 修饰了，那其中一个线程修改完成写回之后其他线程马上知道了，并且重新从主存中读取，那么最终的结果应该是 10*1000 = 10000，但是实验发现结果不是这样的，我们发现每次每次输出的都要比 10000 小，这是因为什么呢？</p>
+<p>​    首先我们应该考虑一下我们给 test 这个共享变量 +1 的操作都有哪些，我们提到过自增变量是不具备原子性的，他需要先取回自己变量的值，+1，写回，这是三个原子性操作，而 volatile 保证的是如果这个共享变量被修改了，那么所有的线程中这个编程无效，重新读取，如果线程 A 只是读取了共享变量 test，然后线程 A 去忙别的了，这时候线程 B 又读取了共享变量 test 进行 +1 操作，然后将变量写回，这时候线程 A 已经读取了变量 test，紧接着他也进行 +1 然后写回，那么就是两个程序执行完毕之后 test 仅仅加了一次，这时候如果有疑惑建议回顾一下上面 volatile 如何保证可见性。</p>
+<p>​    那如何保证原子性呢？使用 synchronized，Lock，AtomicInteger，操作都可以具体不展开了，因为我还需要查~</p>
+<h4 id="Volatile 顺序性"><a href="#Volatile 顺序性" class="headerlink" title="Volatile 顺序性"></a>Volatile 顺序性</h4><p>​    Volatile 可以保证程序的部分顺序执行，保证“部分”顺序执行是什么意思呢？下面举一个例子：</p>
+<p><a href="https://www.cnblogs.com/dolphin0520/p/3920373.html" target="_blank" rel="noopener">参考链接</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//x、y 为非 volatile 变量</span></span><br><span class="line"><span class="comment">//flag 为 volatile 变量</span></span><br><span class="line"> </span><br><span class="line">x = <span class="number">2</span>;        <span class="comment">// 语句 1</span></span><br><span class="line">y = <span class="number">0</span>;        <span class="comment">// 语句 2</span></span><br><span class="line">flag = <span class="keyword">true</span>;  <span class="comment">// 语句 3</span></span><br><span class="line">x = <span class="number">4</span>;         <span class="comment">// 语句 4</span></span><br><span class="line">y = -<span class="number">1</span>;       <span class="comment">// 语句 5</span></span><br></pre></td></tr></table></figure>
+
+<p>flag 是被 volatile 修饰的变量，那他会带来什么效果呢？</p>
+<p>（1）flag 之前的代码全部执行了，flag 后面的代码还没有开始执行</p>
+<p>（2）语句 1 和语句 2 的顺序不能确定，但是语句 1，2 肯定不能放在 flag 后面执行，同理语句 3，4 的顺序不能确定，但是不能放在 flag 之前执行</p>
+<h3 id="什么时候使用 Volatile？"><a href="# 什么时候使用 Volatile？" class="headerlink" title="什么时候使用 Volatile？"></a>什么时候使用 Volatile？</h3><p>​    我们知道多线程经常用的关键字就是 synchronized 以及 volatile，那么他们各自都有什么作用呢？synchronized 是防止多个线程同时执行一段代码，相当于给这段代码加锁了，不断线程过来请求访问这段代码，如果加锁了就只能等，所有 Volatile 在效率上是优于 synchronized 的，但是 Volatile 是不能保证操作的原子性的，所以有时候必须结合 synchronized 一起来用，那什么时候可以只用 Volatile 这个关键字呢？</p>
+<p>（1）对变量的写操作不依赖当前的变量值</p>
+<p>（2）该变量没有包含在具有其他变量的不变式中</p>
+<p>上面两个条件就是针对 Volatile 不能保证原子性，所以就不能随便改变共享变量的数值，哪怕是被 Volatile 修饰的，下面举例什么时候使用 Volatile</p>
+<h4 id="更改状态标记量："><a href="# 更改状态标记量：" class="headerlink" title="更改状态标记量："></a>更改状态标记量：</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="keyword">boolean</span> flag = <span class="keyword">false</span>;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">while</span>(!flag)&#123;</span><br><span class="line">    doSomething();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setFlag</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    flag = <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段代码中的 setFlag 方法将 flag 置为 true，哪怕出现了原子性问题，线程 A 读取了然后停一会，期间线程 B 读取了重写会主存中为 true，这时候线程 A 再写一遍 true 也是无所谓的</p>
+<h4 id="double-check-volatile"><a href="#double-check-volatile" class="headerlink" title="double check+volatile:"></a>double check+volatile:</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">null</span>;</span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         </span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(instance==<span class="keyword">null</span>)</span><br><span class="line">                    instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面是为了实现单例模式使用了 double check，因为 synchronized 如果直接修饰整个 getInstance 方法会导致效率变低，我们只需要初始化的时候进行加锁即可，就是下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(instance==<span class="keyword">null</span>)</span><br><span class="line">                    instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">return</span> uniqueSingleton;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="双重检查锁（double-checked-locking）"><a href="# 双重检查锁（double-checked-locking）" class="headerlink" title="双重检查锁（double checked locking）"></a>双重检查锁（double checked locking）</h5><p>先判断对象是否已经被初始化，再决定要不要加锁，双重检查流程如下：</p>
+<ol>
+<li>检查变量是否被初始化(不去获得锁)，如果已被初始化则立即返回。</li>
+<li>获取锁。</li>
+<li>再次检查变量是否已经被初始化，如果还没被初始化就初始化一个对象。</li>
+</ol>
+<p>执行双重检查是因为，如果多个线程同时了通过了第一次检查，并且其中一个线程首先通过了第二次检查并实例化了对象，那么剩余通过了第一次检查的线程就不会再去实例化对象。</p>
+<p>这样，除了初始化的时候会出现加锁的情况，后续的所有调用都会避免加锁而直接返回，解决了性能消耗的问题。否则每一次调用 getInstance()方法都会加锁，性能低下。</p>
+<h5 id="隐患"><a href="# 隐患" class="headerlink" title="隐患"></a>隐患 </h5><p> 上述写法看似解决了问题，但是有个很大的隐患。实例化对象的那行代码（标记为 error 的那行），实际上可以分解成以下三个步骤：</p>
+<ol>
+<li>分配内存空间</li>
+<li>初始化对象</li>
+<li>将对象指向刚分配的内存空间</li>
+</ol>
+<p>但是有些编译器为了性能的原因，可能会将第二步和第三步进行 <strong> 重排序</strong>，顺序就成了：</p>
+<ol>
+<li>分配内存空间</li>
+<li>将对象指向刚分配的内存空间</li>
+<li>初始化对象</li>
+</ol>
+<p>现在考虑重排序后，两个线程发生了以下调用：</p>
+<table>
+<thead>
+<tr>
+<th align="left">Time</th>
+<th align="left">Thread A</th>
+<th align="left">Thread B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">T1</td>
+<td align="left">检查到 Singleton 为空</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T2</td>
+<td align="left">获取锁</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T3</td>
+<td align="left">再次检查到 Singleton 为空</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T4</td>
+<td align="left">为 Singleton 分配内存空间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T5</td>
+<td align="left">将 Singleton 指向内存空间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T6</td>
+<td align="left"></td>
+<td align="left">检查到 Singleton 不为空</td>
+</tr>
+<tr>
+<td align="left">T7</td>
+<td align="left"></td>
+<td align="left">访问 Singleton（此时对象还未完成初始化）</td>
+</tr>
+<tr>
+<td align="left">T8</td>
+<td align="left">初始化 Singleton</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>在这种情况下，T7 时刻线程 B 对 Singleton 的访问，访问的是一个 <strong> 初始化未完成 </strong> 的对象。</p>
+<p>为了解决上述问题，需要在 Singleton 前加入关键字<code>volatile</code>。使用了 volatile 关键字后，重排序被禁止，所有的写（write）操作都将发生在读（read）操作之前。</p>
+<p>至此，双重检查锁就可以完美工作了。</p>
 <p>参考：</p>
 <p><a href="https://www.cnblogs.com/dolphin0520/p/3920373.html" target="_blank" rel="noopener">https://www.cnblogs.com/dolphin0520/p/3920373.html</a></p>
 <p><a href="https://cloud.tencent.com/developer/article/1548942" target="_blank" rel="noopener">https://cloud.tencent.com/developer/article/1548942</a></p>
+<p><a href="https://www.cnblogs.com/xz816111/p/8470048.html" target="_blank" rel="noopener">https://www.cnblogs.com/xz816111/p/8470048.html</a></p>
 
       
     </div>
@@ -557,7 +666,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#多线程编程基础"><span class="nav-number">1.</span> <span class="nav-text">多线程编程基础 </span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cpu 高速缓存"><span class="nav-number">1.1.</span> <span class="nav-text">cpu 高速缓存 </span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存一致性"><span class="nav-number">1.2.</span> <span class="nav-text">缓存一致性 </span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何解决缓存一致性问题"><span class="nav-number">1.3.</span> <span class="nav-text">如何解决缓存一致性问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#并发编程中常见的三个概念"><span class="nav-number">1.4.</span> <span class="nav-text">并发编程中常见的三个概念 </span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#原子性"><span class="nav-number">1.4.1.</span> <span class="nav-text"> 原子性 </span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可见性"><span class="nav-number">1.4.2.</span> <span class="nav-text">可见性 </span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#有序性"><span class="nav-number">1.4.3.</span> <span class="nav-text">有序性 </span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM 对多线程的 native 操作"><span class="nav-number">1.5.</span> <span class="nav-text">JVM 对多线程的 native 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM 原子性"><span class="nav-number">1.5.1.</span> <span class="nav-text">JVM 原子性</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#多线程编程基础"><span class="nav-number">1.</span> <span class="nav-text">多线程编程基础 </span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cpu 高速缓存"><span class="nav-number">1.1.</span> <span class="nav-text">cpu 高速缓存 </span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存一致性"><span class="nav-number">1.2.</span> <span class="nav-text">缓存一致性 </span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何解决缓存一致性问题"><span class="nav-number">1.3.</span> <span class="nav-text">如何解决缓存一致性问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#并发编程中常见的三个概念"><span class="nav-number">1.4.</span> <span class="nav-text">并发编程中常见的三个概念 </span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#原子性"><span class="nav-number">1.4.1.</span> <span class="nav-text"> 原子性 </span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可见性"><span class="nav-number">1.4.2.</span> <span class="nav-text">可见性 </span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#有序性"><span class="nav-number">1.4.3.</span> <span class="nav-text">有序性 </span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM 对多线程的 native 操作"><span class="nav-number">1.5.</span> <span class="nav-text">JVM 对多线程的 native 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM 原子性"><span class="nav-number">1.5.1.</span> <span class="nav-text">JVM 原子性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM 可见性如何"><span class="nav-number">1.5.2.</span> <span class="nav-text">JVM 可见性如何</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM 有序性如何"><span class="nav-number">1.5.3.</span> <span class="nav-text">JVM 有序性如何</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#讲解关于 Volatile 关键字"><span class="nav-number">1.6.</span> <span class="nav-text">讲解关于 Volatile 关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Volatile 可见性？"><span class="nav-number">1.6.1.</span> <span class="nav-text">Volatile 可见性？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Volatile 原子性？"><span class="nav-number">1.6.2.</span> <span class="nav-text">Volatile 原子性？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Volatile 顺序性"><span class="nav-number">1.6.3.</span> <span class="nav-text">Volatile 顺序性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候使用 Volatile？"><span class="nav-number">1.7.</span> <span class="nav-text">什么时候使用 Volatile？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#更改状态标记量："><span class="nav-number">1.7.1.</span> <span class="nav-text">更改状态标记量：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#double-check-volatile"><span class="nav-number">1.7.2.</span> <span class="nav-text">double check+volatile:</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#双重检查锁（double-checked-locking）"><span class="nav-number">1.7.2.1.</span> <span class="nav-text">双重检查锁（double checked locking）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#隐患"><span class="nav-number">1.7.2.2.</span> <span class="nav-text">隐患 </span></a></li></ol></li></ol></li></ol></li></ol></div>
             
 
           </div>
