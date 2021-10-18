@@ -20,30 +20,40 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="好文章是打磨出来的">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Liu&#39;s blog">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac安装grafana+Grafana连接ClickHouse">
+<meta property="og:url" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/index.html">
 <meta property="og:site_name" content="Liu&#39;s blog">
-<meta property="og:description" content="好文章是打磨出来的">
+<meta property="og:description" content="Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse">
 <meta property="og:locale">
+<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png">
+<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png">
+<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png">
+<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png">
+<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png">
+<meta property="article:published_time" content="2021-10-13T09:11:29.000Z">
+<meta property="article:modified_time" content="2021-10-18T12:18:30.251Z">
 <meta property="article:author" content="Super Pikachu">
+<meta property="article:tag" content="ClickHouse">
+<meta property="article:tag" content="Grafana">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png">
 
-<link rel="canonical" href="http://example.com/">
+<link rel="canonical" href="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-Hans'
   };
 </script>
 
-  <title>Liu's blog</title>
+  <title>Mac安装grafana+Grafana连接ClickHouse | Liu's blog</title>
   
 
 
@@ -147,76 +157,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">Superset查询会丢数据问题排查</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2021-10-18 20:22:01 / Modified: 21:01:36" itemprop="dateCreated datePublished" datetime="2021-10-18T20:22:01+08:00">2021-10-18</time>
-            </span>
-
-          
-
-        </div>
-      </header>
 
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Superset版本 1.3.0</p>
-<p>查询结果会比正确结果少两条数据</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
@@ -232,10 +176,9 @@
       <meta itemprop="name" content="Liu's blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/" class="post-title-link" itemprop="url">Mac安装grafana+Grafana连接ClickHouse</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          Mac安装grafana+Grafana连接ClickHouse
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -265,234 +208,68 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
+        <p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
+<span id="more"></span>
+
+<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后我们用命令检查一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
+
+<p>使用brew启动grafana服务</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
+
+<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
+
+<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a target="_blank" rel="noopener" href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation">https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation</a> 有两种安装方式。</p>
+<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
+<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
+<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
+<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
+
+<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a target="_blank" rel="noopener" href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed">https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed</a></p>
+<p>参考文章：</p>
+<p><a target="_blank" rel="noopener" href="https://grafana.com/docs/grafana/latest/installation/mac/">https://grafana.com/docs/grafana/latest/installation/mac/</a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/ClickHouse/" rel="tag"># ClickHouse</a>
+              <a href="/tags/Grafana/" rel="tag"># Grafana</a>
+          </div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/" class="post-title-link" itemprop="url">学习clickhouse详细知识</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2021-10-08 19:21:49 / Modified: 21:27:22" itemprop="dateCreated datePublished" datetime="2021-10-08T19:21:49+08:00">2021-10-08</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>ClickHouse基础应用与内部原理</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="post-title-link" itemprop="url">多线程编程基础</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2021-08-26 11:25:18 / Modified: 11:27:09" itemprop="dateCreated datePublished" datetime="2021-08-26T11:25:18+08:00">2021-08-26</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/" rel="prev" title="学习clickhouse详细知识">
+      <i class="fa fa-chevron-left"></i> 学习clickhouse详细知识
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" rel="next" title="Superset查询会丢数据问题排查">
+      Superset查询会丢数据问题排查 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">Clickhouse 入门与实践</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2021-08-26 11:09:27" itemprop="dateCreated datePublished" datetime="2021-08-26T11:09:27+08:00">2021-08-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-08 19:21:28" itemprop="dateModified" datetime="2021-10-08T19:21:28+08:00">2021-10-08</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
   
 
 
@@ -545,6 +322,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mac%E5%AE%89%E8%A3%85grafana"><span class="nav-number">1.</span> <span class="nav-text">Mac安装grafana</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85grafana-clickhouse%E6%8F%92%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">安装grafana-clickhouse插件</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
