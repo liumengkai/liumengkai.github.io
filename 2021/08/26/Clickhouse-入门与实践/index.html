@@ -1,216 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="好文章是打磨出来的">
+    <meta name="author" content="SuperPiKaChu">
+    
+    <title>
+        
+            Clickhouse 入门与实践 |
+        
+        Liu&#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
 
-<link rel="stylesheet" href="/css/main.css">
+    <link rel="shortcut icon" href="/images/logo.svg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
 
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-Hans"};
+    KEEP.theme_config = {"toc":{"enable":false,"number":false,"expand_all":false,"init_open":false},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.png","favicon":"/images/logo.svg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":false,"scale":false},"first_screen":{"enable":false,"background_img":"/images/bg.svg","description":"Keep writing and Keep loving."},"scroll":{"progress_bar":{"enable":false},"percent":{"enable":false}}},"local_search":{"enable":false,"preload":false},"code_copy":{"enable":false,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":false},"version":"3.4.3"};
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
   </script>
-
-  <meta name="description" content="ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Clickhouse 入门与实践">
-<meta property="og:url" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/index.html">
-<meta property="og:site_name" content="Liu&#39;s blog">
-<meta property="og:description" content="ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。">
-<meta property="og:locale">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/shujuku.jpg">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/jiancha.png">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/chaxunjieguo.png">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/clickhouse_yinqing.png">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/yinqing.png">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/zookeeper.png">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/clickhouse.png">
-<meta property="og:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/jiqunxinxi.png">
-<meta property="article:published_time" content="2021-08-26T03:09:27.000Z">
-<meta property="article:modified_time" content="2021-10-08T11:21:28.322Z">
-<meta property="article:author" content="Super Pikachu">
-<meta property="article:tag" content="ClickHouse">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/shujuku.jpg">
-
-<link rel="canonical" href="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/">
+<meta name="generator" content="Hexo 5.4.0"></head>
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-Hans'
-  };
-</script>
-
-  <title>Clickhouse 入门与实践 | Liu's blog</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Liu's blog</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">中二是最后的热血</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
+<body>
+<div class="progress-bar-container">
+    
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
+</div>
 
 
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
+<main class="page-container">
 
-          <div class="content post posts-expand">
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
             
+            <a class="logo-title" href="/">
+                Liu&#39;s blog
+            </a>
+        </div>
 
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/">
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+        </ul>
+    </div>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Clickhouse 入门与实践
-        </h1>
+    <div class="window-mask"></div>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
+</header>
 
-              <time title="Created: 2021-08-26 11:09:27" itemprop="dateCreated datePublished" datetime="2021-08-26T11:09:27+08:00">2021-08-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-08 19:21:28" itemprop="dateModified" datetime="2021-10-08T19:21:28+08:00">2021-10-08</time>
-              </span>
-
-          
 
         </div>
-      </header>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">Clickhouse 入门与实践</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.png">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">SuperPiKaChu</span>
+                        
+                            <span class="author-label">Lv1</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;2021-08-26 11:09:27
+    </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/ClickHouse/">ClickHouse</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
 
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    
+</div>
 
-      
-        <p>ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。</p>
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <p>ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。</p>
 <span id="more"></span>
 
 <h1 id="OLAP和OLTP区别"><a href="#OLAP和OLTP区别" class="headerlink" title="OLAP和OLTP区别"></a>OLAP和OLTP区别</h1><p>上面那句话是来自ClickHouse中文官网</p>
@@ -287,7 +241,7 @@
 <p>这里我们建立一个库名叫做adtiming</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clickhouse<span class="operator">-</span>client <span class="comment">--query &quot;CREATE DATABASE IF NOT EXISTS adtiming&quot;</span></span><br></pre></td></tr></table></figure>
 
-<p>建表语法要复杂的多，<a target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/sql-reference/statements/create/">建表文档</a></p>
+<p>建表语法要复杂的多，<a class="link"   target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/sql-reference/statements/create/" >建表文档<i class="fas fa-external-link-alt"></i></a></p>
 <p>分别创建hits表以及visits表</p>
 <div class='spoiler collapsed'>
     <div class='spoiler-title'>
@@ -303,8 +257,8 @@
     </div>
 </div>
 
-<p>我们可以看到两张表分别使用了不同的表引擎，其中 <code>hits_v1</code>使用 <a target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/mergetree/">MergeTree引擎</a>，而<code>visits_v1</code>使用 <a target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/collapsingmergetree/">Collapsing</a>引擎</p>
-<p>对于我们需要不同功能的表或者不同使用途径的表Clickhouse具有不同的表引擎来应对，<a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/762461">表引擎文档</a> <a target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/mergetree/">表引擎官方文档</a></p>
+<p>我们可以看到两张表分别使用了不同的表引擎，其中 <code>hits_v1</code>使用 <a class="link"   target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/mergetree/" >MergeTree引擎<i class="fas fa-external-link-alt"></i></a>，而<code>visits_v1</code>使用 <a class="link"   target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/collapsingmergetree/" >Collapsing<i class="fas fa-external-link-alt"></i></a>引擎</p>
+<p>对于我们需要不同功能的表或者不同使用途径的表Clickhouse具有不同的表引擎来应对，<a class="link"   target="_blank" rel="noopener" href="https://developer.aliyun.com/article/762461" >表引擎文档<i class="fas fa-external-link-alt"></i></a> <a class="link"   target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/mergetree/" >表引擎官方文档<i class="fas fa-external-link-alt"></i></a></p>
 <p><code>MergeTree</code> 系列的引擎被设计用于插入极大量的数据到一张表当中。数据可以以数据片段的形式一个接着一个的快速写入，数据片段在后台按照一定的规则进行合并。相比在插入时不断修改（重写）已存储的数据，这种策略会高效很多。所以相当于这种表结构适用于插入操作较多，并且一次插入数据较大的情况。</p>
 <p><code>CollapsingMergeTree</code> 会异步的删除（折叠） <code>Sign</code> 有 <code>1</code> 和 <code>-1</code> 且其余所有字段的值都相等的成对的行。没有成对的行会被保留。</p>
 <p>每个引擎实际上就代表一种需求，比如CollapsingMergeTree就是去重作用。</p>
@@ -386,7 +340,7 @@
 
 <p>version字段会自动的添加到order by末尾，我们在插入数据的之和只要保证同一条数据的version大小，就相当于可以保证它的顺序关系。</p>
 <p><strong>GraphiteMergeTree</strong>： 用来存储时序数据库 Graphites 的数据。</p>
-<p>ClickHouse表引擎种类繁多，其中每一种适合的业务场景都不相同，详细可以参考<a target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/collapsingmergetree/">官方文档</a> 或者一些<a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/762461">三方文档</a>，</p>
+<p>ClickHouse表引擎种类繁多，其中每一种适合的业务场景都不相同，详细可以参考<a class="link"   target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/collapsingmergetree/" >官方文档<i class="fas fa-external-link-alt"></i></a> 或者一些<a class="link"   target="_blank" rel="noopener" href="https://developer.aliyun.com/article/762461" >三方文档<i class="fas fa-external-link-alt"></i></a>，</p>
 <img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/yinqing.png" class="" title="中二是最后的热血">
 
 
@@ -427,7 +381,7 @@
 <p>（1）下面xml信息中的集群名称叫做‘doit_ch_cluster1’，可以随意修改，但是要记住名称</p>
 <p>（2）<shard>代表分片，<replica>代表副本，一个分片可能有多个副本，集群表也可以有多个分片</p>
 <p>（3）下面配置文件集群信息是<clickhouse_remote_servers>标签，注意config.xml中的集群信息叫做什么，一般需要在config.xml中进行一行配置 <code>&lt;remote_servers incl=&quot;clickhouse_remote_servers&quot; /&gt;</code>，意思相当于<remote_servers>标签内容取自<clickhouse_remote_servers>，其他标签也是一样的，虽然听起来多此一举，但是可以将通用的配置信息摘取出来，之和直接scp给各个服务器就行，但是我两台机器中的一台这样配置一直没有生效。。。没错两台中的一台没有生效，另一台生效了，就很无语，只能将其中的配置直接修改到config.xml中，也算是解决了</p>
-<p>（4）macros配置，这个配置创建数据副本表的时候路径可以直接使用宏替换替换，因为我们创建集群表的时候需要保证不同的表以及不同副本在Zookeeper中的路径不同，其中<code>&lt;shard&gt;</code>标签代表的是我们想让哪几台机器组成一个分片集合，同一个分片的分片名称是一样的比如都是01，或者02，而<code>&lt;replica&gt;</code>标签代表的是本台机器的创建的副本的名称标识，副本是即使是同一个分片的副本名称也不能一样，所以这个副本名称一般采用主机名或者ip，这是需要注意的地方，这块理解起来需要结合官方文档](<a target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/replication/">https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/replication/</a>)</p>
+<p>（4）macros配置，这个配置创建数据副本表的时候路径可以直接使用宏替换替换，因为我们创建集群表的时候需要保证不同的表以及不同副本在Zookeeper中的路径不同，其中<code>&lt;shard&gt;</code>标签代表的是我们想让哪几台机器组成一个分片集合，同一个分片的分片名称是一样的比如都是01，或者02，而<code>&lt;replica&gt;</code>标签代表的是本台机器的创建的副本的名称标识，副本是即使是同一个分片的副本名称也不能一样，所以这个副本名称一般采用主机名或者ip，这是需要注意的地方，这块理解起来需要结合官方文档](<a class="link"   target="_blank" rel="noopener" href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/replication/" >https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/replication/<i class="fas fa-external-link-alt"></i></a>)</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">yandex</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- /etc/clickhouse-server/config.xml 中配置的remote_servers的incl属性值，--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 集群名称，可以修改 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">doit_ch_cluster1</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 配置三个分片，每个分片对应一台机器，为每个分片配置一个副本 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shard</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">host</span>&gt;</span>master<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shard</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver1<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shard</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver2<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">doit_ch_cluster1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- zookeeper相关配置 --&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 该标签与config.xml的&lt;zookeeper incl=&quot;zookeeper-servers&quot; optional=&quot;true&quot; /&gt; 保持一致 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>master<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver1<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver2<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 分片和副本标识，shard标签配置分片编号，&lt;replica&gt;配置分片副本主机名，需要修改对应主机上的配置 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">macros</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">replica</span>&gt;</span>doit01<span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">macros</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">networks</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">ip</span>&gt;</span>::/0<span class="tag">&lt;/<span class="name">ip</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">networks</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">clickhouse_compression</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">case</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">min_part_size</span>&gt;</span>10000000000<span class="tag">&lt;/<span class="name">min_part_size</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">min_part_size_ratio</span>&gt;</span>0.01<span class="tag">&lt;/<span class="name">min_part_size_ratio</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">method</span>&gt;</span>lz4<span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">case</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">clickhouse_compression</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">yandex</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
 <li><p>启动ClickHouse集群</p>
 <p>我们在ClickHouse机器上都配置完成之后，确保我们的Zookeeper是开启状态，然后重启ClickHouse集群</p>
@@ -456,182 +410,144 @@
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> user_local <span class="keyword">ON</span> CLUSTER doit_ch_cluster1</span><br><span class="line">(</span><br><span class="line">    `id` Int32,</span><br><span class="line">    `name` String</span><br><span class="line">)</span><br><span class="line">ENGINE <span class="operator">=</span> MergeTree()</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> id</span><br><span class="line"><span class="keyword">PRIMARY</span> KEY id</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> id</span><br></pre></td></tr></table></figure></li>
 </ul>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
-    </div>
-
-    
-    
-    
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/ClickHouse/" rel="tag"># ClickHouse</a>
-          </div>
+        </div>
 
         
 
+        
+            <div class="article-nav">
+                
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">多线程编程基础</span>
+                                <span class="post-nav-item">上一篇</span>
+                            </span>
+                        </a>
+                    </div>
+                
+                
+            </div>
+        
 
         
-    <div class="post-nav">
-      <div class="post-nav-item"></div>
-      <div class="post-nav-item">
-    <a href="/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" rel="next" title="多线程编程基础">
-      多线程编程基础 <i class="fa fa-chevron-right"></i>
-    </a></div>
     </div>
-      </footer>
-    
-  </article>
-  
-  
-  
+</div>
 
 
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
+                
+            </div>
 
         </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#OLAP%E5%92%8COLTP%E5%8C%BA%E5%88%AB"><span class="nav-number">1.</span> <span class="nav-text">OLAP和OLTP区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#OLAP%E5%88%86%E7%B1%BB"><span class="nav-number">1.1.</span> <span class="nav-text">OLAP分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLAP"><span class="nav-number">1.1.1.</span> <span class="nav-text">ROLAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MOLAP"><span class="nav-number">1.1.2.</span> <span class="nav-text">MOLAP</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ClickHouse"><span class="nav-number">2.</span> <span class="nav-text">ClickHouse</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%B8%8E%E9%83%A8%E7%BD%B2"><span class="nav-number">2.1.</span> <span class="nav-text">安装与部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E7%A4%BA%E4%BE%8B%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">2.2.</span> <span class="nav-text">导入示例数据集</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%BA%93%E8%A1%A8"><span class="nav-number">2.2.1.</span> <span class="nav-text">准备库表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E6%95%B0%E6%8D%AE"><span class="nav-number">2.2.2.</span> <span class="nav-text">插入数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2"><span class="nav-number">2.3.</span> <span class="nav-text">查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E6%80%9D%E8%80%83"><span class="nav-number">2.4.</span> <span class="nav-text">简单思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ClickHouse%E8%A1%A8%E5%BC%95%E6%93%8E"><span class="nav-number">2.5.</span> <span class="nav-text">ClickHouse表引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BAClickHouse%E9%9B%86%E7%BE%A4"><span class="nav-number">2.6.</span> <span class="nav-text">搭建ClickHouse集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BADistribute-Local%E8%A1%A8"><span class="nav-number">2.7.</span> <span class="nav-text">创建Distribute+Local表</span></a></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Super Pikachu"
-      src="/images/avatar.png">
-  <p class="site-author-name" itemprop="name">Super Pikachu</p>
-  <div class="site-description" itemprop="description">好文章是打磨出来的</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2020</span>&nbsp;-&nbsp;
+            
+            2021&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">SuperPiKaChu</a>
+        </div>
         
-          <span class="site-state-item-count">5</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">3</span>
-        <span class="site-state-item-name">tags</span>
-      </div>
-  </nav>
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+
+        <!-- go comment -->
+        
+    </ul>
 </div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/liumengkai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;liumengkai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:liu_mengkai@foxmail.com" title="E-Mail → mailto:liu_mengkai@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-  </div>
 
+        </div>
+    
 
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
 
-      </div>
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="fas fa-arrow-up"></i>
+            </li>
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+    </ul>
+</div>
 
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
 
+    
 
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2021</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Super Pikachu</span>
+    <div class="image-viewer-container">
+    <img src="">
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
-  </div>
-
-        
 
 
+    
 
+</main>
 
 
 
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
 <script src="/js/utils.js"></script>
 
-<script src="/js/motion.js"></script>
+<script src="/js/main.js"></script>
 
+<script src="/js/header-shrink.js"></script>
 
-<script src="/js/schemes/pisces.js"></script>
+<script src="/js/back2top.js"></script>
 
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
+<script src="/js/dark-light-toggle.js"></script>
 
 
 
@@ -640,16 +556,11 @@
 
 
 
+<div class="post-scripts">
+    
+</div>
 
 
-
-
-
-
-
-  
-
-  
 
 </body>
 </html>

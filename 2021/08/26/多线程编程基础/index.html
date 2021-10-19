@@ -1,200 +1,159 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="好文章是打磨出来的">
+    <meta name="author" content="SuperPiKaChu">
+    
+    <title>
+        
+            多线程编程基础 |
+        
+        Liu&#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
 
-<link rel="stylesheet" href="/css/main.css">
+    <link rel="shortcut icon" href="/images/logo.svg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
 
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-Hans"};
+    KEEP.theme_config = {"toc":{"enable":false,"number":false,"expand_all":false,"init_open":false},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.png","favicon":"/images/logo.svg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":false,"scale":false},"first_screen":{"enable":false,"background_img":"/images/bg.svg","description":"Keep writing and Keep loving."},"scroll":{"progress_bar":{"enable":false},"percent":{"enable":false}}},"local_search":{"enable":false,"preload":false},"code_copy":{"enable":false,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":false},"version":"3.4.3"};
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
   </script>
-
-  <meta name="description" content="本文记载了关于多线程编程的一些基础知识，不断补充">
-<meta property="og:type" content="article">
-<meta property="og:title" content="多线程编程基础">
-<meta property="og:url" content="http://example.com/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/index.html">
-<meta property="og:site_name" content="Liu&#39;s blog">
-<meta property="og:description" content="本文记载了关于多线程编程的一些基础知识，不断补充">
-<meta property="og:locale">
-<meta property="article:published_time" content="2021-08-26T03:25:18.000Z">
-<meta property="article:modified_time" content="2021-08-26T03:27:09.550Z">
-<meta property="article:author" content="Super Pikachu">
-<meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="http://example.com/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+<meta name="generator" content="Hexo 5.4.0"></head>
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-Hans'
-  };
-</script>
-
-  <title>多线程编程基础 | Liu's blog</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Liu's blog</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">中二是最后的热血</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
+<body>
+<div class="progress-bar-container">
+    
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
+</div>
 
 
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
+<main class="page-container">
 
-          <div class="content post posts-expand">
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
             
+            <a class="logo-title" href="/">
+                Liu&#39;s blog
+            </a>
+        </div>
 
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+        </ul>
+    </div>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          多线程编程基础
-        </h1>
+    <div class="window-mask"></div>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
+</header>
 
-              <time title="Created: 2021-08-26 11:25:18 / Modified: 11:27:09" itemprop="dateCreated datePublished" datetime="2021-08-26T11:25:18+08:00">2021-08-26</time>
-            </span>
-
-          
 
         </div>
-      </header>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">多线程编程基础</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.png">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">SuperPiKaChu</span>
+                        
+                            <span class="author-label">Lv1</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;2021-08-26 11:25:18
+    </span>
+    
+    
 
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    
+</div>
 
-      
-        <p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
 <span id="more"></span>
 
 <h2 id="多线程编程基础"><a href="#多线程编程基础" class="headerlink" title="多线程编程基础"></a>多线程编程基础</h2><h3 id="cpu-高速缓存"><a href="#cpu-高速缓存" class="headerlink" title="cpu 高速缓存"></a>cpu 高速缓存</h3><p>为了解决 cpu 和主存之间的速率差，CPU 中的高速缓存运营而生，程序运算时会将数据复制一份到 CPU 的高速缓存中，当 CPU 计算时直接从高速缓存中取数据，然后计算完成之后将数据写回高速缓存中，隔一段时间刷新一次高速缓存中内容到主存</p>
@@ -246,11 +205,11 @@
 <li>线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过 Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行</li>
 <li>对象终结规则：一个对象的初始化完成先行发生于他的 finalize()方法的开始</li>
 </ul>
-<p>关于 happens-before 解析详看这篇文章：<a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000011458941">https://segmentfault.com/a/1190000011458941</a></p>
+<p>关于 happens-before 解析详看这篇文章：<a class="link"   target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000011458941" >https://segmentfault.com/a/1190000011458941<i class="fas fa-external-link-alt"></i></a></p>
 <p>后面有时间了我也会详细的看一看，然后总结一下，哭 好忙~</p>
 <h3 id="讲解关于-Volatile-关键字"><a href="#讲解关于-Volatile-关键字" class="headerlink" title="讲解关于 Volatile 关键字"></a>讲解关于 Volatile 关键字</h3><p> 还是针对上面三个多线程中讨论的地方：可见性，原子性，有序性，我们来讨论一下 Volatile 关键字如何操作这三方面的</p>
 <h4 id="Volatile-可见性？"><a href="#Volatile-可见性？" class="headerlink" title="Volatile 可见性？"></a>Volatile 可见性？</h4><p> Volatile 可以保证可见性嘛？答案是肯定的，被 Volatile 修饰过的变量在被线程 A 修改过后必须马上写回到主存中，所以效果上来看，Volatile 这个关键字是保证了变量的可见性的，这个操作和我们前面提到的缓存一致性协议有着千丝万缕的关系，可以说 Volatile 底层就是缓存一致性协议的实现，具体可以看这篇文章(好文真多)：</p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/mashaokang1314/article/details/96571818">https://blog.csdn.net/mashaokang1314/article/details/96571818</a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/mashaokang1314/article/details/96571818" >https://blog.csdn.net/mashaokang1314/article/details/96571818<i class="fas fa-external-link-alt"></i></a></p>
 <p>Volatile 实现内存可见性是通过 store 和 load 指令完成的；也就是对 volatile 变量执行写操作时，会在写操作后加入一条 store 指令，即强迫线程将最新的值刷新到主内存中；而在读操作时，会加入一条 load 指令，即强迫从主内存中读入变量的值。写操作之后紧跟着写回主存的操作，读必须从主存中读取，这个就是 volatile 保证可见性的方法。</p>
 <h4 id="Volatile-原子性？"><a href="#Volatile-原子性？" class="headerlink" title="Volatile 原子性？"></a>Volatile 原子性？</h4><p> 上面我们知道了 Volatile 是具有可见性的，那我们来查看一下下面的代码：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">// 十个线程各自循环 1000 次对一个 volatile 修饰的共享变量来进行自增</span><br><span class="line">public class Test &#123;</span><br><span class="line">    public volatile int inc = 0;</span><br><span class="line">     </span><br><span class="line">    public void increase() &#123;</span><br><span class="line">        inc++;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final Test test = new Test();</span><br><span class="line">        for(int i=0;i&lt;10;i++)&#123;</span><br><span class="line">            new Thread()&#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    for(int j=0;j&lt;1000;j++)</span><br><span class="line">                        test.increase();</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;.start();</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        while(Thread.activeCount()&gt;1)  // 保证前面的线程都执行完</span><br><span class="line">            Thread.yield();</span><br><span class="line">        System.out.println(test.inc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -259,7 +218,7 @@
 <p> 首先我们应该考虑一下我们给 test 这个共享变量 +1 的操作都有哪些，我们提到过自增变量是不具备原子性的，他需要先取回自己变量的值，+1，写回，这是三个原子性操作，而 volatile 保证的是如果这个共享变量被修改了，那么所有的线程中这个编程无效，重新读取，如果线程 A 只是读取了共享变量 test，然后线程 A 去忙别的了，这时候线程 B 又读取了共享变量 test 进行 +1 操作，然后将变量写回，这时候线程 A 已经读取了变量 test，紧接着他也进行 +1 然后写回，那么就是两个程序执行完毕之后 test 仅仅加了一次，这时候如果有疑惑建议回顾一下上面 volatile 如何保证可见性。</p>
 <p> 那如何保证原子性呢？使用 synchronized，Lock，AtomicInteger，操作都可以具体不展开了，因为我还需要查~</p>
 <h4 id="Volatile-顺序性"><a href="#Volatile-顺序性" class="headerlink" title="Volatile 顺序性"></a>Volatile 顺序性</h4><p> Volatile 可以保证程序的部分顺序执行，保证“部分”顺序执行是什么意思呢？下面举一个例子：</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/dolphin0520/p/3920373.html">参考链接</a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >参考链接<i class="fas fa-external-link-alt"></i></a></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//x、y 为非 volatile 变量</span><br><span class="line">//flag 为 volatile 变量</span><br><span class="line"> </span><br><span class="line">x = 2;        // 语句 1</span><br><span class="line">y = 0;        // 语句 2</span><br><span class="line">flag = true;  // 语句 3</span><br><span class="line">x = 4;         // 语句 4</span><br><span class="line">y = -1;       // 语句 5</span><br></pre></td></tr></table></figure>
 
 <p>flag 是被 volatile 修饰的变量，那他会带来什么效果呢？</p>
@@ -351,186 +310,163 @@
 <p>为了解决上述问题，需要在 Singleton 前加入关键字<code>volatile</code>。使用了 volatile 关键字后，重排序被禁止，所有的写（write）操作都将发生在读（read）操作之前。</p>
 <p>至此，双重检查锁就可以完美工作了。</p>
 <p>参考：</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/dolphin0520/p/3920373.html">https://www.cnblogs.com/dolphin0520/p/3920373.html</a></p>
-<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1548942">https://cloud.tencent.com/developer/article/1548942</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xz816111/p/8470048.html">https://www.cnblogs.com/xz816111/p/8470048.html</a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >https://www.cnblogs.com/dolphin0520/p/3920373.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1548942" >https://cloud.tencent.com/developer/article/1548942<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/xz816111/p/8470048.html" >https://www.cnblogs.com/xz816111/p/8470048.html<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
-    </div>
-
-    
-    
-    
-
-      <footer class="post-footer">
+        </div>
 
         
 
+        
+            <div class="article-nav">
+                
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">学习clickhouse详细知识</span>
+                                <span class="post-nav-item">上一篇</span>
+                            </span>
+                        </a>
+                    </div>
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">Clickhouse 入门与实践</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
 
         
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/" rel="prev" title="Clickhouse 入门与实践">
-      <i class="fa fa-chevron-left"></i> Clickhouse 入门与实践
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/" rel="next" title="学习clickhouse详细知识">
-      学习clickhouse详细知识 <i class="fa fa-chevron-right"></i>
-    </a></div>
     </div>
-      </footer>
-    
-  </article>
-  
-  
-  
+</div>
 
 
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
+                
+            </div>
 
         </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">多线程编程基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cpu-%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98"><span class="nav-number">1.1.</span> <span class="nav-text">cpu 高速缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">缓存一致性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.</span> <span class="nav-text">如何解决缓存一致性问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%AD%E5%B8%B8%E8%A7%81%E7%9A%84%E4%B8%89%E4%B8%AA%E6%A6%82%E5%BF%B5"><span class="nav-number">1.4.</span> <span class="nav-text">并发编程中常见的三个概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-number">1.4.1.</span> <span class="nav-text">原子性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E8%A7%81%E6%80%A7"><span class="nav-number">1.4.2.</span> <span class="nav-text">可见性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E5%BA%8F%E6%80%A7"><span class="nav-number">1.4.3.</span> <span class="nav-text">有序性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM-%E5%AF%B9%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84-native-%E6%93%8D%E4%BD%9C"><span class="nav-number">1.5.</span> <span class="nav-text">JVM 对多线程的 native 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM-%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-number">1.5.1.</span> <span class="nav-text">JVM 原子性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM-%E5%8F%AF%E8%A7%81%E6%80%A7%E5%A6%82%E4%BD%95"><span class="nav-number">1.5.2.</span> <span class="nav-text">JVM 可见性如何</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM-%E6%9C%89%E5%BA%8F%E6%80%A7%E5%A6%82%E4%BD%95"><span class="nav-number">1.5.3.</span> <span class="nav-text">JVM 有序性如何</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B2%E8%A7%A3%E5%85%B3%E4%BA%8E-Volatile-%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">1.6.</span> <span class="nav-text">讲解关于 Volatile 关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Volatile-%E5%8F%AF%E8%A7%81%E6%80%A7%EF%BC%9F"><span class="nav-number">1.6.1.</span> <span class="nav-text">Volatile 可见性？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Volatile-%E5%8E%9F%E5%AD%90%E6%80%A7%EF%BC%9F"><span class="nav-number">1.6.2.</span> <span class="nav-text">Volatile 原子性？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Volatile-%E9%A1%BA%E5%BA%8F%E6%80%A7"><span class="nav-number">1.6.3.</span> <span class="nav-text">Volatile 顺序性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%BD%BF%E7%94%A8-Volatile%EF%BC%9F"><span class="nav-number">1.7.</span> <span class="nav-text">什么时候使用 Volatile？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E6%94%B9%E7%8A%B6%E6%80%81%E6%A0%87%E8%AE%B0%E9%87%8F%EF%BC%9A"><span class="nav-number">1.7.1.</span> <span class="nav-text">更改状态标记量：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#double-check-volatile"><span class="nav-number">1.7.2.</span> <span class="nav-text">double check+volatile:</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%8C%E9%87%8D%E6%A3%80%E6%9F%A5%E9%94%81%EF%BC%88double-checked-locking%EF%BC%89"><span class="nav-number">1.7.2.1.</span> <span class="nav-text">双重检查锁（double checked locking）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9A%90%E6%82%A3"><span class="nav-number">1.7.2.2.</span> <span class="nav-text">隐患</span></a></li></ol></li></ol></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Super Pikachu"
-      src="/images/avatar.png">
-  <p class="site-author-name" itemprop="name">Super Pikachu</p>
-  <div class="site-description" itemprop="description">好文章是打磨出来的</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2020</span>&nbsp;-&nbsp;
+            
+            2021&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">SuperPiKaChu</a>
+        </div>
         
-          <span class="site-state-item-count">5</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">3</span>
-        <span class="site-state-item-name">tags</span>
-      </div>
-  </nav>
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+
+        <!-- go comment -->
+        
+    </ul>
 </div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/liumengkai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;liumengkai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:liu_mengkai@foxmail.com" title="E-Mail → mailto:liu_mengkai@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-  </div>
 
+        </div>
+    
 
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
 
-      </div>
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="fas fa-arrow-up"></i>
+            </li>
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+    </ul>
+</div>
 
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
 
+    
 
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2021</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Super Pikachu</span>
+    <div class="image-viewer-container">
+    <img src="">
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
-  </div>
-
-        
 
 
+    
 
+</main>
 
 
 
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
 <script src="/js/utils.js"></script>
 
-<script src="/js/motion.js"></script>
+<script src="/js/main.js"></script>
 
+<script src="/js/header-shrink.js"></script>
 
-<script src="/js/schemes/pisces.js"></script>
+<script src="/js/back2top.js"></script>
 
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
+<script src="/js/dark-light-toggle.js"></script>
 
 
 
@@ -539,16 +475,11 @@
 
 
 
+<div class="post-scripts">
+    
+</div>
 
 
-
-
-
-
-
-  
-
-  
 
 </body>
 </html>

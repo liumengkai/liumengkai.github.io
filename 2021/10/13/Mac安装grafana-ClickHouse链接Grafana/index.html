@@ -1,214 +1,174 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="好文章是打磨出来的">
+    <meta name="author" content="SuperPiKaChu">
+    
+    <title>
+        
+            Mac安装grafana+Grafana连接ClickHouse |
+        
+        Liu&#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
 
-<link rel="stylesheet" href="/css/main.css">
+    <link rel="shortcut icon" href="/images/logo.svg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
 
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-Hans"};
+    KEEP.theme_config = {"toc":{"enable":false,"number":false,"expand_all":false,"init_open":false},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.png","favicon":"/images/logo.svg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":false,"scale":false},"first_screen":{"enable":false,"background_img":"/images/bg.svg","description":"Keep writing and Keep loving."},"scroll":{"progress_bar":{"enable":false},"percent":{"enable":false}}},"local_search":{"enable":false,"preload":false},"code_copy":{"enable":false,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":false},"version":"3.4.3"};
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
   </script>
-
-  <meta name="description" content="Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Mac安装grafana+Grafana连接ClickHouse">
-<meta property="og:url" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/index.html">
-<meta property="og:site_name" content="Liu&#39;s blog">
-<meta property="og:description" content="Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse">
-<meta property="og:locale">
-<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png">
-<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png">
-<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png">
-<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png">
-<meta property="og:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png">
-<meta property="article:published_time" content="2021-10-13T09:11:29.000Z">
-<meta property="article:modified_time" content="2021-10-18T12:18:30.251Z">
-<meta property="article:author" content="Super Pikachu">
-<meta property="article:tag" content="ClickHouse">
-<meta property="article:tag" content="Grafana">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png">
-
-<link rel="canonical" href="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/">
+<meta name="generator" content="Hexo 5.4.0"></head>
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-Hans'
-  };
-</script>
-
-  <title>Mac安装grafana+Grafana连接ClickHouse | Liu's blog</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Liu's blog</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">中二是最后的热血</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
+<body>
+<div class="progress-bar-container">
+    
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
+</div>
 
 
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
+<main class="page-container">
 
-          <div class="content post posts-expand">
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
             
+            <a class="logo-title" href="/">
+                Liu&#39;s blog
+            </a>
+        </div>
 
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/">
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+        </ul>
+    </div>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Mac安装grafana+Grafana连接ClickHouse
-        </h1>
+    <div class="window-mask"></div>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
+</header>
 
-              <time title="Created: 2021-10-13 17:11:29" itemprop="dateCreated datePublished" datetime="2021-10-13T17:11:29+08:00">2021-10-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-18 20:18:30" itemprop="dateModified" datetime="2021-10-18T20:18:30+08:00">2021-10-18</time>
-              </span>
-
-          
 
         </div>
-      </header>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">Mac安装grafana+Grafana连接ClickHouse</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.png">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">SuperPiKaChu</span>
+                        
+                            <span class="author-label">Lv1</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;2021-10-13 17:11:29
+    </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/ClickHouse/">ClickHouse</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Grafana/">Grafana</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
 
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    
+</div>
 
-      
-        <p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
 <span id="more"></span>
 
 <h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
@@ -227,7 +187,7 @@
 <p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
 <img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
 
-<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a target="_blank" rel="noopener" href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation">https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation</a> 有两种安装方式。</p>
+<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   target="_blank" rel="noopener" href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
 <p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
 <p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
 <p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
@@ -235,190 +195,163 @@
 <p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
 <img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
 
-<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a target="_blank" rel="noopener" href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed">https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed</a></p>
+<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
 <p>参考文章：</p>
-<p><a target="_blank" rel="noopener" href="https://grafana.com/docs/grafana/latest/installation/mac/">https://grafana.com/docs/grafana/latest/installation/mac/</a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
-    </div>
-
-    
-    
-    
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/ClickHouse/" rel="tag"># ClickHouse</a>
-              <a href="/tags/Grafana/" rel="tag"># Grafana</a>
-          </div>
+        </div>
 
         
 
+        
+            <div class="article-nav">
+                
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">Superset查询会丢数据问题排查</span>
+                                <span class="post-nav-item">上一篇</span>
+                            </span>
+                        </a>
+                    </div>
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">学习clickhouse详细知识</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
 
         
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/" rel="prev" title="学习clickhouse详细知识">
-      <i class="fa fa-chevron-left"></i> 学习clickhouse详细知识
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" rel="next" title="Superset查询会丢数据问题排查">
-      Superset查询会丢数据问题排查 <i class="fa fa-chevron-right"></i>
-    </a></div>
     </div>
-      </footer>
-    
-  </article>
-  
-  
-  
+</div>
 
 
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
+                
+            </div>
 
         </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mac%E5%AE%89%E8%A3%85grafana"><span class="nav-number">1.</span> <span class="nav-text">Mac安装grafana</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85grafana-clickhouse%E6%8F%92%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">安装grafana-clickhouse插件</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Super Pikachu"
-      src="/images/avatar.png">
-  <p class="site-author-name" itemprop="name">Super Pikachu</p>
-  <div class="site-description" itemprop="description">好文章是打磨出来的</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2020</span>&nbsp;-&nbsp;
+            
+            2021&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">SuperPiKaChu</a>
+        </div>
         
-          <span class="site-state-item-count">5</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">3</span>
-        <span class="site-state-item-name">tags</span>
-      </div>
-  </nav>
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+
+        <!-- go comment -->
+        
+    </ul>
 </div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/liumengkai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;liumengkai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:liu_mengkai@foxmail.com" title="E-Mail → mailto:liu_mengkai@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-  </div>
 
+        </div>
+    
 
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
 
-      </div>
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="fas fa-arrow-up"></i>
+            </li>
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+    </ul>
+</div>
 
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
 
+    
 
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2021</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Super Pikachu</span>
+    <div class="image-viewer-container">
+    <img src="">
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
-  </div>
-
-        
 
 
+    
 
+</main>
 
 
 
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
 <script src="/js/utils.js"></script>
 
-<script src="/js/motion.js"></script>
+<script src="/js/main.js"></script>
 
+<script src="/js/header-shrink.js"></script>
 
-<script src="/js/schemes/pisces.js"></script>
+<script src="/js/back2top.js"></script>
 
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
+<script src="/js/dark-light-toggle.js"></script>
 
 
 
@@ -427,16 +360,11 @@
 
 
 
+<div class="post-scripts">
+    
+</div>
 
 
-
-
-
-
-
-  
-
-  
 
 </body>
 </html>

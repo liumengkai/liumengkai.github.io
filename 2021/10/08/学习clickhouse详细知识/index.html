@@ -1,208 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="好文章是打磨出来的">
+    <meta name="author" content="SuperPiKaChu">
+    
+    <title>
+        
+            学习clickhouse详细知识 |
+        
+        Liu&#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
 
-<link rel="stylesheet" href="/css/main.css">
+    <link rel="shortcut icon" href="/images/logo.svg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
 
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-Hans"};
+    KEEP.theme_config = {"toc":{"enable":false,"number":false,"expand_all":false,"init_open":false},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.png","favicon":"/images/logo.svg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":false,"scale":false},"first_screen":{"enable":false,"background_img":"/images/bg.svg","description":"Keep writing and Keep loving."},"scroll":{"progress_bar":{"enable":false},"percent":{"enable":false}}},"local_search":{"enable":false,"preload":false},"code_copy":{"enable":false,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":false},"version":"3.4.3"};
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
   </script>
-
-  <meta name="description" content="ClickHouse基础应用与内部原理">
-<meta property="og:type" content="article">
-<meta property="og:title" content="学习clickhouse详细知识">
-<meta property="og:url" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/index.html">
-<meta property="og:site_name" content="Liu&#39;s blog">
-<meta property="og:description" content="ClickHouse基础应用与内部原理">
-<meta property="og:locale">
-<meta property="og:image" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/int.png">
-<meta property="og:image" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/wufuhao_int.png">
-<meta property="og:image" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/float.png">
-<meta property="og:image" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/decimal.png">
-<meta property="og:image" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/yinqing.png">
-<meta property="og:image" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/mtreejianbiao.png">
-<meta property="article:published_time" content="2021-10-08T11:21:49.000Z">
-<meta property="article:modified_time" content="2021-10-08T13:27:22.481Z">
-<meta property="article:author" content="Super Pikachu">
-<meta property="article:tag" content="ClickHouse">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/int.png">
-
-<link rel="canonical" href="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/">
+<meta name="generator" content="Hexo 5.4.0"></head>
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-Hans'
-  };
-</script>
-
-  <title>学习clickhouse详细知识 | Liu's blog</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Liu's blog</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">中二是最后的热血</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
+<body>
+<div class="progress-bar-container">
+    
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
+</div>
 
 
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
+<main class="page-container">
 
-          <div class="content post posts-expand">
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
             
+            <a class="logo-title" href="/">
+                Liu&#39;s blog
+            </a>
+        </div>
 
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/">
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Super Pikachu">
-      <meta itemprop="description" content="好文章是打磨出来的">
-    </span>
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+        </ul>
+    </div>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Liu's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          学习clickhouse详细知识
-        </h1>
+    <div class="window-mask"></div>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
+</header>
 
-              <time title="Created: 2021-10-08 19:21:49 / Modified: 21:27:22" itemprop="dateCreated datePublished" datetime="2021-10-08T19:21:49+08:00">2021-10-08</time>
-            </span>
-
-          
 
         </div>
-      </header>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">学习clickhouse详细知识</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.png">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">SuperPiKaChu</span>
+                        
+                            <span class="author-label">Lv1</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;2021-10-08 19:21:49
+    </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/ClickHouse/">ClickHouse</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
 
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    
+</div>
 
-      
-        <p>ClickHouse基础应用与内部原理</p>
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <p>ClickHouse基础应用与内部原理</p>
 <span id="more"></span>
 
 <h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h2 id="基础类型"><a href="#基础类型" class="headerlink" title="基础类型"></a>基础类型</h2><h3 id="数值"><a href="#数值" class="headerlink" title="数值"></a>数值</h3><h4 id="有符号整数"><a href="#有符号整数" class="headerlink" title="有符号整数"></a>有符号整数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/int.png" class="" title="中二是最后的热血">
@@ -220,7 +182,7 @@
 <h4 id="DateTime64"><a href="#DateTime64" class="headerlink" title="DateTime64"></a>DateTime64</h4><p>DateTime64可以记录亚秒，它在DateTime之上增加了精度的设置</p>
 <h4 id="Date"><a href="#Date" class="headerlink" title="Date"></a>Date</h4><p>Date类型不包含具体的时间信息，只精确到天</p>
 <h2 id="复合类型"><a href="#复合类型" class="headerlink" title="复合类型"></a>复合类型</h2><p>数组、元组、枚举和嵌套</p>
-<p>这里不多记录，详细参考<a target="_blank" rel="noopener" href="https://clickhouse.com/docs/zh/sql-reference/data-types/enum/%E7%AD%89%E5%AE%98%E7%BD%91%E4%BF%A1%E6%81%AF">https://clickhouse.com/docs/zh/sql-reference/data-types/enum/等官网信息</a></p>
+<p>这里不多记录，详细参考<a class="link"   target="_blank" rel="noopener" href="https://clickhouse.com/docs/zh/sql-reference/data-types/enum/%E7%AD%89%E5%AE%98%E7%BD%91%E4%BF%A1%E6%81%AF" >https://clickhouse.com/docs/zh/sql-reference/data-types/enum/等官网信息<i class="fas fa-external-link-alt"></i></a></p>
 <h2 id="特殊类型"><a href="#特殊类型" class="headerlink" title="特殊类型"></a>特殊类型</h2><h4 id="Nullable"><a href="#Nullable" class="headerlink" title="Nullable"></a>Nullable</h4><p>Nullable并不能算是一种独立的数据类型，它更像是一种辅助的修饰符，需要与基础数据类型一起搭配使用。不能用于数组和元组这些复合类型，也不能作为索引字段；其次，应该慎用Nullable类型，包括Nullable的数据表，不然会使查询和写入性能变慢。因为在正常情况下，每个列字段的数据会被存储在对应的[Column].bin文件中。如果一个列字段被Nullable类型修饰后，会额外生成一个[Column].null.bin文件专门保存它的Null值。这意味着在读取和写入数据时，需要一倍的额外文件操作。</p>
 <h4 id="Domain"><a href="#Domain" class="headerlink" title="Domain"></a>Domain</h4><p>域名类型分为IPv4和IPv6两类，本质上它们是对整型和字符串的进一步封装。</p>
 <p>（1）出于便捷性的考量，例如IPv4类型支持格式检查，格式错误的IP数据是无法被写入的</p>
@@ -235,185 +197,159 @@
 <p>（2）ORDER BY [必填]：排序键，用于指定在一个数据片段内，数据以何种标准排序。默认情况下主键（PRIMARY KEY）与排序键相同。排序键既可以是单个列字段，例如ORDER BY CounterID，也可以通过元组的形式使用多个列字段，例如ORDERBY（CounterID,EventDate）。当使用多个列字段排序时，以ORDERBY（CounterID,EventDate）为例，在单个数据片段内，数据首先会以CounterID排序，相同CounterID的数据再按EventDate排序。</p>
 <p>（3）PRIMARY KEY [选填]：主键，顾名思义，声明后会依照主键字段生成一级索引，用于加速表查询。默认情况下，主键与排序键(ORDER BY)相同，所以通常直接使用ORDER BY代为指定主键，无须刻意通过PRIMARY KEY声明。所以在一般情况下，在单个数据片段内，数据与一级索引以相同的规则升序排列。与其他数据库不同，MergeTree主键允许存在重复数据（ReplacingMergeTree可以去重）。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
-    </div>
-
-    
-    
-    
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/ClickHouse/" rel="tag"># ClickHouse</a>
-          </div>
+        </div>
 
         
 
+        
+            <div class="article-nav">
+                
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">Mac安装grafana+Grafana连接ClickHouse</span>
+                                <span class="post-nav-item">上一篇</span>
+                            </span>
+                        </a>
+                    </div>
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">多线程编程基础</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
 
         
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" rel="prev" title="多线程编程基础">
-      <i class="fa fa-chevron-left"></i> 多线程编程基础
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/" rel="next" title="Mac安装grafana+Grafana连接ClickHouse">
-      Mac安装grafana+Grafana连接ClickHouse <i class="fa fa-chevron-right"></i>
-    </a></div>
     </div>
-      </footer>
-    
-  </article>
-  
-  
-  
+</div>
 
 
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
+                
+            </div>
 
         </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.</span> <span class="nav-text">基础类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%80%BC"><span class="nav-number">1.1.1.</span> <span class="nav-text">数值</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E7%AC%A6%E5%8F%B7%E6%95%B4%E6%95%B0"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">有符号整数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%AC%A6%E5%8F%B7%E7%9A%84%E6%95%B4%E6%95%B0"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">无符号的整数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">浮点数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Decimal"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">Decimal</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.2.</span> <span class="nav-text">字符串类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#String"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">String</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FixedString"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">FixedString</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UUID"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">UUID</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.3.</span> <span class="nav-text">时间类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DateTime"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">DateTime</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DateTime64"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">DateTime64</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Date"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">Date</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%90%88%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">复合类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">特殊类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Nullable"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">Nullable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Domain"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">Domain</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MergeTree%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">MergeTree原理解析</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Super Pikachu"
-      src="/images/avatar.png">
-  <p class="site-author-name" itemprop="name">Super Pikachu</p>
-  <div class="site-description" itemprop="description">好文章是打磨出来的</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2020</span>&nbsp;-&nbsp;
+            
+            2021&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">SuperPiKaChu</a>
+        </div>
         
-          <span class="site-state-item-count">5</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">3</span>
-        <span class="site-state-item-name">tags</span>
-      </div>
-  </nav>
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+
+        <!-- go comment -->
+        
+    </ul>
 </div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/liumengkai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;liumengkai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:liu_mengkai@foxmail.com" title="E-Mail → mailto:liu_mengkai@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-  </div>
 
+        </div>
+    
 
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
 
-      </div>
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="fas fa-arrow-up"></i>
+            </li>
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+    </ul>
+</div>
 
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
 
+    
 
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2021</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Super Pikachu</span>
+    <div class="image-viewer-container">
+    <img src="">
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
-  </div>
-
-        
 
 
+    
 
+</main>
 
 
 
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
 <script src="/js/utils.js"></script>
 
-<script src="/js/motion.js"></script>
+<script src="/js/main.js"></script>
 
+<script src="/js/header-shrink.js"></script>
 
-<script src="/js/schemes/pisces.js"></script>
+<script src="/js/back2top.js"></script>
 
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
+<script src="/js/dark-light-toggle.js"></script>
 
 
 
@@ -422,16 +358,11 @@
 
 
 
+<div class="post-scripts">
+    
+</div>
 
 
-
-
-
-
-
-  
-
-  
 
 </body>
 </html>
