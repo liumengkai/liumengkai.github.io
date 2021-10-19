@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Mac安装grafana+Grafana连接ClickHouse</title>
+    <url>/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/</url>
+    <content><![CDATA[<p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
+<span id="more"></span>
+
+<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后我们用命令检查一下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
+
+<p>使用brew启动grafana服务</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
+
+<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
+
+<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
+<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
+<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
+<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
+<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
+
+<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
+<p>参考文章：</p>
+<p><a class="link"   href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Superset查询会丢数据问题排查</title>
+    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
+    <content><![CDATA[<p>Superset版本 1.3.0</p>
+<p>查询结果会比正确结果少两条数据</p>
+<span id="more"></span>
+
+<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
+<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
+<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
+<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
+<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
+<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
+<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
+<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
+<p>参考连接：</p>
+<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Superset</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>学习clickhouse详细知识</title>
+    <url>/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/</url>
+    <content><![CDATA[<p>ClickHouse基础应用与内部原理</p>
+<span id="more"></span>
+
+<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h2 id="基础类型"><a href="#基础类型" class="headerlink" title="基础类型"></a>基础类型</h2><h3 id="数值"><a href="#数值" class="headerlink" title="数值"></a>数值</h3><h4 id="有符号整数"><a href="#有符号整数" class="headerlink" title="有符号整数"></a>有符号整数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/int.png" class="" title="中二是最后的热血">
+
+<h4 id="无符号的整数"><a href="#无符号的整数" class="headerlink" title="无符号的整数"></a>无符号的整数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/wufuhao_int.png" class="" title="中二是最后的热血">
+
+<h4 id="浮点数"><a href="#浮点数" class="headerlink" title="浮点数"></a>浮点数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/float.png" class="" title="中二是最后的热血">
+
+<h4 id="Decimal"><a href="#Decimal" class="headerlink" title="Decimal"></a>Decimal</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/decimal.png" class="" title="中二是最后的热血">
+
+<h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><h4 id="String"><a href="#String" class="headerlink" title="String"></a>String</h4><p>字符串由String定义，长度不限。因此在使用String的时候无须声明大小。它完全代替了传统意义上数据库的Varchar、Text、Clob和Blob等字符类型。String类型不限定字符集。</p>
+<h4 id="FixedString"><a href="#FixedString" class="headerlink" title="FixedString"></a>FixedString</h4><p>FixedString类型和传统意义上的Char类型有些类似，对于一些字符有明确长度的场合，可以使用固定长度的字符串。定长字符串通过FixedString(N)声明，其中N表示字符串长度。但与Char不同的是，FixedString使用null字节填充末尾字符</p>
+<h4 id="UUID"><a href="#UUID" class="headerlink" title="UUID"></a>UUID</h4><p>UUID是一种数据库常见的主键类型，在ClickHouse中直接把它作为一种数据类型。UUID共有32位，它的格式为8-4-4-4-12。如果一个UUID类型的字段在写入数据时没有被赋值，则会依照格式使用0填充</p>
+<h3 id="时间类型"><a href="#时间类型" class="headerlink" title="时间类型"></a>时间类型</h3><h4 id="DateTime"><a href="#DateTime" class="headerlink" title="DateTime"></a>DateTime</h4><p>DateTime类型包含时、分、秒信息，精确到秒</p>
+<h4 id="DateTime64"><a href="#DateTime64" class="headerlink" title="DateTime64"></a>DateTime64</h4><p>DateTime64可以记录亚秒，它在DateTime之上增加了精度的设置</p>
+<h4 id="Date"><a href="#Date" class="headerlink" title="Date"></a>Date</h4><p>Date类型不包含具体的时间信息，只精确到天</p>
+<h2 id="复合类型"><a href="#复合类型" class="headerlink" title="复合类型"></a>复合类型</h2><p>数组、元组、枚举和嵌套</p>
+<p>这里不多记录，详细参考<a class="link"   href="https://clickhouse.com/docs/zh/sql-reference/data-types/enum/%E7%AD%89%E5%AE%98%E7%BD%91%E4%BF%A1%E6%81%AF" >https://clickhouse.com/docs/zh/sql-reference/data-types/enum/等官网信息<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="特殊类型"><a href="#特殊类型" class="headerlink" title="特殊类型"></a>特殊类型</h2><h4 id="Nullable"><a href="#Nullable" class="headerlink" title="Nullable"></a>Nullable</h4><p>Nullable并不能算是一种独立的数据类型，它更像是一种辅助的修饰符，需要与基础数据类型一起搭配使用。不能用于数组和元组这些复合类型，也不能作为索引字段；其次，应该慎用Nullable类型，包括Nullable的数据表，不然会使查询和写入性能变慢。因为在正常情况下，每个列字段的数据会被存储在对应的[Column].bin文件中。如果一个列字段被Nullable类型修饰后，会额外生成一个[Column].null.bin文件专门保存它的Null值。这意味着在读取和写入数据时，需要一倍的额外文件操作。</p>
+<h4 id="Domain"><a href="#Domain" class="headerlink" title="Domain"></a>Domain</h4><p>域名类型分为IPv4和IPv6两类，本质上它们是对整型和字符串的进一步封装。</p>
+<p>（1）出于便捷性的考量，例如IPv4类型支持格式检查，格式错误的IP数据是无法被写入的</p>
+<p>（2）出于性能的考量，同样以IPv4为例，IPv4使用UInt32存储，相比String更加紧凑，占用的空间更小，查询性能更快。IPv6类型是基于FixedString(16)封装的，它的使用方法与IPv4别无二致。</p>
+<h1 id="MergeTree原理解析"><a href="#MergeTree原理解析" class="headerlink" title="MergeTree原理解析"></a>MergeTree原理解析</h1><p>MergeTree是家族中最基础的表引擎，提供了主键索引、数据分区、数据副本和数据采样等基本能力，而家族中其他的表引擎则在MergeTree的基础之上各有所长。</p>
+<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/yinqing.png" class="" title="中二是最后的热血">
+
+<p>MergeTree建表语句</p>
+<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/mtreejianbiao.png" class="" title="中二是最后的热血">
+<p>其中重要的参数：</p>
+<p>（1）PARTITION BY [选填]：分区键，用于指定表数据以何种标准进行分区。分区键既可以是单个列字段，也可以通过元组的形式使用多个列字段，同时它也支持使用列表达式。如果不声明分区键，则ClickHouse会生成一个名为all的分区。合理使用数据分区，可以有效减少查询时数据文件的扫描范围。</p>
+<p>（2）ORDER BY [必填]：排序键，用于指定在一个数据片段内，数据以何种标准排序。默认情况下主键（PRIMARY KEY）与排序键相同。排序键既可以是单个列字段，例如ORDER BY CounterID，也可以通过元组的形式使用多个列字段，例如ORDERBY（CounterID,EventDate）。当使用多个列字段排序时，以ORDERBY（CounterID,EventDate）为例，在单个数据片段内，数据首先会以CounterID排序，相同CounterID的数据再按EventDate排序。</p>
+<p>（3）PRIMARY KEY [选填]：主键，顾名思义，声明后会依照主键字段生成一级索引，用于加速表查询。默认情况下，主键与排序键(ORDER BY)相同，所以通常直接使用ORDER BY代为指定主键，无须刻意通过PRIMARY KEY声明。所以在一般情况下，在单个数据片段内，数据与一级索引以相同的规则升序排列。与其他数据库不同，MergeTree主键允许存在重复数据（ReplacingMergeTree可以去重）。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>多线程编程基础</title>
+    <url>/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
+<span id="more"></span>
+
+<h2 id="多线程编程基础"><a href="#多线程编程基础" class="headerlink" title="多线程编程基础"></a>多线程编程基础</h2><h3 id="cpu-高速缓存"><a href="#cpu-高速缓存" class="headerlink" title="cpu 高速缓存"></a>cpu 高速缓存</h3><p>为了解决 cpu 和主存之间的速率差，CPU 中的高速缓存运营而生，程序运算时会将数据复制一份到 CPU 的高速缓存中，当 CPU 计算时直接从高速缓存中取数据，然后计算完成之后将数据写回高速缓存中，隔一段时间刷新一次高速缓存中内容到主存</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">val i = 0</span><br><span class="line">i = i + 1</span><br></pre></td></tr></table></figure>
+
+<p>　当线程执行这个语句时，会先从主存当中读取 i 的值，然后复制一份到高速缓存当中，然后 CPU 执行指令对 i 进行加 1 操作，然后将数据写入高速缓存，最后将高速缓存中 i 最新的值刷新到主存当中。</p>
+<p> 但是多线程执行时候会带来一个问题叫做“缓存一致性问题”，什么叫做缓存一致性问题呢？</p>
+<p> 首先我们上面提高了 CPU 中是有高速缓存这个概念，那么这里的缓存一致性中的缓存是否就是指的 CPU 中的缓存呢？答案是：是的，当多线程执行上面的 i=i+1 语句的时候，我们期待的结果是 n 个线程执行那么 i 就应该是原先的值 +n，但是事实真是如此吗？</p>
+<h3 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h3><p>多个线程同时将变量 i 拷贝到 CPU 中，这时候他们拷贝的变量都是 i 的初始值 0 ，线程 A 经过计算得到 i=1，然后将 i 重新写回高速缓存中，高速缓存再将 i 重新刷新回主存中，这时候的 i 应该是 2，同理线程 B 进行了上述操作，你会发现，这时候的 i 依旧是 1，不是我们想象的 2，通常称这种被多个线程同时访问的变量叫做共享变量。</p>
+<p>缓存一致性导致原因：一个变量在多个 CPU 中同时存在缓存，就有可能导致程序的修改没有起作用或者被覆盖</p>
+<p> 原因找到了，我们来针对原因想象一下可能会有那些方法呢？首先因为线程 A 和线程 B 都会去将 i 值 copy 进自己的高速缓存，线程 A 修改了数值，但是线程 B 不知道，后面重复写入的时候导致出现问题，有人可能就会说应该线程 A 访问这个变量的时候线程 B 不能访问，这样就保证了线程 A 的修改一定是生效的。没错，这种就是加锁的思想，但是这种思想的缺点也很明显，线程 A 访问变量加锁，线程 B 等等线程都会被卡住，只能等待 A 释放共享变量之后才能访问，效率十分低下。</p>
+<h3 id="如何解决缓存一致性问题"><a href="#如何解决缓存一致性问题" class="headerlink" title="如何解决缓存一致性问题"></a>如何解决缓存一致性问题</h3><p> 我们重新回头看一下缓存一致性的原因，如果不能在线程访问变量的时候加锁，那我们能不能在后面的操作添加以下限制呢？这时候就有人提出来了一种叫做缓存一致性协议：如果线程 A 修改了共享变量的数值那么就会通知其他线程他们缓存的共享变量是无效的，这时候如果其他线程想要使用共享变量的数值就必须去通知线程 A 将修改后的数值重写会主存，并且从主存中重新读取共享变量的值</p>
+<p>上面就是解决缓存一致性的两种常见的方法：（1）加锁（2）缓存一致性协议</p>
+<p>加锁的缺点我们上面已经说过了，那么缓存一致性的缺点是什么呢？乍一看仿佛方法很完美，但是不要忘掉了 CPU 是一个高速不断运行的环境，缓存一致性协议需要做的事情很多，例如线程 A 去通知所有其它使用了该共享变量的线程 你们的这个变量的缓存无效 如果用的话必须说一声，我给你们更新下再用，然后各自线程将该缓存变量的状态更改为无效并且返回”晓得了”指令，CPU 都会等待所有的缓存响应完成，详细内容贴在后面的参考文章</p>
+<h3 id="并发编程中常见的三个概念"><a href="#并发编程中常见的三个概念" class="headerlink" title="并发编程中常见的三个概念"></a>并发编程中常见的三个概念</h3><h4 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h4><p>首先第一个原子性，没错就是我们常说的原子性，一个操作要不就不执行，要不就全部执行，不能被打断，最经典的就是银行转账：</p>
+<p>账户 A 向账户 B 转账 1000 元，账户 A 中扣钱和账户 B 中数额增长必须是一起生效</p>
+<p>那么我们程序中有哪些时候会用到原子性这个概念呢？举个例子就是 赋值操作时候</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">i = 0</span><br></pre></td></tr></table></figure>
+
+<p>在 64 位机器 上我们假设先给前 32 位赋值，然后再给后 32 位赋值，如果进行到一半，一个线程读取了 i 的值，那么他读取的肯定就会出问题，这个就是原子性的意义。</p>
+<h4 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h4><p>用我们上面的例子举例就是线程 A 对共享变量做出改变之后，其他线程可以立即知晓</p>
+<h4 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h4><p>什么叫做有序性呢？你思考过这样一个问题没有，就是我们写下来的一行行的代码真的是按照顺序执行下来的吗？如果你是写编译器的人，你考虑到有时候有一些语句没有前后的依赖关系，而你又很想提高程序的运行效率，那应该怎么办呢？没错就是改变程序的运行顺序，至于为什么改变执行顺序就能提高效率这个另说，和底层指令集息息相关，反正他们之间没有相互依赖关系，这样最终的结果不会变，并且我们的执行效率变高了，但是如果在多线程情况下呢？</p>
+<p>我们看下面的代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 线程 1:</span><br><span class="line">var app = new Application();   // 语句 1</span><br><span class="line">if_init = true;             // 语句 2</span><br><span class="line"> </span><br><span class="line">// 线程 2:</span><br><span class="line">while(!if_init)&#123;</span><br><span class="line">  sleep()</span><br><span class="line">&#125;</span><br><span class="line">doSomethingwithconfig(app);</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码意思是，创建 app 对象，然后将 if_init 重置成 true，表明现在可以使用 app 了，但是编译器认为的是语句 1 和语句 2 之间没有任何关系，那么他就会去将两个语句重排序，如果语句 2 先执行，语句 1 还没有执行，这时候线程 2 执行 while()代码，发现 if_inie 为 true-&gt; 跳出循环，下面的函数使用到了 app 这个变量，极有可能导致程序出错</p>
+<h3 id="JVM-对多线程的-native-操作"><a href="#JVM-对多线程的-native-操作" class="headerlink" title="JVM 对多线程的 native 操作"></a>JVM 对多线程的 native 操作</h3><p> 首先我们需要知道的是 JVM 没有对程序使用 CPU 中的高速缓存器进行限制，那么他就会出现我们上面提到过的问题，比如高速缓存和内存之间更新不及时导致的缓存一致性问题，以及指令重排导致的程序执行和预期想象的不一样。</p>
+<p> Java 内存模型规定所有的变量都是存在主存当中（类似于前面说的物理内存），每个线程都有自己的工作内存（类似于前面的高速缓存）。线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作。并且每个线程不能访问其他线程的工作内存。</p>
+<h4 id="JVM-原子性"><a href="#JVM-原子性" class="headerlink" title="JVM 原子性"></a>JVM 原子性</h4><p> java 规定给一个变量赋值以及读取是原子性操作，这些操作是不可中断的，也就是我们上面说过的比如给 64 位数赋值，前 32 位和后 32 位要一起赋值，如果没有成功那么前后 32 位都没有成功，撤销操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 下面这些语句哪些是原子性呢？</span><br><span class="line">x = 10;         // 语句 1</span><br><span class="line">y = x;         // 语句 2</span><br><span class="line">x++;           // 语句 3</span><br><span class="line">x = x + 1;     // 语句 4</span><br></pre></td></tr></table></figure>
+
+<p>语句 1 是原子性</p>
+<p>语句 2 不是：先读取 x 的值，再去给 y 赋值</p>
+<p>语句 3 不是：先读取 x 的值再加 1，再赋值给 x</p>
+<p>语句 4：先读取 x 的值再加 1，再重新写回</p>
+<p>所以上面只有第一个操作是原子性的，剩下三个其实都是原子性操作的组合</p>
+<h4 id="JVM-可见性如何"><a href="#JVM-可见性如何" class="headerlink" title="JVM 可见性如何"></a>JVM 可见性如何</h4><p>JAVA 通过关键字 volatile 关键字来实现可见性，被 volatile 关键字修饰的共享变量将会在被修改后立刻更新到主存中，并且其他线程如果想读取这个被修改过的共享变量就必须去主存中重新加载一遍。</p>
+<p> 另外我们上面提到过的 synchronized 关键字和 Lock 关键字都可以保证可见性，但是这种可见性是表现出来的可见性，这两个关键字限制了同时只能有一个线程去访问，修改完成之后将变量重写回主存中之后才会解锁</p>
+<h4 id="JVM-有序性如何"><a href="#JVM-有序性如何" class="headerlink" title="JVM 有序性如何"></a>JVM 有序性如何</h4><p> 我们提到过 JVM 是允许指令重排的，这个意思就是允许编译器对指令执行顺序进行重新排序以获得更好的性能，但是会带来的问题就是会影响程序的执行效果，那么 JVM 如何来保证多线程中的有序性呢？主要通过三个关键字 volatile 以及 synchronized 和 Lock，后两个很容易理解，因为规定了只能由一个线程访问所以相当于将多线程的问题直接转变成在单线程的情况下运行，自然就不会出现那样的问题，那么第一个关键字主要是通过什么呢？这个我们后面再说。其中 JVM 还规定了一个排序原则：happens-before 原则，这个是 JVM 推断语句变换顺序的时候会不会最终效果一样的准则，如果两个操作不能通过 happens-before 来进行推导那么就认为两个语句是可以进行重排序的。</p>
+<p> 注意 happens-before 原则适用于推导语句的前后顺序关系，如果语句不能从 happens-beofre 中推导出来，那么就认为这两个语句是无序的，不要搞混了</p>
+<p>下面就来具体介绍下 happens-before 原则（先行发生原则）：</p>
+<ul>
+<li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
+<li>锁定规则：一个 unLock 操作先行发生于后面对同一个锁额 lock 操作</li>
+<li>volatile 变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作</li>
+<li>传递规则：如果操作 A 先行发生于操作 B，而操作 B 又先行发生于操作 C，则可以得出操作 A 先行发生于操作 C</li>
+<li>线程启动规则：Thread 对象的 start()方法先行发生于此线程的每个一个动作</li>
+<li>线程中断规则：对线程 interrupt()方法的调用先行发生于被中断线程的代码检测到中断事件的发生</li>
+<li>线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过 Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行</li>
+<li>对象终结规则：一个对象的初始化完成先行发生于他的 finalize()方法的开始</li>
+</ul>
+<p>关于 happens-before 解析详看这篇文章：<a class="link"   href="https://segmentfault.com/a/1190000011458941" >https://segmentfault.com/a/1190000011458941<i class="fas fa-external-link-alt"></i></a></p>
+<p>后面有时间了我也会详细的看一看，然后总结一下，哭 好忙~</p>
+<h3 id="讲解关于-Volatile-关键字"><a href="#讲解关于-Volatile-关键字" class="headerlink" title="讲解关于 Volatile 关键字"></a>讲解关于 Volatile 关键字</h3><p> 还是针对上面三个多线程中讨论的地方：可见性，原子性，有序性，我们来讨论一下 Volatile 关键字如何操作这三方面的</p>
+<h4 id="Volatile-可见性？"><a href="#Volatile-可见性？" class="headerlink" title="Volatile 可见性？"></a>Volatile 可见性？</h4><p> Volatile 可以保证可见性嘛？答案是肯定的，被 Volatile 修饰过的变量在被线程 A 修改过后必须马上写回到主存中，所以效果上来看，Volatile 这个关键字是保证了变量的可见性的，这个操作和我们前面提到的缓存一致性协议有着千丝万缕的关系，可以说 Volatile 底层就是缓存一致性协议的实现，具体可以看这篇文章(好文真多)：</p>
+<p><a class="link"   href="https://blog.csdn.net/mashaokang1314/article/details/96571818" >https://blog.csdn.net/mashaokang1314/article/details/96571818<i class="fas fa-external-link-alt"></i></a></p>
+<p>Volatile 实现内存可见性是通过 store 和 load 指令完成的；也就是对 volatile 变量执行写操作时，会在写操作后加入一条 store 指令，即强迫线程将最新的值刷新到主内存中；而在读操作时，会加入一条 load 指令，即强迫从主内存中读入变量的值。写操作之后紧跟着写回主存的操作，读必须从主存中读取，这个就是 volatile 保证可见性的方法。</p>
+<h4 id="Volatile-原子性？"><a href="#Volatile-原子性？" class="headerlink" title="Volatile 原子性？"></a>Volatile 原子性？</h4><p> 上面我们知道了 Volatile 是具有可见性的，那我们来查看一下下面的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 十个线程各自循环 1000 次对一个 volatile 修饰的共享变量来进行自增</span><br><span class="line">public class Test &#123;</span><br><span class="line">    public volatile int inc = 0;</span><br><span class="line">     </span><br><span class="line">    public void increase() &#123;</span><br><span class="line">        inc++;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final Test test = new Test();</span><br><span class="line">        for(int i=0;i&lt;10;i++)&#123;</span><br><span class="line">            new Thread()&#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    for(int j=0;j&lt;1000;j++)</span><br><span class="line">                        test.increase();</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;.start();</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        while(Thread.activeCount()&gt;1)  // 保证前面的线程都执行完</span><br><span class="line">            Thread.yield();</span><br><span class="line">        System.out.println(test.inc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 上面的代码我们想当然的会觉得，既然已经被 Volatile 修饰了，那其中一个线程修改完成写回之后其他线程马上知道了，并且重新从主存中读取，那么最终的结果应该是 10*1000 = 10000，但是实验发现结果不是这样的，我们发现每次每次输出的都要比 10000 小，这是因为什么呢？</p>
+<p> 首先我们应该考虑一下我们给 test 这个共享变量 +1 的操作都有哪些，我们提到过自增变量是不具备原子性的，他需要先取回自己变量的值，+1，写回，这是三个原子性操作，而 volatile 保证的是如果这个共享变量被修改了，那么所有的线程中这个编程无效，重新读取，如果线程 A 只是读取了共享变量 test，然后线程 A 去忙别的了，这时候线程 B 又读取了共享变量 test 进行 +1 操作，然后将变量写回，这时候线程 A 已经读取了变量 test，紧接着他也进行 +1 然后写回，那么就是两个程序执行完毕之后 test 仅仅加了一次，这时候如果有疑惑建议回顾一下上面 volatile 如何保证可见性。</p>
+<p> 那如何保证原子性呢？使用 synchronized，Lock，AtomicInteger，操作都可以具体不展开了，因为我还需要查~</p>
+<h4 id="Volatile-顺序性"><a href="#Volatile-顺序性" class="headerlink" title="Volatile 顺序性"></a>Volatile 顺序性</h4><p> Volatile 可以保证程序的部分顺序执行，保证“部分”顺序执行是什么意思呢？下面举一个例子：</p>
+<p><a class="link"   href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >参考链接<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//x、y 为非 volatile 变量</span><br><span class="line">//flag 为 volatile 变量</span><br><span class="line"> </span><br><span class="line">x = 2;        // 语句 1</span><br><span class="line">y = 0;        // 语句 2</span><br><span class="line">flag = true;  // 语句 3</span><br><span class="line">x = 4;         // 语句 4</span><br><span class="line">y = -1;       // 语句 5</span><br></pre></td></tr></table></figure>
+
+<p>flag 是被 volatile 修饰的变量，那他会带来什么效果呢？</p>
+<p>（1）flag 之前的代码全部执行了，flag 后面的代码还没有开始执行</p>
+<p>（2）语句 1 和语句 2 的顺序不能确定，但是语句 1，2 肯定不能放在 flag 后面执行，同理语句 3，4 的顺序不能确定，但是不能放在 flag 之前执行</p>
+<h3 id="什么时候使用-Volatile？"><a href="#什么时候使用-Volatile？" class="headerlink" title="什么时候使用 Volatile？"></a>什么时候使用 Volatile？</h3><p> 我们知道多线程经常用的关键字就是 synchronized 以及 volatile，那么他们各自都有什么作用呢？synchronized 是防止多个线程同时执行一段代码，相当于给这段代码加锁了，不断线程过来请求访问这段代码，如果加锁了就只能等，所有 Volatile 在效率上是优于 synchronized 的，但是 Volatile 是不能保证操作的原子性的，所以有时候必须结合 synchronized 一起来用，那什么时候可以只用 Volatile 这个关键字呢？</p>
+<p>（1）对变量的写操作不依赖当前的变量值</p>
+<p>（2）该变量没有包含在具有其他变量的不变式中</p>
+<p>上面两个条件就是针对 Volatile 不能保证原子性，所以就不能随便改变共享变量的数值，哪怕是被 Volatile 修饰的，下面举例什么时候使用 Volatile</p>
+<h4 id="更改状态标记量："><a href="#更改状态标记量：" class="headerlink" title="更改状态标记量："></a>更改状态标记量：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">volatile boolean flag = false;</span><br><span class="line"> </span><br><span class="line">while(!flag)&#123;</span><br><span class="line">    doSomething();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">public void setFlag() &#123;</span><br><span class="line">    flag = true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段代码中的 setFlag 方法将 flag 置为 true，哪怕出现了原子性问题，线程 A 读取了然后停一会，期间线程 B 读取了重写会主存中为 true，这时候线程 A 再写一遍 true 也是无所谓的</p>
+<h4 id="double-check-volatile"><a href="#double-check-volatile" class="headerlink" title="double check+volatile:"></a>double check+volatile:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">class Singleton&#123;</span><br><span class="line">    private volatile static Singleton instance = null;</span><br><span class="line">     </span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">         </span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if(instance==null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if(instance==null)</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面是为了实现单例模式使用了 double check，因为 synchronized 如果直接修饰整个 getInstance 方法会导致效率变低，我们只需要初始化的时候进行加锁即可，就是下面的代码：</p>
+<figure class="highlight plaintext"><figcaption><span>a</span></figcaption><table><tr><td class="code"><pre><span class="line">public static Singleton getInstance() &#123;</span><br><span class="line">        if(instance==null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if(instance==null)</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    return uniqueSingleton;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="双重检查锁（double-checked-locking）"><a href="#双重检查锁（double-checked-locking）" class="headerlink" title="双重检查锁（double checked locking）"></a>双重检查锁（double checked locking）</h5><p>先判断对象是否已经被初始化，再决定要不要加锁，双重检查流程如下：</p>
+<ol>
+<li>检查变量是否被初始化(不去获得锁)，如果已被初始化则立即返回。</li>
+<li>获取锁。</li>
+<li>再次检查变量是否已经被初始化，如果还没被初始化就初始化一个对象。</li>
+</ol>
+<p>执行双重检查是因为，如果多个线程同时了通过了第一次检查，并且其中一个线程首先通过了第二次检查并实例化了对象，那么剩余通过了第一次检查的线程就不会再去实例化对象。</p>
+<p>这样，除了初始化的时候会出现加锁的情况，后续的所有调用都会避免加锁而直接返回，解决了性能消耗的问题。否则每一次调用 getInstance()方法都会加锁，性能低下。</p>
+<h5 id="隐患"><a href="#隐患" class="headerlink" title="隐患"></a>隐患</h5><p>上述写法看似解决了问题，但是有个很大的隐患。实例化对象的那行代码（标记为 error 的那行），实际上可以分解成以下三个步骤：</p>
+<ol>
+<li>分配内存空间</li>
+<li>初始化对象</li>
+<li>将对象指向刚分配的内存空间</li>
+</ol>
+<p>但是有些编译器为了性能的原因，可能会将第二步和第三步进行 <strong>重排序</strong>，顺序就成了：</p>
+<ol>
+<li>分配内存空间</li>
+<li>将对象指向刚分配的内存空间</li>
+<li>初始化对象</li>
+</ol>
+<p>现在考虑重排序后，两个线程发生了以下调用：</p>
+<table>
+<thead>
+<tr>
+<th align="left">Time</th>
+<th align="left">Thread A</th>
+<th align="left">Thread B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">T1</td>
+<td align="left">检查到 Singleton 为空</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T2</td>
+<td align="left">获取锁</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T3</td>
+<td align="left">再次检查到 Singleton 为空</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T4</td>
+<td align="left">为 Singleton 分配内存空间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T5</td>
+<td align="left">将 Singleton 指向内存空间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T6</td>
+<td align="left"></td>
+<td align="left">检查到 Singleton 不为空</td>
+</tr>
+<tr>
+<td align="left">T7</td>
+<td align="left"></td>
+<td align="left">访问 Singleton（此时对象还未完成初始化）</td>
+</tr>
+<tr>
+<td align="left">T8</td>
+<td align="left">初始化 Singleton</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>在这种情况下，T7 时刻线程 B 对 Singleton 的访问，访问的是一个 <strong>初始化未完成</strong> 的对象。</p>
+<p>为了解决上述问题，需要在 Singleton 前加入关键字<code>volatile</code>。使用了 volatile 关键字后，重排序被禁止，所有的写（write）操作都将发生在读（read）操作之前。</p>
+<p>至此，双重检查锁就可以完美工作了。</p>
+<p>参考：</p>
+<p><a class="link"   href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >https://www.cnblogs.com/dolphin0520/p/3920373.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://cloud.tencent.com/developer/article/1548942" >https://cloud.tencent.com/developer/article/1548942<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://www.cnblogs.com/xz816111/p/8470048.html" >https://www.cnblogs.com/xz816111/p/8470048.html<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+  </entry>
+  <entry>
+    <title>Clickhouse 入门与实践</title>
+    <url>/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。</p>
+<span id="more"></span>
+
+<h1 id="OLAP和OLTP区别"><a href="#OLAP和OLTP区别" class="headerlink" title="OLAP和OLTP区别"></a>OLAP和OLTP区别</h1><p>上面那句话是来自ClickHouse中文官网</p>
+<p>其中OLAP这个词熟悉又陌生，还有一个对应的叫做OLTP，我们简单介绍一下两者区别。</p>
+<p>OLTP（on-line transaction processing）翻译为联机事务处理</p>
+<p>OLAP（On-Line Analytical Processing）翻译为联机分析处理</p>
+<p>OLTP主要对数据做增删改操作</p>
+<p>OLAP主要对数据做查操作</p>
+<p>OLTP用于在业务系统中，直接产生存储业务数据，如电子商务，银行，证券，一般数据量较小，要求操作实时性高</p>
+<p>OLAP主要集中业务数据，进行统一的综合分析，分析的数据量一般巨大，不能做到很好地实时性</p>
+<h2 id="OLAP分类"><a href="#OLAP分类" class="headerlink" title="OLAP分类"></a>OLAP分类</h2><p>OLAP还可以分为ROLAP（关系型联机分析处理）以及MOLAP（多维联机分析处理）</p>
+<h3 id="ROLAP"><a href="#ROLAP" class="headerlink" title="ROLAP"></a>ROLAP</h3><p>完全基于关系模型进行存储，只是根据分析的需求对模型的结构和组织进行了优化，代表有MPP分布式数据库，以及基于Hadoop的Spark，Hive</p>
+<p>因为ROLAP是实时来需求，实时进行计算，所以在数据量庞大的情况下速度会变得不能接受，而传统数据库无法支持大规模集群和PB级别数据量，所以这时候出现了MMP（大规模并行）数据库，这种数据库解决了一部分可扩展性问题，在支持的数据体量上有了很大的提升，但是在节点数量很大的时候就算再提升集群规模性能也不会有很大提升</p>
+<p>基于Hadoop的Spark对硬件要求很低，但是计算量级达到一定程度无法秒级响应，并且因为是基于内存计算容易出现内存溢出等问题</p>
+<h3 id="MOLAP"><a href="#MOLAP" class="headerlink" title="MOLAP"></a>MOLAP</h3><p>MOLAP理念就是既然计算能力不够能秒级返回结果，那我就按照一些维度先算好数据，到时候直接返回，优点就是同等资源下支持的数据体量更大，并发更多，但是当表的维度越多越复杂，需要的磁盘存储空间越大，构建cube也越复杂。常见的MOLAP服务器有SSAS，Kylin</p>
+<p>Kylin则是目前技术较为先进的一款成熟产品，基于Hadoop框架，Cube以分片的形式存储在不同节点上，Cube大小不受服务器配置限制，所以具备很好的可扩展性和对服务器要求很低，在扩容成本上就非常低廉。另外为了控制整体Cube的大小，Kylin给客户提供了建模的能力，即用户可以根据自身需要，对模型种的维度以及维度组合进行预先的构建，把一些不需要的维度和组合筛选掉，从而达到降低维度的目的，减少磁盘空间的占用。</p>
+<p>从可扩展性上看：</p>
+<p>Kylin=Impala/Spark&gt;MPP数据库&gt;传统数据库；</p>
+<p>从对硬件要求上看：</p>
+<p>传统数据库&gt;MPP数据库&gt;Impala/Spark&gt;=Kylin；</p>
+<p>从响应效率上来看：</p>
+<p>不同的数据量、并发数，响应效率差别不一，但可以确定的是，要计算的数据量越大，并发的用户数越多，同等资源情况下预计算的响应效率会越发明显。</p>
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/shujuku.jpg" class="" title="中二是最后的热血">
+
+<h1 id="ClickHouse"><a href="#ClickHouse" class="headerlink" title="ClickHouse"></a>ClickHouse</h1><p>ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)</p>
+<h2 id="安装与部署"><a href="#安装与部署" class="headerlink" title="安装与部署"></a>安装与部署</h2><p>系统是m1 Mac，目前还不能原生的支持ClickHouse，找了个centos 7的服务器，下面我们先来安装部署一下ClickHouse。</p>
+<p>首先检查我们的系统是否支持</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">grep -q sse4_2 /proc/cpuinfo &amp;&amp; echo &quot;SSE 4.2 supported&quot; || echo &quot;SSE 4.2 not supported&quot;</span><br></pre></td></tr></table></figure>
+
+<p>输出前面的结果：SSE 4.2 supported  即为支持</p>
+<p>centos安装命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">首先我们添加安装源</span></span><br><span class="line">sudo yum install yum-utils</span><br><span class="line">sudo rpm --import https://repo.clickhouse.tech/CLICKHOUSE-KEY.GPG</span><br><span class="line">sudo yum-config-manager --add-repo https://repo.clickhouse.tech/rpm/stable/x86_64</span><br></pre></td></tr></table></figure>
+
+<p>如果想使用最新的版本，请用<code>testing</code>替代<code>stable</code></p>
+<p>运行命令安装：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo yum install clickhouse-server clickhouse-client</span><br></pre></td></tr></table></figure>
+
+<p>启动（默认是./config.xml所以需要在相应目录下启动）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo service clickhouse-server start</span><br><span class="line">或者使用</span><br><span class="line">systemctl start clickhouse-serve</span><br></pre></td></tr></table></figure>
+
+<p>服务端日志文件路径:/var/log/clickhouse-server/</p>
+<p>默认配置文件在：/etc/clickhouse-server/config.xml</p>
+<p>运行的时候，配置文件会自动合并<code>/etc/clickhouse-server/config.d</code>目录下的xml文件</p>
+<p>在控制台启动：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">实际上还有config.d目录下的xml配置文件，需要注意下</span></span><br><span class="line">clickhouse-server --config-file=/etc/clickhouse-server/config.xml</span><br></pre></td></tr></table></figure>
+
+<h2 id="导入示例数据集"><a href="#导入示例数据集" class="headerlink" title="导入示例数据集"></a>导入示例数据集</h2><p>下面我们做一个官网的一个数据集测试，了解一下基础的如何导入数据以及查询</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl https://datasets.clickhouse.tech/hits/tsv/hits_v1.tsv.xz | unxz --threads=`nproc` &gt; hits_v1.tsv</span><br><span class="line">curl https://datasets.clickhouse.tech/visits/tsv/visits_v1.tsv.xz | unxz --threads=`nproc` &gt; visits_v1.tsv</span><br></pre></td></tr></table></figure>
+
+<p>这两个文件数据量有10G左右，我们通过head命令提取部分数据即可</p>
+<p>head -n 100000 hits_v1.tsv &gt; hits_v2.tsv</p>
+<p>head visits_v1.tsv -n 50000 &gt; visits_v2.tsv</p>
+<h3 id="准备库表"><a href="#准备库表" class="headerlink" title="准备库表"></a>准备库表</h3><p>登录clickhouse客户端</p>
+<div class='spoiler collapsed'>
+    <div class='spoiler-title'>
+        clickhouse-client快速提示
+    </div>
+    <div class='spoiler-content'>
+        <p>交互模式:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">clickhouse-client</span><br><span class="line">clickhouse-client --host=... --port=... --user=... --password=...</span><br></pre></td></tr></table></figure>
+
+<p>启用多行查询:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">clickhouse-client -m</span><br><span class="line">clickhouse-client --multiline</span><br></pre></td></tr></table></figure>
+
+<p>以批处理模式运行查询:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">clickhouse-client --query=&#x27;SELECT 1&#x27;</span><br><span class="line">echo &#x27;SELECT 1&#x27; | clickhouse-client</span><br><span class="line">clickhouse-client &lt;&lt;&lt; &#x27;SELECT 1&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>从指定格式的文件中插入数据:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">clickhouse-client --query=&#x27;INSERT INTO table VALUES&#x27; &lt; data.txt</span><br><span class="line">clickhouse-client --query=&#x27;INSERT INTO table FORMAT TabSeparated&#x27; &lt; data.tsv </span><br></pre></td></tr></table></figure>
+
+    </div>
+</div>
+
+<p>这里我们建立一个库名叫做adtiming</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">clickhouse<span class="operator">-</span>client <span class="comment">--query &quot;CREATE DATABASE IF NOT EXISTS adtiming&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>建表语法要复杂的多，<a class="link"   href="https://clickhouse.tech/docs/zh/sql-reference/statements/create/" >建表文档<i class="fas fa-external-link-alt"></i></a></p>
+<p>分别创建hits表以及visits表</p>
+<div class='spoiler collapsed'>
+    <div class='spoiler-title'>
+        建表语句
+    </div>
+    <div class='spoiler-content'>
+        <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> adtiming.hits_v1</span><br><span class="line">(</span><br><span class="line">    `WatchID` UInt64,</span><br><span class="line">    `JavaEnable` UInt8,</span><br><span class="line">    `Title` String,</span><br><span class="line">    `GoodEvent` Int16,</span><br><span class="line">    `EventTime` DateTime,</span><br><span class="line">    `EventDate` <span class="type">Date</span>,</span><br><span class="line">    `CounterID` UInt32,</span><br><span class="line">    `ClientIP` UInt32,</span><br><span class="line">    `ClientIP6` FixedString(<span class="number">16</span>),</span><br><span class="line">    `RegionID` UInt32,</span><br><span class="line">    `UserID` UInt64,</span><br><span class="line">    `CounterClass` Int8,</span><br><span class="line">    `OS` UInt8,</span><br><span class="line">    `UserAgent` UInt8,</span><br><span class="line">    `URL` String,</span><br><span class="line">    `Referer` String,</span><br><span class="line">    `URLDomain` String,</span><br><span class="line">    `RefererDomain` String,</span><br><span class="line">    `Refresh` UInt8,</span><br><span class="line">    `IsRobot` UInt8,</span><br><span class="line">    `RefererCategories` <span class="keyword">Array</span>(UInt16),</span><br><span class="line">    `URLCategories` <span class="keyword">Array</span>(UInt16),</span><br><span class="line">    `URLRegions` <span class="keyword">Array</span>(UInt32),</span><br><span class="line">    `RefererRegions` <span class="keyword">Array</span>(UInt32),</span><br><span class="line">    `ResolutionWidth` UInt16,</span><br><span class="line">    `ResolutionHeight` UInt16,</span><br><span class="line">    `ResolutionDepth` UInt8,</span><br><span class="line">    `FlashMajor` UInt8,</span><br><span class="line">    `FlashMinor` UInt8,</span><br><span class="line">    `FlashMinor2` String,</span><br><span class="line">    `NetMajor` UInt8,</span><br><span class="line">    `NetMinor` UInt8,</span><br><span class="line">    `UserAgentMajor` UInt16,</span><br><span class="line">    `UserAgentMinor` FixedString(<span class="number">2</span>),</span><br><span class="line">    `CookieEnable` UInt8,</span><br><span class="line">    `JavascriptEnable` UInt8,</span><br><span class="line">    `IsMobile` UInt8,</span><br><span class="line">    `MobilePhone` UInt8,</span><br><span class="line">    `MobilePhoneModel` String,</span><br><span class="line">    `Params` String,</span><br><span class="line">    `IPNetworkID` UInt32,</span><br><span class="line">    `TraficSourceID` Int8,</span><br><span class="line">    `SearchEngineID` UInt16,</span><br><span class="line">    `SearchPhrase` String,</span><br><span class="line">    `AdvEngineID` UInt8,</span><br><span class="line">    `IsArtifical` UInt8,</span><br><span class="line">    `WindowClientWidth` UInt16,</span><br><span class="line">    `WindowClientHeight` UInt16,</span><br><span class="line">    `ClientTimeZone` Int16,</span><br><span class="line">    `ClientEventTime` DateTime,</span><br><span class="line">    `SilverlightVersion1` UInt8,</span><br><span class="line">    `SilverlightVersion2` UInt8,</span><br><span class="line">    `SilverlightVersion3` UInt32,</span><br><span class="line">    `SilverlightVersion4` UInt16,</span><br><span class="line">    `PageCharset` String,</span><br><span class="line">    `CodeVersion` UInt32,</span><br><span class="line">    `IsLink` UInt8,</span><br><span class="line">    `IsDownload` UInt8,</span><br><span class="line">    `IsNotBounce` UInt8,</span><br><span class="line">    `FUniqID` UInt64,</span><br><span class="line">    `HID` UInt32,</span><br><span class="line">    `IsOldCounter` UInt8,</span><br><span class="line">    `IsEvent` UInt8,</span><br><span class="line">    `IsParameter` UInt8,</span><br><span class="line">    `DontCountHits` UInt8,</span><br><span class="line">    `WithHash` UInt8,</span><br><span class="line">    `HitColor` FixedString(<span class="number">1</span>),</span><br><span class="line">    `UTCEventTime` DateTime,</span><br><span class="line">    `Age` UInt8,</span><br><span class="line">    `Sex` UInt8,</span><br><span class="line">    `Income` UInt8,</span><br><span class="line">    `Interests` UInt16,</span><br><span class="line">    `Robotness` UInt8,</span><br><span class="line">    `GeneralInterests` <span class="keyword">Array</span>(UInt16),</span><br><span class="line">    `RemoteIP` UInt32,</span><br><span class="line">    `RemoteIP6` FixedString(<span class="number">16</span>),</span><br><span class="line">    `WindowName` Int32,</span><br><span class="line">    `OpenerName` Int32,</span><br><span class="line">    `HistoryLength` Int16,</span><br><span class="line">    `BrowserLanguage` FixedString(<span class="number">2</span>),</span><br><span class="line">    `BrowserCountry` FixedString(<span class="number">2</span>),</span><br><span class="line">    `SocialNetwork` String,</span><br><span class="line">    `SocialAction` String,</span><br><span class="line">    `HTTPError` UInt16,</span><br><span class="line">    `SendTiming` Int32,</span><br><span class="line">    `DNSTiming` Int32,</span><br><span class="line">    `ConnectTiming` Int32,</span><br><span class="line">    `ResponseStartTiming` Int32,</span><br><span class="line">    `ResponseEndTiming` Int32,</span><br><span class="line">    `FetchTiming` Int32,</span><br><span class="line">    `RedirectTiming` Int32,</span><br><span class="line">    `DOMInteractiveTiming` Int32,</span><br><span class="line">    `DOMContentLoadedTiming` Int32,</span><br><span class="line">    `DOMCompleteTiming` Int32,</span><br><span class="line">    `LoadEventStartTiming` Int32,</span><br><span class="line">    `LoadEventEndTiming` Int32,</span><br><span class="line">    `NSToDOMContentLoadedTiming` Int32,</span><br><span class="line">    `FirstPaintTiming` Int32,</span><br><span class="line">    `RedirectCount` Int8,</span><br><span class="line">    `SocialSourceNetworkID` UInt8,</span><br><span class="line">    `SocialSourcePage` String,</span><br><span class="line">    `ParamPrice` Int64,</span><br><span class="line">    `ParamOrderID` String,</span><br><span class="line">    `ParamCurrency` FixedString(<span class="number">3</span>),</span><br><span class="line">    `ParamCurrencyID` UInt16,</span><br><span class="line">    `GoalsReached` <span class="keyword">Array</span>(UInt32),</span><br><span class="line">    `OpenstatServiceName` String,</span><br><span class="line">    `OpenstatCampaignID` String,</span><br><span class="line">    `OpenstatAdID` String,</span><br><span class="line">    `OpenstatSourceID` String,</span><br><span class="line">    `UTMSource` String,</span><br><span class="line">    `UTMMedium` String,</span><br><span class="line">    `UTMCampaign` String,</span><br><span class="line">    `UTMContent` String,</span><br><span class="line">    `UTMTerm` String,</span><br><span class="line">    `FromTag` String,</span><br><span class="line">    `HasGCLID` UInt8,</span><br><span class="line">    `RefererHash` UInt64,</span><br><span class="line">    `URLHash` UInt64,</span><br><span class="line">    `CLID` UInt32,</span><br><span class="line">    `YCLID` UInt64,</span><br><span class="line">    `ShareService` String,</span><br><span class="line">    `ShareURL` String,</span><br><span class="line">    `ShareTitle` String,</span><br><span class="line">    `ParsedParams` Nested(</span><br><span class="line">        Key1 String,</span><br><span class="line">        Key2 String,</span><br><span class="line">        Key3 String,</span><br><span class="line">        Key4 String,</span><br><span class="line">        Key5 String,</span><br><span class="line">        ValueDouble Float64),</span><br><span class="line">    `IslandID` FixedString(<span class="number">16</span>),</span><br><span class="line">    `RequestNum` UInt32,</span><br><span class="line">    `RequestTry` UInt8</span><br><span class="line">)</span><br><span class="line">ENGINE <span class="operator">=</span> MergeTree()</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> toYYYYMM(EventDate)</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> (CounterID, EventDate, intHash32(UserID))</span><br><span class="line">SAMPLE <span class="keyword">BY</span> intHash32(UserID)</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> adtiming.visits_v1</span><br><span class="line">(</span><br><span class="line">    `CounterID` UInt32,</span><br><span class="line">    `StartDate` <span class="type">Date</span>,</span><br><span class="line">    `Sign` Int8,</span><br><span class="line">    `IsNew` UInt8,</span><br><span class="line">    `VisitID` UInt64,</span><br><span class="line">    `UserID` UInt64,</span><br><span class="line">    `StartTime` DateTime,</span><br><span class="line">    `Duration` UInt32,</span><br><span class="line">    `UTCStartTime` DateTime,</span><br><span class="line">    `PageViews` Int32,</span><br><span class="line">    `Hits` Int32,</span><br><span class="line">    `IsBounce` UInt8,</span><br><span class="line">    `Referer` String,</span><br><span class="line">    `StartURL` String,</span><br><span class="line">    `RefererDomain` String,</span><br><span class="line">    `StartURLDomain` String,</span><br><span class="line">    `EndURL` String,</span><br><span class="line">    `LinkURL` String,</span><br><span class="line">    `IsDownload` UInt8,</span><br><span class="line">    `TraficSourceID` Int8,</span><br><span class="line">    `SearchEngineID` UInt16,</span><br><span class="line">    `SearchPhrase` String,</span><br><span class="line">    `AdvEngineID` UInt8,</span><br><span class="line">    `PlaceID` Int32,</span><br><span class="line">    `RefererCategories` <span class="keyword">Array</span>(UInt16),</span><br><span class="line">    `URLCategories` <span class="keyword">Array</span>(UInt16),</span><br><span class="line">    `URLRegions` <span class="keyword">Array</span>(UInt32),</span><br><span class="line">    `RefererRegions` <span class="keyword">Array</span>(UInt32),</span><br><span class="line">    `IsYandex` UInt8,</span><br><span class="line">    `GoalReachesDepth` Int32,</span><br><span class="line">    `GoalReachesURL` Int32,</span><br><span class="line">    `GoalReachesAny` Int32,</span><br><span class="line">    `SocialSourceNetworkID` UInt8,</span><br><span class="line">    `SocialSourcePage` String,</span><br><span class="line">    `MobilePhoneModel` String,</span><br><span class="line">    `ClientEventTime` DateTime,</span><br><span class="line">    `RegionID` UInt32,</span><br><span class="line">    `ClientIP` UInt32,</span><br><span class="line">    `ClientIP6` FixedString(<span class="number">16</span>),</span><br><span class="line">    `RemoteIP` UInt32,</span><br><span class="line">    `RemoteIP6` FixedString(<span class="number">16</span>),</span><br><span class="line">    `IPNetworkID` UInt32,</span><br><span class="line">    `SilverlightVersion3` UInt32,</span><br><span class="line">    `CodeVersion` UInt32,</span><br><span class="line">    `ResolutionWidth` UInt16,</span><br><span class="line">    `ResolutionHeight` UInt16,</span><br><span class="line">    `UserAgentMajor` UInt16,</span><br><span class="line">    `UserAgentMinor` UInt16,</span><br><span class="line">    `WindowClientWidth` UInt16,</span><br><span class="line">    `WindowClientHeight` UInt16,</span><br><span class="line">    `SilverlightVersion2` UInt8,</span><br><span class="line">    `SilverlightVersion4` UInt16,</span><br><span class="line">    `FlashVersion3` UInt16,</span><br><span class="line">    `FlashVersion4` UInt16,</span><br><span class="line">    `ClientTimeZone` Int16,</span><br><span class="line">    `OS` UInt8,</span><br><span class="line">    `UserAgent` UInt8,</span><br><span class="line">    `ResolutionDepth` UInt8,</span><br><span class="line">    `FlashMajor` UInt8,</span><br><span class="line">    `FlashMinor` UInt8,</span><br><span class="line">    `NetMajor` UInt8,</span><br><span class="line">    `NetMinor` UInt8,</span><br><span class="line">    `MobilePhone` UInt8,</span><br><span class="line">    `SilverlightVersion1` UInt8,</span><br><span class="line">    `Age` UInt8,</span><br><span class="line">    `Sex` UInt8,</span><br><span class="line">    `Income` UInt8,</span><br><span class="line">    `JavaEnable` UInt8,</span><br><span class="line">    `CookieEnable` UInt8,</span><br><span class="line">    `JavascriptEnable` UInt8,</span><br><span class="line">    `IsMobile` UInt8,</span><br><span class="line">    `BrowserLanguage` UInt16,</span><br><span class="line">    `BrowserCountry` UInt16,</span><br><span class="line">    `Interests` UInt16,</span><br><span class="line">    `Robotness` UInt8,</span><br><span class="line">    `GeneralInterests` <span class="keyword">Array</span>(UInt16),</span><br><span class="line">    `Params` <span class="keyword">Array</span>(String),</span><br><span class="line">    `Goals` Nested(</span><br><span class="line">        ID UInt32,</span><br><span class="line">        Serial UInt32,</span><br><span class="line">        EventTime DateTime,</span><br><span class="line">        Price Int64,</span><br><span class="line">        OrderID String,</span><br><span class="line">        CurrencyID UInt32),</span><br><span class="line">    `WatchIDs` <span class="keyword">Array</span>(UInt64),</span><br><span class="line">    `ParamSumPrice` Int64,</span><br><span class="line">    `ParamCurrency` FixedString(<span class="number">3</span>),</span><br><span class="line">    `ParamCurrencyID` UInt16,</span><br><span class="line">    `ClickLogID` UInt64,</span><br><span class="line">    `ClickEventID` Int32,</span><br><span class="line">    `ClickGoodEvent` Int32,</span><br><span class="line">    `ClickEventTime` DateTime,</span><br><span class="line">    `ClickPriorityID` Int32,</span><br><span class="line">    `ClickPhraseID` Int32,</span><br><span class="line">    `ClickPageID` Int32,</span><br><span class="line">    `ClickPlaceID` Int32,</span><br><span class="line">    `ClickTypeID` Int32,</span><br><span class="line">    `ClickResourceID` Int32,</span><br><span class="line">    `ClickCost` UInt32,</span><br><span class="line">    `ClickClientIP` UInt32,</span><br><span class="line">    `ClickDomainID` UInt32,</span><br><span class="line">    `ClickURL` String,</span><br><span class="line">    `ClickAttempt` UInt8,</span><br><span class="line">    `ClickOrderID` UInt32,</span><br><span class="line">    `ClickBannerID` UInt32,</span><br><span class="line">    `ClickMarketCategoryID` UInt32,</span><br><span class="line">    `ClickMarketPP` UInt32,</span><br><span class="line">    `ClickMarketCategoryName` String,</span><br><span class="line">    `ClickMarketPPName` String,</span><br><span class="line">    `ClickAWAPSCampaignName` String,</span><br><span class="line">    `ClickPageName` String,</span><br><span class="line">    `ClickTargetType` UInt16,</span><br><span class="line">    `ClickTargetPhraseID` UInt64,</span><br><span class="line">    `ClickContextType` UInt8,</span><br><span class="line">    `ClickSelectType` Int8,</span><br><span class="line">    `ClickOptions` String,</span><br><span class="line">    `ClickGroupBannerID` Int32,</span><br><span class="line">    `OpenstatServiceName` String,</span><br><span class="line">    `OpenstatCampaignID` String,</span><br><span class="line">    `OpenstatAdID` String,</span><br><span class="line">    `OpenstatSourceID` String,</span><br><span class="line">    `UTMSource` String,</span><br><span class="line">    `UTMMedium` String,</span><br><span class="line">    `UTMCampaign` String,</span><br><span class="line">    `UTMContent` String,</span><br><span class="line">    `UTMTerm` String,</span><br><span class="line">    `FromTag` String,</span><br><span class="line">    `HasGCLID` UInt8,</span><br><span class="line">    `FirstVisit` DateTime,</span><br><span class="line">    `PredLastVisit` <span class="type">Date</span>,</span><br><span class="line">    `LastVisit` <span class="type">Date</span>,</span><br><span class="line">    `TotalVisits` UInt32,</span><br><span class="line">    `TraficSource` Nested(</span><br><span class="line">        ID Int8,</span><br><span class="line">        SearchEngineID UInt16,</span><br><span class="line">        AdvEngineID UInt8,</span><br><span class="line">        PlaceID UInt16,</span><br><span class="line">        SocialSourceNetworkID UInt8,</span><br><span class="line">        Domain String,</span><br><span class="line">        SearchPhrase String,</span><br><span class="line">        SocialSourcePage String),</span><br><span class="line">    `Attendance` FixedString(<span class="number">16</span>),</span><br><span class="line">    `CLID` UInt32,</span><br><span class="line">    `YCLID` UInt64,</span><br><span class="line">    `NormalizedRefererHash` UInt64,</span><br><span class="line">    `SearchPhraseHash` UInt64,</span><br><span class="line">    `RefererDomainHash` UInt64,</span><br><span class="line">    `NormalizedStartURLHash` UInt64,</span><br><span class="line">    `StartURLDomainHash` UInt64,</span><br><span class="line">    `NormalizedEndURLHash` UInt64,</span><br><span class="line">    `TopLevelDomain` UInt64,</span><br><span class="line">    `URLScheme` UInt64,</span><br><span class="line">    `OpenstatServiceNameHash` UInt64,</span><br><span class="line">    `OpenstatCampaignIDHash` UInt64,</span><br><span class="line">    `OpenstatAdIDHash` UInt64,</span><br><span class="line">    `OpenstatSourceIDHash` UInt64,</span><br><span class="line">    `UTMSourceHash` UInt64,</span><br><span class="line">    `UTMMediumHash` UInt64,</span><br><span class="line">    `UTMCampaignHash` UInt64,</span><br><span class="line">    `UTMContentHash` UInt64,</span><br><span class="line">    `UTMTermHash` UInt64,</span><br><span class="line">    `FromHash` UInt64,</span><br><span class="line">    `WebVisorEnabled` UInt8,</span><br><span class="line">    `WebVisorActivity` UInt32,</span><br><span class="line">    `ParsedParams` Nested(</span><br><span class="line">        Key1 String,</span><br><span class="line">        Key2 String,</span><br><span class="line">        Key3 String,</span><br><span class="line">        Key4 String,</span><br><span class="line">        Key5 String,</span><br><span class="line">        ValueDouble Float64),</span><br><span class="line">    `Market` Nested(</span><br><span class="line">        Type UInt8,</span><br><span class="line">        GoalID UInt32,</span><br><span class="line">        OrderID String,</span><br><span class="line">        OrderPrice Int64,</span><br><span class="line">        PP UInt32,</span><br><span class="line">        DirectPlaceID UInt32,</span><br><span class="line">        DirectOrderID UInt32,</span><br><span class="line">        DirectBannerID UInt32,</span><br><span class="line">        GoodID String,</span><br><span class="line">        GoodName String,</span><br><span class="line">        GoodQuantity Int32,</span><br><span class="line">        GoodPrice Int64),</span><br><span class="line">    `IslandID` FixedString(<span class="number">16</span>)</span><br><span class="line">)</span><br><span class="line">ENGINE <span class="operator">=</span> CollapsingMergeTree(Sign)</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> toYYYYMM(StartDate)</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> (CounterID, StartDate, intHash32(UserID), VisitID)</span><br><span class="line">SAMPLE <span class="keyword">BY</span> intHash32(UserID)</span><br></pre></td></tr></table></figure>
+
+    </div>
+</div>
+
+<p>我们可以看到两张表分别使用了不同的表引擎，其中 <code>hits_v1</code>使用 <a class="link"   href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/mergetree/" >MergeTree引擎<i class="fas fa-external-link-alt"></i></a>，而<code>visits_v1</code>使用 <a class="link"   href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/collapsingmergetree/" >Collapsing<i class="fas fa-external-link-alt"></i></a>引擎</p>
+<p>对于我们需要不同功能的表或者不同使用途径的表Clickhouse具有不同的表引擎来应对，<a class="link"   href="https://developer.aliyun.com/article/762461" >表引擎文档<i class="fas fa-external-link-alt"></i></a> <a class="link"   href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/mergetree/" >表引擎官方文档<i class="fas fa-external-link-alt"></i></a></p>
+<p><code>MergeTree</code> 系列的引擎被设计用于插入极大量的数据到一张表当中。数据可以以数据片段的形式一个接着一个的快速写入，数据片段在后台按照一定的规则进行合并。相比在插入时不断修改（重写）已存储的数据，这种策略会高效很多。所以相当于这种表结构适用于插入操作较多，并且一次插入数据较大的情况。</p>
+<p><code>CollapsingMergeTree</code> 会异步的删除（折叠） <code>Sign</code> 有 <code>1</code> 和 <code>-1</code> 且其余所有字段的值都相等的成对的行。没有成对的行会被保留。</p>
+<p>每个引擎实际上就代表一种需求，比如CollapsingMergeTree就是去重作用。</p>
+<h3 id="插入数据"><a href="#插入数据" class="headerlink" title="插入数据"></a>插入数据</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">clickhouse-client --query &quot;INSERT INTO adtiming.hits_v1 FORMAT TSV&quot; --max_insert_block_size=100000 &lt; hits_v2.tsv</span><br><span class="line">clickhouse-client --query &quot;INSERT INTO adtiming.visits_v1 FORMAT TSV&quot; --max_insert_block_size=100000 &lt; visits_v2.tsv</span><br></pre></td></tr></table></figure>
+
+<p>检验插入是否成功(如果直接用大数据量文件可能会导致插入失败)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">clickhouse-client --query &quot;SELECT COUNT(*) FROM adtiming.hits_v1&quot;</span><br><span class="line">clickhouse-client --query &quot;SELECT COUNT(*) FROM adtiming.visits_v1&quot;</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/jiancha.png" class="" title="中二是最后的热血">
+
+<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><p>下面对数据进行简单的查询</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    StartURL <span class="keyword">AS</span> URL,</span><br><span class="line">    <span class="built_in">AVG</span>(Duration) <span class="keyword">AS</span> AvgDuration</span><br><span class="line"><span class="keyword">FROM</span> tutorial.visits_v1</span><br><span class="line"><span class="keyword">WHERE</span> StartDate <span class="keyword">BETWEEN</span> <span class="string">&#x27;2014-03-23&#x27;</span> <span class="keyword">AND</span> <span class="string">&#x27;2014-03-30&#x27;</span></span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> URL</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> AvgDuration <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">10</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>查询结果如下图所示</p>
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/chaxunjieguo.png" class="" title="中二是最后的热血">
+
+<h2 id="简单思考"><a href="#简单思考" class="headerlink" title="简单思考"></a>简单思考</h2><p>官网实例这个sql第一眼看上去感觉有点怪，因为group by后面的字段是别名字段URL，这个在Hive或者Mysql中应该都是不可以的，group by后面直接使用别名是会报错的，我们可以从SQL的执行顺序出发来看这个问题。</p>
+<div class='spoiler collapsed'>
+    <div class='spoiler-title'>
+        执行顺序
+    </div>
+    <div class='spoiler-content'>
+        <p>Mysql的实行顺序：</p>
+<p>(1)    FROM <left_table></p>
+<p>(2)    ON <join_condition></p>
+<p>(3)    <join_type> JOIN <right_table></p>
+<p>(4)    WHERE <where_condition></p>
+<p>(5)    GROUP BY <group_by_list></p>
+<p>(6)    HAVING <having_condition></p>
+<p>(7)    SELECT</p>
+<p>(8)    DISTINCT <select_list></p>
+<p>(9)    ORDER BY <order_by_condition></p>
+<p>(10)   LIMIT <limit_number> </p>
+<p>Hive执行顺序</p>
+<p><code>from … on … join … where … group by … having …</code></p>
+<p><code>select … distinct … order by … limit</code></p>
+<p>上面展示了Hive以及Mysql中都是group by在select后面，所以group by不能使用别名来操作，但是order by是可以直接使用别名的，说明ClickHouse的SQL执行和常见的数据库不太一样，具体差别都有什么我们后面学习到了再来总结。</p>
+
+    </div>
+</div>
+
+<h2 id="ClickHouse表引擎"><a href="#ClickHouse表引擎" class="headerlink" title="ClickHouse表引擎"></a>ClickHouse表引擎</h2><p>首先我们了解到ClickHouse的核心引擎是MergeTree系列引擎，因为MT系列引擎支持了像数据按照主键排序，指定分区键实现分区，数据副本，数据采样等功能，这是其他像Log，Integration引擎所不具备的功能，所以我们先学习MergeTree系列引擎，也是最难的。</p>
+<p>MergeTree系列引擎种类繁多，有以下MergeTree、ReplacingMergeTree、SummingMergeTree、AggregatingMergeTree、CollapsingMergeTree、VersionedCollapsingMergeTree、GraphiteMergeTree 等 7 种不同类型的 MergeTree 引擎，以及其对应支持副本的Replicated*系列引擎</p>
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/clickhouse_yinqing.png" class="" title="中二是最后的热血">
+
+<p>下面我们介绍每一种引擎的业务场景</p>
+<p><strong>ReplacingMergeTree</strong>： 在后台数据合并期间，对同一个分区内具有相同 <code>排序键</code> 的数据进行去重操作，<code>ReplacingMergeTree</code> 适用于在后台清除重复的数据以节省空间，但是它只能保证同一个分区内没有重复的数据出现</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> [IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] [db.]table_name [<span class="keyword">ON</span> CLUSTER cluster]</span><br><span class="line">(</span><br><span class="line">    name1 [type1] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr1],</span><br><span class="line">    name2 [type2] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr2],</span><br><span class="line">    ...</span><br><span class="line">) ENGINE <span class="operator">=</span> ReplacingMergeTree([ver])</span><br><span class="line">[<span class="keyword">PARTITION</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[<span class="keyword">ORDER</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[SAMPLE <span class="keyword">BY</span> expr]</span><br><span class="line">[SETTINGS name<span class="operator">=</span><span class="keyword">value</span>, ...]</span><br></pre></td></tr></table></figure>
+
+<p>ENGINE = ReplacingMergeTree([ver])，其中ver为选填参数，它需要指定一个UInt8/UInt16、Date或DateTime类型的字段，它决定了数据去重时所用的算法，如果没有设置该参数，合并时保留分组内的最后一条数据；如果指定了该参数，则保留ver字段取值最大的那一行。</p>
+<p><strong>SummingMergeTree</strong>： 当合并数据时，会把同一个分区内的具有相同主键的记录合并为一条记录。根据聚合字段设置，该字段的值为聚合后的汇总值，非聚合字段使用第一条记录的值，聚合字段类型必须为数值类型。如果没有指定聚合字段，则会按照<code>非主键的数值类型字段</code>进行聚合</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> [IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] [db.]table_name [<span class="keyword">ON</span> CLUSTER cluster]</span><br><span class="line">(</span><br><span class="line">    name1 [type1] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr1],</span><br><span class="line">    name2 [type2] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr2],</span><br><span class="line">    ...</span><br><span class="line">) ENGINE <span class="operator">=</span> SummingMergeTree([columns])</span><br><span class="line">[<span class="keyword">PARTITION</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[<span class="keyword">ORDER</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[SAMPLE <span class="keyword">BY</span> expr]</span><br><span class="line">[SETTINGS name<span class="operator">=</span><span class="keyword">value</span>, ...]</span><br></pre></td></tr></table></figure>
+
+<p>SummingMergeTree表引擎依据ORDER BY指定的字段进行聚合，PRIMARY KEY指定主键，但是ORDER BY可以指代主键，一般只声明ORDER BY即可，表数据会按照orderby的维度进行排序，而索引数据会按照主键进行排序生成，索引的顺序必须和表数据对应上，那么含义就是order by的维度中主键必须是最左前缀，下面举一个例子。</p>
+<p>假设我们有col1,col2,col3三列，业务上我们只需要对col1进行查询过滤，就是我们只需要col1当做主键，然后根据col1数据以及index_granularity（索引间隔）参数生成我们的索引文件，为了保证数据也是索引的顺序，那么我们应该写order by(col1,col2).</p>
+<p>这样带来的好处还有就是主键和维度分开，我们以后可以根据业务情况修改维度</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> test_summing MODIFY <span class="keyword">ORDER</span> <span class="keyword">BY</span> (col1,col2,col3);</span><br></pre></td></tr></table></figure>
+
+<p><strong>AggregatingMergeTree</strong>： 在同一数据分区下，可以将具有相同主键的数据进行聚合。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> [IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] [db.]table_name [<span class="keyword">ON</span> CLUSTER cluster]</span><br><span class="line">(</span><br><span class="line">    name1 [type1] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr1],</span><br><span class="line">    name2 [type2] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr2],</span><br><span class="line">    ...</span><br><span class="line">) ENGINE <span class="operator">=</span> AggregatingMergeTree()</span><br><span class="line">[<span class="keyword">PARTITION</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[<span class="keyword">ORDER</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[SAMPLE <span class="keyword">BY</span> expr]</span><br><span class="line">[TTL expr]</span><br><span class="line">[SETTINGS name<span class="operator">=</span><span class="keyword">value</span>, ...]</span><br></pre></td></tr></table></figure>
+
+<p>与<code>SummingMergeTree</code>的区别在于：<code>SummingMergeTree</code>对非主键列进行<code>sum</code>聚合，而<code>AggregatingMergeTree</code>则可以指定各种聚合函数。对于<code>AggregateFunction</code>类型的列字段，在进行数据的写入和查询时与其他的表引擎有很大区别，在写入数据时，需使用带有 -State- 聚合函数的 INSERT SELECT语句；而在查询数据时，则需要调用相应的-Merge函数。</p>
+<p>一般AggregatingMergeTree都是需要和普通的MergeTree进行合用，MergeTree作为底表，防止因为聚合函数错误导致数据丢失，而AggregatingMergeTree作为<code>物化视图</code>，相当于在底表上进行聚合查询</p>
+<p><strong>CollapsingMergeTree</strong>： 在同一数据分区下，对具有相同主键的数据进行折叠合并。</p>
+<p>建表语法：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> [IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] [db.]table_name [<span class="keyword">ON</span> CLUSTER cluster]</span><br><span class="line">(</span><br><span class="line">    name1 [type1] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr1],</span><br><span class="line">    name2 [type2] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr2],</span><br><span class="line">    ...</span><br><span class="line">) ENGINE <span class="operator">=</span> VersionedCollapsingMergeTree(sign, version)</span><br><span class="line">[<span class="keyword">PARTITION</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[<span class="keyword">ORDER</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[SAMPLE <span class="keyword">BY</span> expr]</span><br><span class="line">[SETTINGS name<span class="operator">=</span><span class="keyword">value</span>, ...]</span><br></pre></td></tr></table></figure>
+
+<p>CollapsingMergeTree同样也根据order by字段进行唯一性判定，实际上这种引擎是根据以赠代删的思路，支持行级别修改和删除，通过定义一个sign标记为字段，记录数据行状态，如果sign标记为1，则表示这是一行有效数据，如果sign为-1表示这行数据需要被删除，当分区合并的时候，同一个分区内sign标记为1和-1的一组数据会被抵消删除掉。</p>
+<p>分区数据合并折叠不是实时操作，需要在后台实行Compaction操作，用户可以进行手动操作，但是在生产环境中不适合使用效率很低，一般建议group by完毕之和进行having count。eg:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> emp_id,name,<span class="built_in">sum</span>(salary <span class="operator">*</span> sign)<span class="keyword">FROM</span> emp_collapsingmergetree <span class="keyword">GROUP</span> <span class="keyword">BY</span> emp_id, name <span class="keyword">HAVING</span> <span class="built_in">sum</span>(sign) <span class="operator">&gt;</span> <span class="number">0</span>;</span><br><span class="line">┌─emp_id─┬─name─┬─<span class="built_in">sum</span>(multiply(salary, sign))─┐</span><br><span class="line">│      <span class="number">1</span> │ tom  │                    <span class="number">30000.00</span> │</span><br><span class="line">└────────┴──────┴─────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>上面我们知道了CollapsingMergeTree的合并原理，不难想象，这种合并对写入顺序有着严格要求，否则就会导致数据无法正常折叠，比如我们先写入的是sign=-1的数据，然后再写入sign=1的数据，这时候我们合并分区之和再进行排查依旧是会出现两条数据。</p>
+<p>所以这种表结构只适合单线程写入，可以很好地控制顺序写入，但是如果是多线程的状态就不能很好地控制数据写入顺序了，这时候就需要另一种表结构了，就是下面我们要提到的VersionedCollapsingMergeTree</p>
+<p><strong>VersionedCollapsingMergeTree</strong>：</p>
+<p>基于 CollapsingMergeTree 引擎，增添了数据版本信息字段(version)配置选项。在数据依据 ORDER BY 设置对数据进行排序的基础上，如果数据的版本信息列不在排序字段中，那么版本信息会被隐式的作为 ORDER BY 的最后一列从而影响数据排序。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> [IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] [db.]table_name [<span class="keyword">ON</span> CLUSTER cluster]</span><br><span class="line">(</span><br><span class="line">    name1 [type1] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr1],</span><br><span class="line">    name2 [type2] [<span class="keyword">DEFAULT</span><span class="operator">|</span>MATERIALIZED<span class="operator">|</span>ALIAS expr2],</span><br><span class="line">    ...</span><br><span class="line">) ENGINE <span class="operator">=</span> VersionedCollapsingMergeTree(sign, version)</span><br><span class="line">[<span class="keyword">PARTITION</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[<span class="keyword">ORDER</span> <span class="keyword">BY</span> expr]</span><br><span class="line">[SAMPLE <span class="keyword">BY</span> expr]</span><br><span class="line">[SETTINGS name<span class="operator">=</span><span class="keyword">value</span>, ...]</span><br></pre></td></tr></table></figure>
+
+<p>version字段会自动的添加到order by末尾，我们在插入数据的之和只要保证同一条数据的version大小，就相当于可以保证它的顺序关系。</p>
+<p><strong>GraphiteMergeTree</strong>： 用来存储时序数据库 Graphites 的数据。</p>
+<p>ClickHouse表引擎种类繁多，其中每一种适合的业务场景都不相同，详细可以参考<a class="link"   href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/collapsingmergetree/" >官方文档<i class="fas fa-external-link-alt"></i></a> 或者一些<a class="link"   href="https://developer.aliyun.com/article/762461" >三方文档<i class="fas fa-external-link-alt"></i></a>，</p>
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/yinqing.png" class="" title="中二是最后的热血">
+
+
+
+<h2 id="搭建ClickHouse集群"><a href="#搭建ClickHouse集群" class="headerlink" title="搭建ClickHouse集群"></a>搭建ClickHouse集群</h2><p>搭建ClickHouse需要依赖Zookeeper集群，这里我们只在一台机器上搭建Zookeeper，给出Zookeeper，ClickHouse，Kafka版本作参考</p>
+<table>
+<thead>
+<tr>
+<th>Zookeeper</th>
+<th>ClickHouse</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zookeeper-3.4.10</td>
+<td>21.8.4.51(21.8.4.51)</td>
+</tr>
+</tbody></table>
+<p>启动Zookeeper并查看状态</p>
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/zookeeper.png" class="">
+
+<p>接下来需要在ClickHouse中配置集群信息，在配置之前我们需要明白以下几个关键信息</p>
+<p>1.主要读取的配置文件是/etc/clickhouse-server/config.xml</p>
+<p>2.ClickHouse会将/etc/clickhouse-server/conf.d/metrika.xml配置文件和上面提到的配置文件合并，但是为了保险，建议还是执行第二条</p>
+<p>3.通用的配置信息可以写到metrika.xml配置文件中，如果没有的话需要创建一个，然后在config.xml中引入</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--引入方法--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">include_from</span>&gt;</span>/etc/clickhouse-server/conf.d/metrika.xml<span class="tag">&lt;/<span class="name">include_from</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>4.如果上面的方法没有生效，直接修改config.xml文件</p>
+<p>5.要清楚你在修改配置文件的哪些地方，我们不管是直接修改config.xml还是写一个metrika.xml文件都是为了修改<remote_servers>,<zookeeper>等几个关键信息，要确保我们的修改成功生效</p>
+<p>了解上面几点之和我们开始配置ClickHouse集群：</p>
+<ul>
+<li><p>修改/etc/clickhouse-server/config.xml</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 如果禁用了ipv6，使用下面配置 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">listen_host</span>&gt;</span>0.0.0.0<span class="tag">&lt;/<span class="name">listen_host</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 如果没有禁用ipv6，使用下面配置，我使用的下面的配置 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">listen_host</span>&gt;</span>::<span class="tag">&lt;/<span class="name">listen_host</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个配置是为了我们能正常的登录clickhouse-client，服务器使用了ipv6但是我不小心用了上面的<listen_host>，登录的时候报错 9000 connection refused，最终定位到了这里。</p>
+</li>
+<li><p>创建/etc/clickhouse-server/conf.d/metrika.xml文件</p>
+<p>根据集群信息，将下面的xml改写成自己集群使用的配置文件，放到对应目录下，需要注意一下几点：</p>
+<p>（1）下面xml信息中的集群名称叫做‘doit_ch_cluster1’，可以随意修改，但是要记住名称</p>
+<p>（2）<shard>代表分片，<replica>代表副本，一个分片可能有多个副本，集群表也可以有多个分片</p>
+<p>（3）下面配置文件集群信息是<clickhouse_remote_servers>标签，注意config.xml中的集群信息叫做什么，一般需要在config.xml中进行一行配置 <code>&lt;remote_servers incl=&quot;clickhouse_remote_servers&quot; /&gt;</code>，意思相当于<remote_servers>标签内容取自<clickhouse_remote_servers>，其他标签也是一样的，虽然听起来多此一举，但是可以将通用的配置信息摘取出来，之和直接scp给各个服务器就行，但是我两台机器中的一台这样配置一直没有生效。。。没错两台中的一台没有生效，另一台生效了，就很无语，只能将其中的配置直接修改到config.xml中，也算是解决了</p>
+<p>（4）macros配置，这个配置创建数据副本表的时候路径可以直接使用宏替换替换，因为我们创建集群表的时候需要保证不同的表以及不同副本在Zookeeper中的路径不同，其中<code>&lt;shard&gt;</code>标签代表的是我们想让哪几台机器组成一个分片集合，同一个分片的分片名称是一样的比如都是01，或者02，而<code>&lt;replica&gt;</code>标签代表的是本台机器的创建的副本的名称标识，副本是即使是同一个分片的副本名称也不能一样，所以这个副本名称一般采用主机名或者ip，这是需要注意的地方，这块理解起来需要结合官方文档](<a class="link"   href="https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/replication/" >https://clickhouse.tech/docs/zh/engines/table-engines/mergetree-family/replication/<i class="fas fa-external-link-alt"></i></a>)</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">yandex</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- /etc/clickhouse-server/config.xml 中配置的remote_servers的incl属性值，--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 集群名称，可以修改 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">doit_ch_cluster1</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 配置三个分片，每个分片对应一台机器，为每个分片配置一个副本 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shard</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">host</span>&gt;</span>master<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shard</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver1<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shard</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver2<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">doit_ch_cluster1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- zookeeper相关配置 --&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 该标签与config.xml的&lt;zookeeper incl=&quot;zookeeper-servers&quot; optional=&quot;true&quot; /&gt; 保持一致 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>master<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver1<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>slaver2<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 分片和副本标识，shard标签配置分片编号，&lt;replica&gt;配置分片副本主机名，需要修改对应主机上的配置 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">macros</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">replica</span>&gt;</span>doit01<span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">macros</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">networks</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">ip</span>&gt;</span>::/0<span class="tag">&lt;/<span class="name">ip</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">networks</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">clickhouse_compression</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">case</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">min_part_size</span>&gt;</span>10000000000<span class="tag">&lt;/<span class="name">min_part_size</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">min_part_size_ratio</span>&gt;</span>0.01<span class="tag">&lt;/<span class="name">min_part_size_ratio</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">method</span>&gt;</span>lz4<span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">case</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">clickhouse_compression</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">yandex</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>启动ClickHouse集群</p>
+<p>我们在ClickHouse机器上都配置完成之后，确保我们的Zookeeper是开启状态，然后重启ClickHouse集群</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">systemctl restart clickhouse-server</span><br></pre></td></tr></table></figure>
+
+<p>确保所有的Clickhouse状态都正常，如果出现问题就去查看一下/var/log/clickhouse/中的err日志</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">systemctl status clickhouse-server</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/clickhouse.png" class="">
+
+<p>确认所有正常之后我们登录任意一台clickhouse客户端，查看clickhouse集群以及Zookeeper信息，需要注意的是，system.zookeeper表只有在关于Zookeeper配置生效之后才会出现</p>
+<img src="/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/jiqunxinxi.png" class=""></li>
+</ul>
+<h2 id="创建Distribute-Local表"><a href="#创建Distribute-Local表" class="headerlink" title="创建Distribute+Local表"></a>创建Distribute+Local表</h2><p>Distribute是Clickhouse比较特殊的一种表引擎，是ClickHouse分布式表的代言词，distribute表引擎创建的表不存储数据，它起到一个路由的作用，将数据路由到集群机器上的本地表。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Distributed(cluster_name, database_name, table_name[, sharding_key])</span><br></pre></td></tr></table></figure>
+
+<p>cluster_name：集群名称，与集群配置中的自定义名称相对应。<br>database_name：数据库名称。<br>table_name：表名称，需要集群中的机器上都存在这个表<br>sharding_key：可选的，用于分片的key值，在数据写入的过程中，分布式表会依据分片key的规则，将数据分布到各个节点的本地表，这个参数可选</p>
+<ul>
+<li><p>建立distribute表</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> user_cluster <span class="keyword">ON</span> CLUSTER doit_ch_cluster1</span><br><span class="line">(</span><br><span class="line">    id Int32,</span><br><span class="line">    name String</span><br><span class="line">)ENGINE <span class="operator">=</span> Distributed(doit_ch_cluster1, <span class="keyword">default</span>, user_local,id);</span><br><span class="line"></span><br><span class="line"><span class="comment">--上面建表语句代表了数据是要分发到doit_ch_cluster1集群中default.user_local表，根据id决定分发到哪台机器上</span></span><br></pre></td></tr></table></figure>
+
+<p>这里我们为了简单，就只设计两个表字段，其中id是我们用来将数据分到集群机器上的sharding_key，我们也可以用rand()函数让ck随机的决定将数据发送到哪台机器</p>
+</li>
+<li><p>建立本地表</p>
+<p>得益于我们的集群配置，我们可以使用<code>ON CLUSTER doit_ch_cluster1</code>语法自动在集群中建表，这里我们使用正常的查询引擎MergeTree()</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> user_local <span class="keyword">ON</span> CLUSTER doit_ch_cluster1</span><br><span class="line">(</span><br><span class="line">    `id` Int32,</span><br><span class="line">    `name` String</span><br><span class="line">)</span><br><span class="line">ENGINE <span class="operator">=</span> MergeTree()</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> id</span><br><span class="line"><span class="keyword">PRIMARY</span> KEY id</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> id</span><br></pre></td></tr></table></figure></li>
+</ul>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+      </tags>
+  </entry>
+</search>
