@@ -64,7 +64,7 @@
                             <a class=""
                                href="/"
                             >
-                                HOME
+                                首页
                             </a>
                         </li>
                     
@@ -72,7 +72,7 @@
                             <a class=""
                                href="/archives"
                             >
-                                ARCHIVES
+                                归档
                             </a>
                         </li>
                     
@@ -99,12 +99,12 @@
             
                 <li class="drawer-menu-item flex-center">
                     <a class=""
-                       href="/">HOME</a>
+                       href="/">首页</a>
                 </li>
             
                 <li class="drawer-menu-item flex-center">
                     <a class=""
-                       href="/archives">ARCHIVES</a>
+                       href="/archives">归档</a>
                 </li>
             
         </ul>
@@ -138,7 +138,7 @@
                     <div class="author">
                         <span class="name">SuperPiKaChu</span>
                         
-                            <span class="author-label">Lv1</span>
+                            <span class="author-label">Lv2</span>
                         
                     </div>
                     <div class="meta-info">
@@ -167,12 +167,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>3.5k Words</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>3.7k 字</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fas fa-clock"></i>&nbsp;<span>12 Mins</span>
+            <i class="fas fa-clock"></i>&nbsp;<span>13 分钟</span>
         </span>
     
     
@@ -193,55 +193,158 @@
 
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/%E6%95%B0%E6%8D%AE%E6%B9%96.png" class="" title="中二是最后的热血">
 
-<p>​    关于数据湖为什么会出现我觉得有一句话概括的非常好，<code>大数据领域发展至今已经经历了相当长时间的发展和探索，虽然大数据技术的出现和迭代降低了用户处理海量数据的门槛，但是有一个问题不能忽视，数据格式对不同引擎适配的对接。这句话是什么意思呢？我们在使用不同的引擎进行计算时，需要将数据根据引擎进行适配。这是相当棘手的问题，为此出现了一种新的解决方案：</code><strong>介于上层计算引擎和底层存储格式之间的一个中间层</strong>。<code>这个中间层不是数据存储的方式，只是定义了数据的元数据组织方式，并且向引擎层面提供统一的类似传统数据库中&quot;表&quot;的语义。它的底层仍然是Parquet、ORC等存储格式。重新应证了那句话，</code><strong>计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决</strong><code>。基于此，Netflix开发了Iceberg，目前已经是Apache的顶级项目，除此之外还有Hudi，delta数据湖方案。</code></p>
+
+
+<p>​    关于数据湖为什么会出现我觉得有一句话概括的非常好，</p>
+<p><code>大数据领域发展至今已经经历了相当长时间的发展和探索，虽然大数据技术的出现和迭代降低了用户处理海量数据的门槛，但是有一个问题不能忽视，数据格式对不同引擎适配的对接</code></p>
+<p>这句话是什么意思呢？我们在使用不同的引擎进行计算时，需要将数据根据引擎进行适配。这是相当棘手的问题，比如说我用Spark进行计算，但是底层的文件可能是TXT存储的，可能是Hive ORC存储的，或者是经过HDFS的一些压缩算法处理的数据，那么我Spark就需要支持读取TXT文件，读取ORC文件，读取snappy文件 and so on.为了将计算引擎和数据剥离开来，结合的不那么紧密，大牛们出现了一种新的解决方案：</p>
+<p><code>介于上层计算引擎和底层存储格式之间的一个中间层。</code></p>
+<p>这个中间层不是数据存储的方式，只是定义了数据的元数据组织方式，并且向引擎层面提供统一的类似传统数据库</p>
+<p>中”表”的语义。它的底层仍然是Parquet、ORC等存储格式。重新应证了那句话。</p>
+<p><strong>计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决</strong>。</p>
+<p><code>基于此，Netflix开发了Iceberg数据湖（更主要的是基于Hive的数据湖方案不能满足需求），目前已经是Apache的顶级项目，除此之外还有Hudi，delta数据湖方案。</code></p>
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/%E6%95%B0%E6%8D%AE%E6%B9%96%E6%A6%82%E5%BF%B5.png" class="" title="中二是最后的热血">
 
-<p>​    我们可以看到数据湖是一个在计算平台和存储平台中间的一个类似中间件的东西，用于解决多种数据源，多种计算引擎之间的连接关系，数据湖中的数据可以包括来自于关系型数据库中的结构化数据（行和列）、半结构化数据（如CSV、日志、XML、JSON）、非结构化数据（如email、文档、PDF等）和二进制数据（如图像、音频、视频）。除此之外引申出来的还有关于元数据的管理，源数据的多种Schema种类样式都要满足。概括一下成熟的数据湖应该满足以下需求：<br>（1）需要支持比较丰富的数据 Schema 的组织；<br>（2）它在注入的过程中要支撑<strong>实时的数据查询</strong>，所以<strong>需要 ACID</strong> 的保证，确保不会读到一些还没写完的中间状态的脏数据；<br>（3）例如日志这些有可能临时需要改个格式，或者加一列。类似这种情况，需要避免像传统的数仓一样，可能要把所有的数据重新提出来写一遍，重新注入到存储；而是需要一个轻量级的解决方案来达成需求。</p>
-<h3 id="Lambda架构"><a href="#Lambda架构" class="headerlink" title="Lambda架构"></a>Lambda架构</h3><p>​        在继续了解数据湖之前我们先来了解一下相关大数据架构，lambda是一种比较传统的大数据架构，广泛应用于现在的大数据数仓平台中，其中主要的特点就是流批分离，比如我们批处理数据会在每天夜间12点运行一次，计算昨天一天的数据然后覆盖到druid或者clickhouse中，保证数据的准确性，但是对于今天的实时数据查询来说我们就只能通过实时程序来计算好之后存到druid或者clickhouse中，因为离线层采用分布式存储系统，这样哪怕程序崩溃也不大可能会损伤到数据。</p>
+
+
+<p>​    我们可以看到数据湖是一个在计算平台和存储平台中间的一个类似中间件的东西，用于解决多种数据源，多种计算引擎</p>
+<p>之间的连接关系，数据湖中的数据可以包括来自于关系型数据库中的结构化数据（行和列）、半结构化数据（如CSV、日</p>
+<p>志、XML、JSON）、非结构化数据（如email、文档、PDF等）和二进制数据（如图像、音频、视频）。除此之外引申出</p>
+<p>来的还有关于元数据的管理，源数据的多种Schema种类样式都要满足。概括一下成熟的数据湖应该满足以下需求：</p>
+<p>（1）需要支持比较丰富的数据 Schema 的组织；</p>
+<p>（2）它在注入的过程中要支撑<strong>实时的数据查询</strong>，所以<strong>需要 ACID</strong> 的保证，确保不会读到一些还没写完的中间状态的脏数据；</p>
+<p>（3）例如日志这些有可能临时需要改个格式，或者加一列。类似这种情况，需要避免像传统的数仓一样，可能要把所有的数据重新提出来写一遍，重新注入到存储；而是需要一个轻量级的解决方案来达成需求。</p>
+<h3 id="Lambda架构"><a href="#Lambda架构" class="headerlink" title="Lambda架构"></a>Lambda架构</h3><p>​        在继续了解数据湖之前我们先来了解一下相关大数据架构，主要分为两种架构，分别是lambda &amp; kappa，我们先来</p>
+<p>说lambda架构。lambda是一种比较传统的大数据架构，广泛应用于现在的大数据数仓平台中，其中主要的特点就是流批</p>
+<p>分离，比如我们批处理数据会在每天夜间12点运行一次，计算昨天一天的数据然后覆盖到druid或者clickhouse中，保证数</p>
+<p>据的准确性，但是对于今天的实时数据查询来说我们就只能通过实时程序来计算好之后存到druid或者clickhouse中，因为</p>
+<p>离线层采用分布式存储系统，这样哪怕程序崩溃也不大可能会损伤到数据。</p>
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/lambda%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
 
-<p>Lambda架构优缺点如下：<br>优点：<br>（1）离线层采用分布式存储管理历史信息，即使系统崩溃也不太可能损伤到数据<br>（2）有效平衡了速度与可靠性<br>（3）容灾而兼具弹性的数据处理架构<br>缺点：<br>（1）Lambad架构维护成本很高。很显然，这种架构下数据存在两份、schema不统一、 数据处理逻辑不统一，整个数仓系统维护成本很高<br>（2）Lambda中的实时数仓中一般使用kafka当做中间件，但是kafka不支持OLAP操作，大多数业务希望可以在DWD、DWS层进行即席查询，kafka无法满足<br>（3）Lambda实时数仓kafka仅支持append不支持update/delete</p>
-<h3 id="Kappa架构"><a href="#Kappa架构" class="headerlink" title="Kappa架构"></a>Kappa架构</h3><p>​        Kappa 架构不能被简单视作 Lambda 架构的替代品，相反，它是在离线层对满足业务需求不是必须实时的一个备选项。该架构适合实时处理不同事件，下图展示了其整体结构</p>
+
+
+<p>Lambda架构优缺点如下：</p>
+<p>优点：</p>
+<p>（1）离线层采用分布式存储管理历史信息，即使系统崩溃也不太可能损伤到数据</p>
+<p>（2）有效平衡了速度与可靠性</p>
+<p>（3）容灾而兼具弹性的数据处理架构</p>
+<p>缺点：</p>
+<p>（1）Lambad架构维护成本很高。很显然，这种架构下数据存在两份、schema不统一、 数据处理逻辑不统一，整个数仓系统维护成本很高</p>
+<p>（2）Lambda中的实时数仓中一般使用kafka当做中间件，但是kafka不支持OLAP操作，大多数业务希望可以在DWD、DWS层进行即席查询，kafka无法满足</p>
+<p>（3）Lambda实时数仓kafka仅支持append不支持update/delete</p>
+<h3 id="Kappa架构"><a href="#Kappa架构" class="headerlink" title="Kappa架构"></a>Kappa架构</h3><p>​        Kappa 架构不能被简单视作 Lambda 架构的替代品，相反，它是在离线层对满足业务需求不是必须实时的一个备选</p>
+<p>项。该架构适合实时处理不同事件，下图展示了其整体结构</p>
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/kappa%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
 
-<p>其中中间的消息件一般采用kafka，因为其多分区，顺序append data，可水平拓展的特性迎合了关键需求。一般实时架构选用的是Flink+Kafka架构，如果数据量极大的情况，一般kafka的过期时间设置的都比较短，比如一天甚至几小时，但是如果数据出现峰值情况，导致数据积压验证的话，可能导致kafka中数据不能被及时消费出来在Kafka中过期导致数据丢失。<br>Kappa架构优缺点：<br>优点：<br>（1）无需离线层<br>（2）只有当代码变更时才需要重新处理<br>（3）可以使用固定内存进行部署<br>（4）可用于具备水平扩展性的系统<br>（5）机器学习是实时的，所以所需资源更少<br>缺点：<br>（1）缺少离线层可能导致数据处理或数据库更新时发生错误，所以往往需要异常管理器来调解矛盾，恢复数据。<br>（2）数据链路更加复杂，如果我们需要对DWD层的实时数仓数据进行数据分析的时候就需要将DWD层的Kafka中的数据写入到ClickHouse或者hive中，增加了链路复杂性<br>（3）Kappa架构是严重依赖于消息队列的，消息队列本身的准确性严格依赖它上游数据的顺序，但是，消息队列越多，发生乱序的可能性越大。</p>
-<p>上面分别讲述了两种架构的优缺点，这时候有人就提出了，有没有一种技术能够保证数据高效回溯能力，架构稳定，支持数据更新，支持数据的流批读写，做到分钟级别的数据接入。</p>
+
+
+<p>其中中间的消息件一般采用kafka，因为其多分区，顺序append data，可水平拓展的特性迎合了关键需求。一般实时架构</p>
+<p>选用的是Flink+Kafka架构，如果数据量极大的情况，一般kafka的过期时间设置的都比较短，比如一天甚至几小时，但是</p>
+<p>如果数据出现峰值情况，导致数据积压验证的话，可能导致kafka中数据不能被及时消费出来在Kafka中过期导致数据丢</p>
+<p>失。</p>
+<p>Kappa架构优缺点：</p>
+<p>优点：</p>
+<p>（1）无需离线层</p>
+<p>（2）只有当代码变更时才需要重新处理</p>
+<p>（3）可以使用固定内存进行部署</p>
+<p>（4）可用于具备水平扩展性的系统</p>
+<p>（5）机器学习是实时的，所以所需资源更少</p>
+<p>缺点：</p>
+<p>（1）缺少离线层可能导致数据处理或数据库更新时发生错误，所以往往需要异常管理器来调解矛盾，恢复数据。</p>
+<p>（2）数据链路更加复杂，如果我们需要对DWD层的实时数仓数据进行数据分析的时候就需要将DWD层的Kafka中的数据</p>
+<p>写入到ClickHouse或者hive中，增加了链路复杂性</p>
+<p>（3）Kappa架构是严重依赖于消息队列的，消息队列本身的准确性严格依赖它上游数据的顺序，但是，消息队列越多，</p>
+<p>发生乱序的可能性越大。</p>
+<p>上面分别讲述了两种架构的优缺点，这时候有人就提出了，有没有一种技术能够保证数据高效回溯能力，架构稳定，支持</p>
+<p>数据更新，支持数据的流批读写，做到分钟级别的数据接入。</p>
 <p>于是乎，各大厂商针对上面的需求，分别推出了自己的数据湖方案，现在基本呈现三足鼎立的局势，Delta，Hudi，以及Iceberg。</p>
-<h2 id="Iceberg"><a href="#Iceberg" class="headerlink" title="Iceberg"></a>Iceberg</h2><p>​    上面我们了解了关于一个数据湖应该具有的特性以及lambda架构和Kappa架构，下面我们来看看Netflix发起的数据湖项目Iceberg，Iceberg的表数据架构图：</p>
+<h2 id="Iceberg"><a href="#Iceberg" class="headerlink" title="Iceberg"></a>Iceberg</h2><p>​    上面我们了解了关于一个数据湖应该具有的特性以及lambda架构和Kappa架构，下面我们来看看Netflix发起的数据湖项</p>
+<p>目Iceberg，Iceberg的表数据架构图：</p>
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/Iceberg%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%84%E7%BB%87%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
 
-<p>有几点需要注意一下：<br>（1）新快照不会覆盖旧快照，旧的快照中依然保存了早期数据的Manifest File，新旧快照共同组成了表的快照Metadata的一部分。<br>（2）数据文件datafile支持多种格式如parque,orc,avro等格式。<br>（3）有了快照，读数据的时候只能读到快照所能引用到的数据，还在写的数据不会被快照引用到，也就不会读到脏数据。多个快照会共享以前的数据文件，通过共享这些 Manifest File 来共享之前的数据。<br>（4）Manifest List再往上是快照元数据（快照Metadata），记录了当前或者历史上表格 Scheme 的变化、分区的配置、所有快照 Manifest File 路径、以及当前快照是哪一个。同时，Iceberg 提供命名空间以及表格的抽象，做完整的数据组织管理。</p>
+
+
+<p>有几点需要注意一下：</p>
+<p>（1）新快照不会覆盖旧快照，旧的快照中依然保存了早期数据的Manifest File，新旧快照共同组成了表的快照Metadata</p>
+<p>的一部分。</p>
+<p>（2）数据文件datafile支持多种格式如parque,orc,avro等格式。</p>
+<p>（3）有了快照，读数据的时候只能读到快照所能引用到的数据，还在写的数据不会被快照引用到，也就不会读到脏数</p>
+<p>据。多个快照会共享以前的数据文件，通过共享这些 Manifest File 来共享之前的数据。</p>
+<p>（4）Manifest List再往上是快照元数据（快照Metadata），记录了当前或者历史上表格 Scheme 的变化、分区的配置、</p>
+<p>所有快照 Manifest File 路径、以及当前快照是哪一个。同时，Iceberg 提供命名空间以及表格的抽象，做完整的数据组织</p>
+<p>管理。</p>
 <p>有了Iceberg这种神器之后，新一代的数仓基于Flink以及Iceberg的设计横空出世</p>
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/%E6%96%B0%E6%95%B0%E4%BB%93%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
 
-<p>这样无论是流处理还是批处理，我们的存储都是进入到了Iceberg数据湖中，不用再分开做流批处理的两套代码，以及不用大量依靠kafka这种消息中间件，下面我们总结一下这个新架构的优点。</p>
-<p>（1）解决Kafka存储数据量有限的问题，kafka使用成本较高，数据湖所有数据都是基于HDFS实现的文件管理系统，数据量可以巨大基本不用担心<br>（2）DWD层，ODS层依然支持OLAP查询，原先的实时数仓如果想查询这两层的数据需要通过Flink将数据导入到OLAP查询平台（ClickHouse、Druid、Hive）<br>（3）批流存储都是基于Iceberg以及HDFS之后，就可以完全复用一套数据质量管理体系，数据血缘关系同样也只做一套即可<br>（4）依靠数据湖架构设计的实时数仓可以看做是一种Kappa架构的升级，kappa的优点在数据湖数仓中依然存在，schema统一，数据处理逻辑统一，开发人员不用再维护两套代码。</p>
-<p>上面基于Iceberg构建的架构看起来就像是把Lambda架构中的Kafka和HDFS结合到了一起，并且我们知道Iceberg也是可以基于HDFS上存储的，那么他究竟是在HDFS上做了哪些操作让其可以作为实时数仓的存储了呢？</p>
-<p>（1）<strong>支持流式写入-增量拉取</strong>，目前主要基于Flink即可实现流式写入，但是这里有个问题，因为频繁的写文件导致小文件可能会增多，数据湖需要在这方面做出处理，还有就是实时处理程序需要知道<strong>哪些文件是新增的哪些是旧的</strong>，每次只需要处理新增的文件即可，这个也是离线数仓做不到实时的关键原因之一，离线数仓的做法就是处理完一整批数据之和给下游说我这批数据处理完了，你可以使用了。那Iceberg如何实现读写增量拉取的呢？这个需要我们上面提到的表数据组织架构。</p>
+
+
+<p>这样无论是流处理还是批处理，我们的存储都是进入到了Iceberg数据湖中，不用再分开做流批处理的两套代码，以及不用</p>
+<p>大量依靠kafka这种消息中间件，下面我们总结一下这个新架构的优点。</p>
+<p>（1）解决Kafka存储数据量有限的问题，kafka使用成本较高，数据湖所有数据都是基于HDFS实现的文件管理系统，数据</p>
+<p>量可以巨大基本不用担心</p>
+<p>（2）DWD层，ODS层依然支持OLAP查询，原先的实时数仓如果想查询这两层的数据需要通过Flink将数据导入到OLAP查</p>
+<p>询平台（ClickHouse、Druid、Hive）</p>
+<p>（3）批流存储都是基于Iceberg以及HDFS之后，就可以完全复用一套数据质量管理体系，数据血缘关系同样也只做一套</p>
+<p>即可</p>
+<p>（4）依靠数据湖架构设计的实时数仓可以看做是一种Kappa架构的升级，kappa的优点在数据湖数仓中依然存在，</p>
+<p>schema统一，数据处理逻辑统一，开发人员不用再维护两套代码。</p>
+<p>上面基于Iceberg构建的架构看起来就像是把Lambda架构中的Kafka和HDFS结合到了一起，并且我们知道Iceberg也是可</p>
+<p>以基于HDFS上存储的，那么他究竟是在HDFS上做了哪些操作让其可以作为实时数仓的存储了呢？</p>
+<p>（1）<strong>支持流式写入-增量拉取</strong>，目前主要基于Flink即可实现流式写入，但是这里有个问题，因为频繁的写文件导致小文件</p>
+<p>可能会增多，数据湖需要在这方面做出处理，还有就是实时处理程序需要知道<strong>哪些文件是新增的哪些是旧的</strong>，每次只需要</p>
+<p>处理新增的文件即可，这个也是离线数仓做不到实时的关键原因之一，离线数仓的做法就是处理完一整批数据之和给下游</p>
+<p>说我这批数据处理完了，你可以使用了。那Iceberg如何实现读写增量拉取的呢？这个需要我们上面提到的表数据组织架</p>
+<p>构。</p>
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/Iceberg%E8%AF%BB%E5%86%99API.png" class="" title="中二是最后的热血">
 
-<p>​        其中的s0表示第一次产生的快照，s1表示第二次产生的快照，同样新快照是包含了旧快照中的数据的，根据快照中的manifest文件Iceberg可以确定哪些文件是旧文件，哪些是新文件，有快照了我们就可以根据快照中的内容判断文件是新增的还是原先就存在的。</p>
-<p>（2）解决小文件过多的问题，目前iceberg的spark代码中有原生的合并小文件代码，flink的合并代码社区还在积极开发中，详细可以看一下<a class="link"   target="_blank" rel="noopener" href="https://github.com/apache/iceberg/pull/3213" >issue<i class="fas fa-external-link-alt"></i></a></p>
+
+
+<p>​        其中的s0表示第一次产生的快照，s1表示第二次产生的快照，同样新快照是包含了旧快照中的数据的，根据快照中的</p>
+<p>manifest文件Iceberg可以确定哪些文件是旧文件，哪些是新文件，有快照了我们就可以根据快照中的内容判断文件是新增</p>
+<p>的还是原先就存在的。</p>
+<p>（2）解决小文件过多的问题，目前iceberg的spark代码中有原生的合并小文件代码，flink的合并代码社区还在积极开发</p>
+<p>中，详细可以看一下<a class="link"   target="_blank" rel="noopener" href="https://github.com/apache/iceberg/pull/3213" >issue<i class="fas fa-external-link-alt"></i></a></p>
 <h2 id="Mac安装Iceberg"><a href="#Mac安装Iceberg" class="headerlink" title="Mac安装Iceberg"></a>Mac安装Iceberg</h2><p>Versions:<br>Hive 3.1.2  (hive –version)<br>Hadoop 3.3.1  (hadoop version)<br>Flink Version: 1.11.1 (flink –version)</p>
-<p><strong>注意事项</strong><br>（1）👆上面的版本是我自己本机的安装，可能其他版本也可以，但是Flink最好是选用1.11版本的，因为Iceberg官网有这样一句话<br><code>Apache Iceberg supports both [Apache Flink](https://flink.apache.org/)‘s DataStream API and Table API to write records into an Iceberg table. Currently, we only integrate Iceberg with Apache Flink 1.11.x.</code><br>（2）Mac使用brew安装指定版本的flink需要将flink项目clone到本地然后找到flink的提交记录，然后安装指定版本对应的commit id，详细参考<a class="link"   target="_blank" rel="noopener" href="https://blog.timeline229.com/homebrew-set-software-elder-version/" >这里!<i class="fas fa-external-link-alt"></i></a>，但是需要说明的是，我这样安装同样是报错的，所以最终采用了下载版本的对应压缩包直接解压在本地目录使用.<br>（3）环境变量必须要配置，我当时没有配置是运行失败了的，配上肯定是保险的，因为Mac程序员一般会用homebrew安装软件，会发现不用像原先Linux，或者windows需要配置环境变量才能使用</p>
+<p><strong>注意事项</strong></p>
+<p>（1）👆上面的版本是我自己本机的安装，可能其他版本也可以，但是Flink最好是选用1.11版本的，因为Iceberg官网有这</p>
+<p>样一句话</p>
+<p><code>Apache Iceberg supports both [Apache Flink](https://flink.apache.org/)‘s DataStream API and Table API to write records into an Iceberg table. Currently, we only integrate Iceberg with Apache Flink 1.11.x.</code></p>
+<p>（2）Mac使用brew安装指定版本的flink需要将flink项目clone到本地然后找到flink的提交记录，然后安装指定版本对应的</p>
+<p>commit id，详细参考<a class="link"   target="_blank" rel="noopener" href="https://blog.timeline229.com/homebrew-set-software-elder-version/" >这里!<i class="fas fa-external-link-alt"></i></a>，但是需要说明的是，我这样安装同样是报错的，所以最终采用了下载版本的对应压缩包直接</p>
+<p>解压在本地目录使用.</p>
+<p>（3）环境变量必须要配置，我当时没有配置是运行失败了的，配上肯定是保险的，因为Mac程序员一般会用homebrew安</p>
+<p>装软件，会发现不用像原先Linux，或者windows需要配置环境变量才能使用</p>
 <blockquote>
 <p>Mac使用Homebrew安装软件的时候，软件包的二进制文件会被创建软连接然后放到/usr/local/bin中，而Mac开机时，会自动读取该文件，使用某个命令时会根据链接文件找到命令的实际位置并执行。</p>
 </blockquote>
 <p>需要配置的环境变量如下所示：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">注意：需要将地址换成你自己的安装地址</span></span><br><span class="line"><span class="meta">#</span><span class="bash">添加完成之后记得进行 <span class="built_in">source</span> 操作，让修改马上生效</span></span><br><span class="line">export HADOOP_HOME=/usr/local/Cellar/hadoop/3.3.1/libexec</span><br><span class="line">export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home</span><br><span class="line"><span class="meta">#</span><span class="bash">需要注意的是hadoop classpath会自动将相关包的路径打出来，不用一个个手动敲</span></span><br><span class="line">export HADOOP_CLASSPATH=hadoop classpath</span><br><span class="line">export PATH=$HADOOP_CLASSPATH:$HADOOP_HOME:$JAVA_HOME/bin:$PATH</span><br></pre></td></tr></table></figure>
 
-<p>（4）我们后面创建HiveCatlog创建修改Hive表数据则需要连接Hive的元数据，那么就意味着需要启动Hive metastore服务，我们平常对Hive metastore元数据服务没有什么感觉，下面有一段关于Hive Metastore的简短介绍，更详细信息可以参考<a class="link"   target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/100585524" >!知乎回答<i class="fas fa-external-link-alt"></i></a> &amp; <a class="link"   target="_blank" rel="noopener" href="https://docs.cloudera.com/runtime/7.2.7/hive-hms-overview/topics/hive-hms-introduction.html" >!cloudera官网介绍<i class="fas fa-external-link-alt"></i></a></p>
+
+
+<p>（4）我们后面创建HiveCatlog创建修改Hive表数据则需要连接Hive的元数据，那么就意味着需要启动Hive metastore服</p>
+<p>务，我们平常对Hive metastore元数据服务没有什么感觉，下面有一段关于Hive Metastore的简短介绍，更详细信息可以</p>
+<p>参考<a class="link"   target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/100585524" >!知乎回答<i class="fas fa-external-link-alt"></i></a> &amp; <a class="link"   target="_blank" rel="noopener" href="https://docs.cloudera.com/runtime/7.2.7/hive-hms-overview/topics/hive-hms-introduction.html" >!cloudera官网介绍<i class="fas fa-external-link-alt"></i></a></p>
 <blockquote>
 <p>Hive Metastore是Hive用来管理库表元数据的一个服务，有了它上层的服务不用再跟裸的文件数据打交道，而是可以基于结构化的库表信息构建计算框架。现在除了Hive之外很多计算框架都支持以Hive Metastore为元数据中心来查询底层Hadoop生态的数据，比如Drill, Presto, Spark等等。</p>
 </blockquote>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">我们在Mac上启动Hive Metastore服务命令</span><br><span class="line">hive --service metastore</span><br></pre></td></tr></table></figure>
 
-<p>了解了上面的注意事项之后我们开始下载Iceberg的jar包，<a class="link"   target="_blank" rel="noopener" href="https://repo.maven.apache.org/maven2/org/apache/iceberg/iceberg-flink-runtime/0.11.1/" >下载地址<i class="fas fa-external-link-alt"></i></a><br>下载好之后我们将Iceberg的Jar包(iceberg-flink-runtime-0.11.1.jar)和用来连接hive的jar包(flink-sql-connector-hive-3.1.2_2.11-1.11.0.jar)放到flink目录中的lib目录</p>
+
+
+<p>了解了上面的注意事项之后我们开始下载Iceberg的jar包，<a class="link"   target="_blank" rel="noopener" href="https://repo.maven.apache.org/maven2/org/apache/iceberg/iceberg-flink-runtime/0.11.1/" >下载地址<i class="fas fa-external-link-alt"></i></a></p>
+<p>下载好之后我们将Iceberg的Jar包(iceberg-flink-runtime-0.11.1.jar)和用来连接hive的jar包(flink-sql-connector-hive-</p>
+<p>3.1.2_2.11-1.11.0.jar)放到flink目录中的lib目录</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">进入flink-sql，进入前记得打开Hive元数据服务</span></span><br><span class="line">./sql-client.sh embedded \\n    </span><br><span class="line">-j /Users/liu/Documents/flink-1.11.1/lib/iceberg-flink-runtime-0.11.1.jar \\n    </span><br><span class="line">-j /Users/liu/Documents/flink-1.11.1/lib/flink-sql-connector-hive-3.1.2_2.11-1.11.0.jar \\n    shell</span><br></pre></td></tr></table></figure>
+
+
 
 <p>创建Hive的Catalog，即可以建立已HDFS为基础的数据湖表</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Flink <span class="keyword">SQL</span><span class="operator">&gt;</span> <span class="keyword">CREATE</span> CATALOG hive_catalog <span class="keyword">WITH</span> (</span><br><span class="line"><span class="operator">&gt;</span>   <span class="string">&#x27;type&#x27;</span><span class="operator">=</span><span class="string">&#x27;iceberg&#x27;</span>,</span><br><span class="line"><span class="operator">&gt;</span>   <span class="string">&#x27;catalog-type&#x27;</span><span class="operator">=</span><span class="string">&#x27;hive&#x27;</span>,</span><br><span class="line"><span class="operator">&gt;</span>   <span class="string">&#x27;uri&#x27;</span><span class="operator">=</span><span class="string">&#x27;thrift://localhost:9083&#x27;</span>,</span><br><span class="line"><span class="operator">&gt;</span>   <span class="string">&#x27;clients&#x27;</span><span class="operator">=</span><span class="string">&#x27;5&#x27;</span>,</span><br><span class="line"><span class="operator">&gt;</span>   <span class="string">&#x27;property-version&#x27;</span><span class="operator">=</span><span class="string">&#x27;1&#x27;</span>,</span><br><span class="line"><span class="operator">&gt;</span>   <span class="string">&#x27;warehouse&#x27;</span><span class="operator">=</span><span class="string">&#x27;hdfs://localhost:9000/user/hive/warehouse&#x27;</span></span><br><span class="line"><span class="operator">&gt;</span> );</span><br></pre></td></tr></table></figure>
 
+
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​        本文主要记录数据湖的基础知识，以及如何在Mac上安装Iceberg，其中的注意事项是我出现过的问题，如果有什么疑问或者不理解的地方欢迎随时交流。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
@@ -249,14 +352,14 @@
             <div class="post-copyright-info">
                 <div class="article-copyright-info-container">
     <ul>
-        <li>Post title：数据湖基础知识以及Mac安装Iceberg教程</li>
-        <li>Post author：SuperPiKaChu</li>
-        <li>Create time：2021-10-20 19:47:14</li>
+        <li>本文标题：数据湖基础知识以及Mac安装Iceberg教程</li>
+        <li>本文作者：SuperPiKaChu</li>
+        <li>创建时间：2021-10-20 19:47:14</li>
         <li>
-            Post link：https://keep.xpoet.cn/2021/10/20/数据湖基础概念与理论，Iceberg/
+            本文链接：https://keep.xpoet.cn/2021/10/20/数据湖基础概念与理论，Iceberg/
         </li>
         <li>
-            Copyright Notice：All articles in this blog are licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> unless stating additionally.
+            版权声明：本博客所有文章除特别声明外，均采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> 许可协议。转载请注明出处！
         </li>
     </ul>
 </div>
@@ -267,6 +370,21 @@
         
             <div class="article-nav">
                 
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">如何使用JMX+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</span>
+                                <span class="post-nav-item">上一篇</span>
+                            </span>
+                        </a>
+                    </div>
+                
                 
                     <div class="article-next">
                         <a class="next"
@@ -275,7 +393,7 @@
                         >
                             <span class="title flex-center">
                                 <span class="post-nav-title-item">使用grafana监控预警表格类型数据</span>
-                                <span class="post-nav-item">Next posts</span>
+                                <span class="post-nav-item">下一篇</span>
                             </span>
                             <span class="right arrow-icon flex-center">
                               <i class="fas fa-chevron-right"></i>
@@ -286,6 +404,63 @@
             </div>
         
 
+        
+            <div class="comment-container">
+                <div class="comments-container">
+    <div id="comment-anchor"></div>
+    <div class="comment-area-title">
+        <i class="fas fa-comments">&nbsp;评论</i>
+    </div>
+    
+
+        
+            
+    <div id="gitalk-container"></div>
+    <script 
+            src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
+    <script >
+
+        function loadGitalk() {
+            let __gitalk__pathname = decodeURI(location.pathname);
+            const __gitalk__pathnameLength = __gitalk__pathname.length;
+            const __gitalk__pathnameMaxLength = 50;
+            if (__gitalk__pathnameLength > __gitalk__pathnameMaxLength) {
+                __gitalk__pathname = __gitalk__pathname.substring(0, __gitalk__pathnameMaxLength - 3) + '...';
+            }
+
+            try {
+                Gitalk && new Gitalk({
+                    clientID: 'ba2b9bee56bb96f70abe',
+                    clientSecret: 'e60dc9aec07ff594b50f6a99b7d72ac5ecc2553c',
+                    repo: 'BlogComment',
+                    owner: 'liumengkai',
+                    admin: ['liumengkai'],
+                    id: __gitalk__pathname,
+                    language: 'zh-Hans'
+                }).render('gitalk-container');
+
+            } catch (e) {
+                window.Gitalk = null;
+            }
+        }
+
+        if ('false') {
+            const loadGitalkTimeout = setTimeout(() => {
+                loadGitalk();
+                clearTimeout(loadGitalkTimeout);
+            }, 1000);
+        } else {
+            window.addEventListener('DOMContentLoaded', loadGitalk);
+        }
+    </script>
+
+
+
+        
+    
+</div>
+
+            </div>
         
     </div>
 </div>
@@ -311,18 +486,18 @@
             <div class="website-count info-item">
                 
                     <span id="busuanzi_container_site_uv">
-                        Visitor Count&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
+                        访问人数&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
                     </span>
                 
                 
                     <span id="busuanzi_container_site_pv">
-                        Totalview&nbsp;<span id="busuanzi_value_site_pv"></span>
+                        总访问量&nbsp;<span id="busuanzi_value_site_pv"></span>
                     </span>
                 
             </div>
         
         <div class="theme-info info-item">
-            Powered by <a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;|&nbsp;Theme&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
         </div>
         
     </div>
@@ -343,6 +518,10 @@
         
 
         <!-- go comment -->
+        
+            <li class="go-comment">
+                <i class="fas fa-comment"></i>
+            </li>
         
     </ul>
 </div>
@@ -397,7 +576,7 @@
         <aside class="page-aside">
             <div class="post-toc-wrap">
     <div class="post-toc">
-        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">数据湖基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lambda%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">Lambda架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kappa%E6%9E%B6%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">Kappa架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Iceberg"><span class="nav-number">2.</span> <span class="nav-text">Iceberg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mac%E5%AE%89%E8%A3%85Iceberg"><span class="nav-number">3.</span> <span class="nav-text">Mac安装Iceberg</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">数据湖基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lambda%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">Lambda架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kappa%E6%9E%B6%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">Kappa架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Iceberg"><span class="nav-number">2.</span> <span class="nav-text">Iceberg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mac%E5%AE%89%E8%A3%85Iceberg"><span class="nav-number">3.</span> <span class="nav-text">Mac安装Iceberg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol>
     </div>
 </div>
         </aside>
@@ -419,7 +598,7 @@
                 <input autocomplete="off"
                        autocorrect="off"
                        autocapitalize="off"
-                       placeholder="Search..."
+                       placeholder="搜索..."
                        spellcheck="false"
                        type="search"
                        class="search-input"
