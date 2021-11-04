@@ -9,7 +9,7 @@
     
     <title>
         
-            如何使用JMX+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群 |
+            如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群 |
         
         Liu&#39;s blog
     </title>
@@ -64,7 +64,7 @@
                             <a class=""
                                href="/"
                             >
-                                首页
+                                HOME
                             </a>
                         </li>
                     
@@ -72,7 +72,7 @@
                             <a class=""
                                href="/archives"
                             >
-                                归档
+                                ARCHIVES
                             </a>
                         </li>
                     
@@ -99,12 +99,12 @@
             
                 <li class="drawer-menu-item flex-center">
                     <a class=""
-                       href="/">首页</a>
+                       href="/">HOME</a>
                 </li>
             
                 <li class="drawer-menu-item flex-center">
                     <a class=""
-                       href="/archives">归档</a>
+                       href="/archives">ARCHIVES</a>
                 </li>
             
         </ul>
@@ -126,7 +126,7 @@
     <div class="article-content-container">
 
         <div class="article-title">
-            <span class="title-hover-animation">如何使用JMX+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</span>
+            <span class="title-hover-animation">如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</span>
         </div>
 
         
@@ -153,11 +153,11 @@
             <ul>
                 
                     <li>
-                        <a href="/tags/data-Lake/">data Lake</a>&nbsp;
+                        <a href="/tags/JMX-Expoter/">JMX_Expoter</a>&nbsp;
                     </li>
                 
                     <li>
-                        | <a href="/tags/Iceberg/">Iceberg</a>&nbsp;
+                        | <a href="/tags/%E7%9B%91%E6%8E%A7/">监控</a>&nbsp;
                     </li>
                 
             </ul>
@@ -166,9 +166,13 @@
 
     
     
+        <span class="article-wordcount article-meta-item">
+            <i class="fas fa-file-word"></i>&nbsp;<span>170 Words</span>
+        </span>
+    
     
         <span class="article-min2read article-meta-item">
-            <i class="fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+            <i class="fas fa-clock"></i>&nbsp;<span>1 Mins</span>
         </span>
     
     
@@ -184,21 +188,26 @@
         
 
         <div class="article-content markdown-body">
-            <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <p>因为目前CDH以及HDP后续要合并闭源，打算花时间自研一个类似的平台，所以花时间对集群监控这块下了点功夫研究了一下。</p>
+<span id="more"></span>
+
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警，那么我们应该如何从Hadoop等集群中提取指标信息呢？</p>
+<p>   首先我们打开Hadoop 官方文档，查看其中的<a class="link"   target="_blank" rel="noopener" href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >Hadoop metrics章节<i class="fas fa-external-link-alt"></i></a>，可以看到其中有非常多的指标，包括JVM，RPC，NameNode运行情况，DataNode等运行情况。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
         
             <div class="post-copyright-info">
                 <div class="article-copyright-info-container">
     <ul>
-        <li>本文标题：如何使用JMX+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</li>
-        <li>本文作者：SuperPiKaChu</li>
-        <li>创建时间：2021-11-03 19:49:02</li>
+        <li>Post title：如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</li>
+        <li>Post author：SuperPiKaChu</li>
+        <li>Create time：2021-11-03 19:49:02</li>
         <li>
-            本文链接：https://keep.xpoet.cn/2021/11/03/如何使用JMX-Prometheus-Grafana监控Hadoop集群-Hbase集群/
+            Post link：https://keep.xpoet.cn/2021/11/03/如何使用JMX-Prometheus-Grafana监控Hadoop集群-Hbase集群/
         </li>
         <li>
-            版权声明：本博客所有文章除特别声明外，均采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> 许可协议。转载请注明出处！
+            Copyright Notice：All articles in this blog are licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> unless stating additionally.
         </li>
     </ul>
 </div>
@@ -217,7 +226,7 @@
                         >
                             <span class="title flex-center">
                                 <span class="post-nav-title-item">数据湖基础知识以及Mac安装Iceberg教程</span>
-                                <span class="post-nav-item">下一篇</span>
+                                <span class="post-nav-item">Next posts</span>
                             </span>
                             <span class="right arrow-icon flex-center">
                               <i class="fas fa-chevron-right"></i>
@@ -233,7 +242,7 @@
                 <div class="comments-container">
     <div id="comment-anchor"></div>
     <div class="comment-area-title">
-        <i class="fas fa-comments">&nbsp;评论</i>
+        <i class="fas fa-comments">&nbsp;Comments</i>
     </div>
     
 
@@ -310,18 +319,18 @@
             <div class="website-count info-item">
                 
                     <span id="busuanzi_container_site_uv">
-                        访问人数&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
+                        Visitor Count&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
                     </span>
                 
                 
                     <span id="busuanzi_container_site_pv">
-                        总访问量&nbsp;<span id="busuanzi_value_site_pv"></span>
+                        Totalview&nbsp;<span id="busuanzi_value_site_pv"></span>
                     </span>
                 
             </div>
         
         <div class="theme-info info-item">
-            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+            Powered by <a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;|&nbsp;Theme&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
         </div>
         
     </div>
@@ -400,7 +409,7 @@
         <aside class="page-aside">
             <div class="post-toc-wrap">
     <div class="post-toc">
-        
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%91%E6%8E%A7"><span class="nav-number">1.</span> <span class="nav-text">监控</span></a></li></ol>
     </div>
 </div>
         </aside>
@@ -422,7 +431,7 @@
                 <input autocomplete="off"
                        autocorrect="off"
                        autocapitalize="off"
-                       placeholder="搜索..."
+                       placeholder="Search..."
                        spellcheck="false"
                        type="search"
                        class="search-input"

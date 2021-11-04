@@ -357,6 +357,185 @@
       </tags>
   </entry>
   <entry>
+    <title>多线程编程基础</title>
+    <url>/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
+<span id="more"></span>
+
+<h2 id="多线程编程基础"><a href="#多线程编程基础" class="headerlink" title="多线程编程基础"></a>多线程编程基础</h2><h3 id="cpu-高速缓存"><a href="#cpu-高速缓存" class="headerlink" title="cpu 高速缓存"></a>cpu 高速缓存</h3><p>为了解决 cpu 和主存之间的速率差，CPU 中的高速缓存运营而生，程序运算时会将数据复制一份到 CPU 的高速缓存中，当 CPU 计算时直接从高速缓存中取数据，然后计算完成之后将数据写回高速缓存中，隔一段时间刷新一次高速缓存中内容到主存</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">val i = 0</span><br><span class="line">i = i + 1</span><br></pre></td></tr></table></figure>
+
+<p>　当线程执行这个语句时，会先从主存当中读取 i 的值，然后复制一份到高速缓存当中，然后 CPU 执行指令对 i 进行加 1 操作，然后将数据写入高速缓存，最后将高速缓存中 i 最新的值刷新到主存当中。</p>
+<p> 但是多线程执行时候会带来一个问题叫做“缓存一致性问题”，什么叫做缓存一致性问题呢？</p>
+<p> 首先我们上面提高了 CPU 中是有高速缓存这个概念，那么这里的缓存一致性中的缓存是否就是指的 CPU 中的缓存呢？答案是：是的，当多线程执行上面的 i=i+1 语句的时候，我们期待的结果是 n 个线程执行那么 i 就应该是原先的值 +n，但是事实真是如此吗？</p>
+<h3 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h3><p>多个线程同时将变量 i 拷贝到 CPU 中，这时候他们拷贝的变量都是 i 的初始值 0 ，线程 A 经过计算得到 i=1，然后将 i 重新写回高速缓存中，高速缓存再将 i 重新刷新回主存中，这时候的 i 应该是 2，同理线程 B 进行了上述操作，你会发现，这时候的 i 依旧是 1，不是我们想象的 2，通常称这种被多个线程同时访问的变量叫做共享变量。</p>
+<p>缓存一致性导致原因：一个变量在多个 CPU 中同时存在缓存，就有可能导致程序的修改没有起作用或者被覆盖</p>
+<p> 原因找到了，我们来针对原因想象一下可能会有那些方法呢？首先因为线程 A 和线程 B 都会去将 i 值 copy 进自己的高速缓存，线程 A 修改了数值，但是线程 B 不知道，后面重复写入的时候导致出现问题，有人可能就会说应该线程 A 访问这个变量的时候线程 B 不能访问，这样就保证了线程 A 的修改一定是生效的。没错，这种就是加锁的思想，但是这种思想的缺点也很明显，线程 A 访问变量加锁，线程 B 等等线程都会被卡住，只能等待 A 释放共享变量之后才能访问，效率十分低下。</p>
+<h3 id="如何解决缓存一致性问题"><a href="#如何解决缓存一致性问题" class="headerlink" title="如何解决缓存一致性问题"></a>如何解决缓存一致性问题</h3><p> 我们重新回头看一下缓存一致性的原因，如果不能在线程访问变量的时候加锁，那我们能不能在后面的操作添加以下限制呢？这时候就有人提出来了一种叫做缓存一致性协议：如果线程 A 修改了共享变量的数值那么就会通知其他线程他们缓存的共享变量是无效的，这时候如果其他线程想要使用共享变量的数值就必须去通知线程 A 将修改后的数值重写会主存，并且从主存中重新读取共享变量的值</p>
+<p>上面就是解决缓存一致性的两种常见的方法：（1）加锁（2）缓存一致性协议</p>
+<p>加锁的缺点我们上面已经说过了，那么缓存一致性的缺点是什么呢？乍一看仿佛方法很完美，但是不要忘掉了 CPU 是一个高速不断运行的环境，缓存一致性协议需要做的事情很多，例如线程 A 去通知所有其它使用了该共享变量的线程 你们的这个变量的缓存无效 如果用的话必须说一声，我给你们更新下再用，然后各自线程将该缓存变量的状态更改为无效并且返回”晓得了”指令，CPU 都会等待所有的缓存响应完成，详细内容贴在后面的参考文章</p>
+<h3 id="并发编程中常见的三个概念"><a href="#并发编程中常见的三个概念" class="headerlink" title="并发编程中常见的三个概念"></a>并发编程中常见的三个概念</h3><h4 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h4><p>首先第一个原子性，没错就是我们常说的原子性，一个操作要不就不执行，要不就全部执行，不能被打断，最经典的就是银行转账：</p>
+<p>账户 A 向账户 B 转账 1000 元，账户 A 中扣钱和账户 B 中数额增长必须是一起生效</p>
+<p>那么我们程序中有哪些时候会用到原子性这个概念呢？举个例子就是 赋值操作时候</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">i = 0</span><br></pre></td></tr></table></figure>
+
+<p>在 64 位机器 上我们假设先给前 32 位赋值，然后再给后 32 位赋值，如果进行到一半，一个线程读取了 i 的值，那么他读取的肯定就会出问题，这个就是原子性的意义。</p>
+<h4 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h4><p>用我们上面的例子举例就是线程 A 对共享变量做出改变之后，其他线程可以立即知晓</p>
+<h4 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h4><p>什么叫做有序性呢？你思考过这样一个问题没有，就是我们写下来的一行行的代码真的是按照顺序执行下来的吗？如果你是写编译器的人，你考虑到有时候有一些语句没有前后的依赖关系，而你又很想提高程序的运行效率，那应该怎么办呢？没错就是改变程序的运行顺序，至于为什么改变执行顺序就能提高效率这个另说，和底层指令集息息相关，反正他们之间没有相互依赖关系，这样最终的结果不会变，并且我们的执行效率变高了，但是如果在多线程情况下呢？</p>
+<p>我们看下面的代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 线程 1:</span><br><span class="line">var app = new Application();   // 语句 1</span><br><span class="line">if_init = true;             // 语句 2</span><br><span class="line"> </span><br><span class="line">// 线程 2:</span><br><span class="line">while(!if_init)&#123;</span><br><span class="line">  sleep()</span><br><span class="line">&#125;</span><br><span class="line">doSomethingwithconfig(app);</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码意思是，创建 app 对象，然后将 if_init 重置成 true，表明现在可以使用 app 了，但是编译器认为的是语句 1 和语句 2 之间没有任何关系，那么他就会去将两个语句重排序，如果语句 2 先执行，语句 1 还没有执行，这时候线程 2 执行 while()代码，发现 if_inie 为 true-&gt; 跳出循环，下面的函数使用到了 app 这个变量，极有可能导致程序出错</p>
+<h3 id="JVM-对多线程的-native-操作"><a href="#JVM-对多线程的-native-操作" class="headerlink" title="JVM 对多线程的 native 操作"></a>JVM 对多线程的 native 操作</h3><p> 首先我们需要知道的是 JVM 没有对程序使用 CPU 中的高速缓存器进行限制，那么他就会出现我们上面提到过的问题，比如高速缓存和内存之间更新不及时导致的缓存一致性问题，以及指令重排导致的程序执行和预期想象的不一样。</p>
+<p> Java 内存模型规定所有的变量都是存在主存当中（类似于前面说的物理内存），每个线程都有自己的工作内存（类似于前面的高速缓存）。线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作。并且每个线程不能访问其他线程的工作内存。</p>
+<h4 id="JVM-原子性"><a href="#JVM-原子性" class="headerlink" title="JVM 原子性"></a>JVM 原子性</h4><p> java 规定给一个变量赋值以及读取是原子性操作，这些操作是不可中断的，也就是我们上面说过的比如给 64 位数赋值，前 32 位和后 32 位要一起赋值，如果没有成功那么前后 32 位都没有成功，撤销操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 下面这些语句哪些是原子性呢？</span><br><span class="line">x = 10;         // 语句 1</span><br><span class="line">y = x;         // 语句 2</span><br><span class="line">x++;           // 语句 3</span><br><span class="line">x = x + 1;     // 语句 4</span><br></pre></td></tr></table></figure>
+
+<p>语句 1 是原子性</p>
+<p>语句 2 不是：先读取 x 的值，再去给 y 赋值</p>
+<p>语句 3 不是：先读取 x 的值再加 1，再赋值给 x</p>
+<p>语句 4：先读取 x 的值再加 1，再重新写回</p>
+<p>所以上面只有第一个操作是原子性的，剩下三个其实都是原子性操作的组合</p>
+<h4 id="JVM-可见性如何"><a href="#JVM-可见性如何" class="headerlink" title="JVM 可见性如何"></a>JVM 可见性如何</h4><p>JAVA 通过关键字 volatile 关键字来实现可见性，被 volatile 关键字修饰的共享变量将会在被修改后立刻更新到主存中，并且其他线程如果想读取这个被修改过的共享变量就必须去主存中重新加载一遍。</p>
+<p> 另外我们上面提到过的 synchronized 关键字和 Lock 关键字都可以保证可见性，但是这种可见性是表现出来的可见性，这两个关键字限制了同时只能有一个线程去访问，修改完成之后将变量重写回主存中之后才会解锁</p>
+<h4 id="JVM-有序性如何"><a href="#JVM-有序性如何" class="headerlink" title="JVM 有序性如何"></a>JVM 有序性如何</h4><p> 我们提到过 JVM 是允许指令重排的，这个意思就是允许编译器对指令执行顺序进行重新排序以获得更好的性能，但是会带来的问题就是会影响程序的执行效果，那么 JVM 如何来保证多线程中的有序性呢？主要通过三个关键字 volatile 以及 synchronized 和 Lock，后两个很容易理解，因为规定了只能由一个线程访问所以相当于将多线程的问题直接转变成在单线程的情况下运行，自然就不会出现那样的问题，那么第一个关键字主要是通过什么呢？这个我们后面再说。其中 JVM 还规定了一个排序原则：happens-before 原则，这个是 JVM 推断语句变换顺序的时候会不会最终效果一样的准则，如果两个操作不能通过 happens-before 来进行推导那么就认为两个语句是可以进行重排序的。</p>
+<p> 注意 happens-before 原则适用于推导语句的前后顺序关系，如果语句不能从 happens-beofre 中推导出来，那么就认为这两个语句是无序的，不要搞混了</p>
+<p>下面就来具体介绍下 happens-before 原则（先行发生原则）：</p>
+<ul>
+<li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
+<li>锁定规则：一个 unLock 操作先行发生于后面对同一个锁额 lock 操作</li>
+<li>volatile 变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作</li>
+<li>传递规则：如果操作 A 先行发生于操作 B，而操作 B 又先行发生于操作 C，则可以得出操作 A 先行发生于操作 C</li>
+<li>线程启动规则：Thread 对象的 start()方法先行发生于此线程的每个一个动作</li>
+<li>线程中断规则：对线程 interrupt()方法的调用先行发生于被中断线程的代码检测到中断事件的发生</li>
+<li>线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过 Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行</li>
+<li>对象终结规则：一个对象的初始化完成先行发生于他的 finalize()方法的开始</li>
+</ul>
+<p>关于 happens-before 解析详看这篇文章：<a class="link"   href="https://segmentfault.com/a/1190000011458941" >https://segmentfault.com/a/1190000011458941<i class="fas fa-external-link-alt"></i></a></p>
+<p>后面有时间了我也会详细的看一看，然后总结一下，哭 好忙~</p>
+<h3 id="讲解关于-Volatile-关键字"><a href="#讲解关于-Volatile-关键字" class="headerlink" title="讲解关于 Volatile 关键字"></a>讲解关于 Volatile 关键字</h3><p> 还是针对上面三个多线程中讨论的地方：可见性，原子性，有序性，我们来讨论一下 Volatile 关键字如何操作这三方面的</p>
+<h4 id="Volatile-可见性？"><a href="#Volatile-可见性？" class="headerlink" title="Volatile 可见性？"></a>Volatile 可见性？</h4><p> Volatile 可以保证可见性嘛？答案是肯定的，被 Volatile 修饰过的变量在被线程 A 修改过后必须马上写回到主存中，所以效果上来看，Volatile 这个关键字是保证了变量的可见性的，这个操作和我们前面提到的缓存一致性协议有着千丝万缕的关系，可以说 Volatile 底层就是缓存一致性协议的实现，具体可以看这篇文章(好文真多)：</p>
+<p><a class="link"   href="https://blog.csdn.net/mashaokang1314/article/details/96571818" >https://blog.csdn.net/mashaokang1314/article/details/96571818<i class="fas fa-external-link-alt"></i></a></p>
+<p>Volatile 实现内存可见性是通过 store 和 load 指令完成的；也就是对 volatile 变量执行写操作时，会在写操作后加入一条 store 指令，即强迫线程将最新的值刷新到主内存中；而在读操作时，会加入一条 load 指令，即强迫从主内存中读入变量的值。写操作之后紧跟着写回主存的操作，读必须从主存中读取，这个就是 volatile 保证可见性的方法。</p>
+<h4 id="Volatile-原子性？"><a href="#Volatile-原子性？" class="headerlink" title="Volatile 原子性？"></a>Volatile 原子性？</h4><p> 上面我们知道了 Volatile 是具有可见性的，那我们来查看一下下面的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 十个线程各自循环 1000 次对一个 volatile 修饰的共享变量来进行自增</span><br><span class="line">public class Test &#123;</span><br><span class="line">    public volatile int inc = 0;</span><br><span class="line">     </span><br><span class="line">    public void increase() &#123;</span><br><span class="line">        inc++;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final Test test = new Test();</span><br><span class="line">        for(int i=0;i&lt;10;i++)&#123;</span><br><span class="line">            new Thread()&#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    for(int j=0;j&lt;1000;j++)</span><br><span class="line">                        test.increase();</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;.start();</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        while(Thread.activeCount()&gt;1)  // 保证前面的线程都执行完</span><br><span class="line">            Thread.yield();</span><br><span class="line">        System.out.println(test.inc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 上面的代码我们想当然的会觉得，既然已经被 Volatile 修饰了，那其中一个线程修改完成写回之后其他线程马上知道了，并且重新从主存中读取，那么最终的结果应该是 10*1000 = 10000，但是实验发现结果不是这样的，我们发现每次每次输出的都要比 10000 小，这是因为什么呢？</p>
+<p> 首先我们应该考虑一下我们给 test 这个共享变量 +1 的操作都有哪些，我们提到过自增变量是不具备原子性的，他需要先取回自己变量的值，+1，写回，这是三个原子性操作，而 volatile 保证的是如果这个共享变量被修改了，那么所有的线程中这个编程无效，重新读取，如果线程 A 只是读取了共享变量 test，然后线程 A 去忙别的了，这时候线程 B 又读取了共享变量 test 进行 +1 操作，然后将变量写回，这时候线程 A 已经读取了变量 test，紧接着他也进行 +1 然后写回，那么就是两个程序执行完毕之后 test 仅仅加了一次，这时候如果有疑惑建议回顾一下上面 volatile 如何保证可见性。</p>
+<p> 那如何保证原子性呢？使用 synchronized，Lock，AtomicInteger，操作都可以具体不展开了，因为我还需要查~</p>
+<h4 id="Volatile-顺序性"><a href="#Volatile-顺序性" class="headerlink" title="Volatile 顺序性"></a>Volatile 顺序性</h4><p> Volatile 可以保证程序的部分顺序执行，保证“部分”顺序执行是什么意思呢？下面举一个例子：</p>
+<p><a class="link"   href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >参考链接<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//x、y 为非 volatile 变量</span><br><span class="line">//flag 为 volatile 变量</span><br><span class="line"> </span><br><span class="line">x = 2;        // 语句 1</span><br><span class="line">y = 0;        // 语句 2</span><br><span class="line">flag = true;  // 语句 3</span><br><span class="line">x = 4;         // 语句 4</span><br><span class="line">y = -1;       // 语句 5</span><br></pre></td></tr></table></figure>
+
+<p>flag 是被 volatile 修饰的变量，那他会带来什么效果呢？</p>
+<p>（1）flag 之前的代码全部执行了，flag 后面的代码还没有开始执行</p>
+<p>（2）语句 1 和语句 2 的顺序不能确定，但是语句 1，2 肯定不能放在 flag 后面执行，同理语句 3，4 的顺序不能确定，但是不能放在 flag 之前执行</p>
+<h3 id="什么时候使用-Volatile？"><a href="#什么时候使用-Volatile？" class="headerlink" title="什么时候使用 Volatile？"></a>什么时候使用 Volatile？</h3><p> 我们知道多线程经常用的关键字就是 synchronized 以及 volatile，那么他们各自都有什么作用呢？synchronized 是防止多个线程同时执行一段代码，相当于给这段代码加锁了，不断线程过来请求访问这段代码，如果加锁了就只能等，所有 Volatile 在效率上是优于 synchronized 的，但是 Volatile 是不能保证操作的原子性的，所以有时候必须结合 synchronized 一起来用，那什么时候可以只用 Volatile 这个关键字呢？</p>
+<p>（1）对变量的写操作不依赖当前的变量值</p>
+<p>（2）该变量没有包含在具有其他变量的不变式中</p>
+<p>上面两个条件就是针对 Volatile 不能保证原子性，所以就不能随便改变共享变量的数值，哪怕是被 Volatile 修饰的，下面举例什么时候使用 Volatile</p>
+<h4 id="更改状态标记量："><a href="#更改状态标记量：" class="headerlink" title="更改状态标记量："></a>更改状态标记量：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">volatile boolean flag = false;</span><br><span class="line"> </span><br><span class="line">while(!flag)&#123;</span><br><span class="line">    doSomething();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">public void setFlag() &#123;</span><br><span class="line">    flag = true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段代码中的 setFlag 方法将 flag 置为 true，哪怕出现了原子性问题，线程 A 读取了然后停一会，期间线程 B 读取了重写会主存中为 true，这时候线程 A 再写一遍 true 也是无所谓的</p>
+<h4 id="double-check-volatile"><a href="#double-check-volatile" class="headerlink" title="double check+volatile:"></a>double check+volatile:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">class Singleton&#123;</span><br><span class="line">    private volatile static Singleton instance = null;</span><br><span class="line">     </span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">         </span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if(instance==null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if(instance==null)</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面是为了实现单例模式使用了 double check，因为 synchronized 如果直接修饰整个 getInstance 方法会导致效率变低，我们只需要初始化的时候进行加锁即可，就是下面的代码：</p>
+<figure class="highlight plaintext"><figcaption><span>a</span></figcaption><table><tr><td class="code"><pre><span class="line">public static Singleton getInstance() &#123;</span><br><span class="line">        if(instance==null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if(instance==null)</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    return uniqueSingleton;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="双重检查锁（double-checked-locking）"><a href="#双重检查锁（double-checked-locking）" class="headerlink" title="双重检查锁（double checked locking）"></a>双重检查锁（double checked locking）</h5><p>先判断对象是否已经被初始化，再决定要不要加锁，双重检查流程如下：</p>
+<ol>
+<li>检查变量是否被初始化(不去获得锁)，如果已被初始化则立即返回。</li>
+<li>获取锁。</li>
+<li>再次检查变量是否已经被初始化，如果还没被初始化就初始化一个对象。</li>
+</ol>
+<p>执行双重检查是因为，如果多个线程同时了通过了第一次检查，并且其中一个线程首先通过了第二次检查并实例化了对象，那么剩余通过了第一次检查的线程就不会再去实例化对象。</p>
+<p>这样，除了初始化的时候会出现加锁的情况，后续的所有调用都会避免加锁而直接返回，解决了性能消耗的问题。否则每一次调用 getInstance()方法都会加锁，性能低下。</p>
+<h5 id="隐患"><a href="#隐患" class="headerlink" title="隐患"></a>隐患</h5><p>上述写法看似解决了问题，但是有个很大的隐患。实例化对象的那行代码（标记为 error 的那行），实际上可以分解成以下三个步骤：</p>
+<ol>
+<li>分配内存空间</li>
+<li>初始化对象</li>
+<li>将对象指向刚分配的内存空间</li>
+</ol>
+<p>但是有些编译器为了性能的原因，可能会将第二步和第三步进行 <strong>重排序</strong>，顺序就成了：</p>
+<ol>
+<li>分配内存空间</li>
+<li>将对象指向刚分配的内存空间</li>
+<li>初始化对象</li>
+</ol>
+<p>现在考虑重排序后，两个线程发生了以下调用：</p>
+<table>
+<thead>
+<tr>
+<th align="left">Time</th>
+<th align="left">Thread A</th>
+<th align="left">Thread B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">T1</td>
+<td align="left">检查到 Singleton 为空</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T2</td>
+<td align="left">获取锁</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T3</td>
+<td align="left">再次检查到 Singleton 为空</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T4</td>
+<td align="left">为 Singleton 分配内存空间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T5</td>
+<td align="left">将 Singleton 指向内存空间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T6</td>
+<td align="left"></td>
+<td align="left">检查到 Singleton 不为空</td>
+</tr>
+<tr>
+<td align="left">T7</td>
+<td align="left"></td>
+<td align="left">访问 Singleton（此时对象还未完成初始化）</td>
+</tr>
+<tr>
+<td align="left">T8</td>
+<td align="left">初始化 Singleton</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>在这种情况下，T7 时刻线程 B 对 Singleton 的访问，访问的是一个 <strong>初始化未完成</strong> 的对象。</p>
+<p>为了解决上述问题，需要在 Singleton 前加入关键字<code>volatile</code>。使用了 volatile 关键字后，重排序被禁止，所有的写（write）操作都将发生在读（read）操作之前。</p>
+<p>至此，双重检查锁就可以完美工作了。</p>
+<p>参考：</p>
+<p><a class="link"   href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >https://www.cnblogs.com/dolphin0520/p/3920373.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://cloud.tencent.com/developer/article/1548942" >https://cloud.tencent.com/developer/article/1548942<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://www.cnblogs.com/xz816111/p/8470048.html" >https://www.cnblogs.com/xz816111/p/8470048.html<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+  </entry>
+  <entry>
+    <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
+    <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
+    <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，打算花时间自研一个类似的平台，所以花时间对集群监控这块下了点功夫研究了一下。</p>
+<span id="more"></span>
+
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警，那么我们应该如何从Hadoop等集群中提取指标信息呢？</p>
+<p>   首先我们打开Hadoop 官方文档，查看其中的<a class="link"   href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >Hadoop metrics章节<i class="fas fa-external-link-alt"></i></a>，可以看到其中有非常多的指标，包括JVM，RPC，NameNode运行情况，DataNode等运行情况。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>JMX_Expoter</tag>
+        <tag>监控</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>学习clickhouse详细知识</title>
     <url>/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/</url>
     <content><![CDATA[<p>ClickHouse基础应用与内部原理</p>
@@ -557,180 +736,6 @@
 
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​        本文主要记录数据湖的基础知识，以及如何在Mac上安装Iceberg，其中的注意事项是我出现过的问题，如果有什么疑问或者不理解的地方欢迎随时交流。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>data Lake</tag>
-        <tag>Iceberg</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>多线程编程基础</title>
-    <url>/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/</url>
-    <content><![CDATA[<p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
-<span id="more"></span>
-
-<h2 id="多线程编程基础"><a href="#多线程编程基础" class="headerlink" title="多线程编程基础"></a>多线程编程基础</h2><h3 id="cpu-高速缓存"><a href="#cpu-高速缓存" class="headerlink" title="cpu 高速缓存"></a>cpu 高速缓存</h3><p>为了解决 cpu 和主存之间的速率差，CPU 中的高速缓存运营而生，程序运算时会将数据复制一份到 CPU 的高速缓存中，当 CPU 计算时直接从高速缓存中取数据，然后计算完成之后将数据写回高速缓存中，隔一段时间刷新一次高速缓存中内容到主存</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">val i = 0</span><br><span class="line">i = i + 1</span><br></pre></td></tr></table></figure>
-
-<p>　当线程执行这个语句时，会先从主存当中读取 i 的值，然后复制一份到高速缓存当中，然后 CPU 执行指令对 i 进行加 1 操作，然后将数据写入高速缓存，最后将高速缓存中 i 最新的值刷新到主存当中。</p>
-<p> 但是多线程执行时候会带来一个问题叫做“缓存一致性问题”，什么叫做缓存一致性问题呢？</p>
-<p> 首先我们上面提高了 CPU 中是有高速缓存这个概念，那么这里的缓存一致性中的缓存是否就是指的 CPU 中的缓存呢？答案是：是的，当多线程执行上面的 i=i+1 语句的时候，我们期待的结果是 n 个线程执行那么 i 就应该是原先的值 +n，但是事实真是如此吗？</p>
-<h3 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h3><p>多个线程同时将变量 i 拷贝到 CPU 中，这时候他们拷贝的变量都是 i 的初始值 0 ，线程 A 经过计算得到 i=1，然后将 i 重新写回高速缓存中，高速缓存再将 i 重新刷新回主存中，这时候的 i 应该是 2，同理线程 B 进行了上述操作，你会发现，这时候的 i 依旧是 1，不是我们想象的 2，通常称这种被多个线程同时访问的变量叫做共享变量。</p>
-<p>缓存一致性导致原因：一个变量在多个 CPU 中同时存在缓存，就有可能导致程序的修改没有起作用或者被覆盖</p>
-<p> 原因找到了，我们来针对原因想象一下可能会有那些方法呢？首先因为线程 A 和线程 B 都会去将 i 值 copy 进自己的高速缓存，线程 A 修改了数值，但是线程 B 不知道，后面重复写入的时候导致出现问题，有人可能就会说应该线程 A 访问这个变量的时候线程 B 不能访问，这样就保证了线程 A 的修改一定是生效的。没错，这种就是加锁的思想，但是这种思想的缺点也很明显，线程 A 访问变量加锁，线程 B 等等线程都会被卡住，只能等待 A 释放共享变量之后才能访问，效率十分低下。</p>
-<h3 id="如何解决缓存一致性问题"><a href="#如何解决缓存一致性问题" class="headerlink" title="如何解决缓存一致性问题"></a>如何解决缓存一致性问题</h3><p> 我们重新回头看一下缓存一致性的原因，如果不能在线程访问变量的时候加锁，那我们能不能在后面的操作添加以下限制呢？这时候就有人提出来了一种叫做缓存一致性协议：如果线程 A 修改了共享变量的数值那么就会通知其他线程他们缓存的共享变量是无效的，这时候如果其他线程想要使用共享变量的数值就必须去通知线程 A 将修改后的数值重写会主存，并且从主存中重新读取共享变量的值</p>
-<p>上面就是解决缓存一致性的两种常见的方法：（1）加锁（2）缓存一致性协议</p>
-<p>加锁的缺点我们上面已经说过了，那么缓存一致性的缺点是什么呢？乍一看仿佛方法很完美，但是不要忘掉了 CPU 是一个高速不断运行的环境，缓存一致性协议需要做的事情很多，例如线程 A 去通知所有其它使用了该共享变量的线程 你们的这个变量的缓存无效 如果用的话必须说一声，我给你们更新下再用，然后各自线程将该缓存变量的状态更改为无效并且返回”晓得了”指令，CPU 都会等待所有的缓存响应完成，详细内容贴在后面的参考文章</p>
-<h3 id="并发编程中常见的三个概念"><a href="#并发编程中常见的三个概念" class="headerlink" title="并发编程中常见的三个概念"></a>并发编程中常见的三个概念</h3><h4 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h4><p>首先第一个原子性，没错就是我们常说的原子性，一个操作要不就不执行，要不就全部执行，不能被打断，最经典的就是银行转账：</p>
-<p>账户 A 向账户 B 转账 1000 元，账户 A 中扣钱和账户 B 中数额增长必须是一起生效</p>
-<p>那么我们程序中有哪些时候会用到原子性这个概念呢？举个例子就是 赋值操作时候</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">i = 0</span><br></pre></td></tr></table></figure>
-
-<p>在 64 位机器 上我们假设先给前 32 位赋值，然后再给后 32 位赋值，如果进行到一半，一个线程读取了 i 的值，那么他读取的肯定就会出问题，这个就是原子性的意义。</p>
-<h4 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h4><p>用我们上面的例子举例就是线程 A 对共享变量做出改变之后，其他线程可以立即知晓</p>
-<h4 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h4><p>什么叫做有序性呢？你思考过这样一个问题没有，就是我们写下来的一行行的代码真的是按照顺序执行下来的吗？如果你是写编译器的人，你考虑到有时候有一些语句没有前后的依赖关系，而你又很想提高程序的运行效率，那应该怎么办呢？没错就是改变程序的运行顺序，至于为什么改变执行顺序就能提高效率这个另说，和底层指令集息息相关，反正他们之间没有相互依赖关系，这样最终的结果不会变，并且我们的执行效率变高了，但是如果在多线程情况下呢？</p>
-<p>我们看下面的代码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 线程 1:</span><br><span class="line">var app = new Application();   // 语句 1</span><br><span class="line">if_init = true;             // 语句 2</span><br><span class="line"> </span><br><span class="line">// 线程 2:</span><br><span class="line">while(!if_init)&#123;</span><br><span class="line">  sleep()</span><br><span class="line">&#125;</span><br><span class="line">doSomethingwithconfig(app);</span><br></pre></td></tr></table></figure>
-
-<p>上面的代码意思是，创建 app 对象，然后将 if_init 重置成 true，表明现在可以使用 app 了，但是编译器认为的是语句 1 和语句 2 之间没有任何关系，那么他就会去将两个语句重排序，如果语句 2 先执行，语句 1 还没有执行，这时候线程 2 执行 while()代码，发现 if_inie 为 true-&gt; 跳出循环，下面的函数使用到了 app 这个变量，极有可能导致程序出错</p>
-<h3 id="JVM-对多线程的-native-操作"><a href="#JVM-对多线程的-native-操作" class="headerlink" title="JVM 对多线程的 native 操作"></a>JVM 对多线程的 native 操作</h3><p> 首先我们需要知道的是 JVM 没有对程序使用 CPU 中的高速缓存器进行限制，那么他就会出现我们上面提到过的问题，比如高速缓存和内存之间更新不及时导致的缓存一致性问题，以及指令重排导致的程序执行和预期想象的不一样。</p>
-<p> Java 内存模型规定所有的变量都是存在主存当中（类似于前面说的物理内存），每个线程都有自己的工作内存（类似于前面的高速缓存）。线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作。并且每个线程不能访问其他线程的工作内存。</p>
-<h4 id="JVM-原子性"><a href="#JVM-原子性" class="headerlink" title="JVM 原子性"></a>JVM 原子性</h4><p> java 规定给一个变量赋值以及读取是原子性操作，这些操作是不可中断的，也就是我们上面说过的比如给 64 位数赋值，前 32 位和后 32 位要一起赋值，如果没有成功那么前后 32 位都没有成功，撤销操作。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 下面这些语句哪些是原子性呢？</span><br><span class="line">x = 10;         // 语句 1</span><br><span class="line">y = x;         // 语句 2</span><br><span class="line">x++;           // 语句 3</span><br><span class="line">x = x + 1;     // 语句 4</span><br></pre></td></tr></table></figure>
-
-<p>语句 1 是原子性</p>
-<p>语句 2 不是：先读取 x 的值，再去给 y 赋值</p>
-<p>语句 3 不是：先读取 x 的值再加 1，再赋值给 x</p>
-<p>语句 4：先读取 x 的值再加 1，再重新写回</p>
-<p>所以上面只有第一个操作是原子性的，剩下三个其实都是原子性操作的组合</p>
-<h4 id="JVM-可见性如何"><a href="#JVM-可见性如何" class="headerlink" title="JVM 可见性如何"></a>JVM 可见性如何</h4><p>JAVA 通过关键字 volatile 关键字来实现可见性，被 volatile 关键字修饰的共享变量将会在被修改后立刻更新到主存中，并且其他线程如果想读取这个被修改过的共享变量就必须去主存中重新加载一遍。</p>
-<p> 另外我们上面提到过的 synchronized 关键字和 Lock 关键字都可以保证可见性，但是这种可见性是表现出来的可见性，这两个关键字限制了同时只能有一个线程去访问，修改完成之后将变量重写回主存中之后才会解锁</p>
-<h4 id="JVM-有序性如何"><a href="#JVM-有序性如何" class="headerlink" title="JVM 有序性如何"></a>JVM 有序性如何</h4><p> 我们提到过 JVM 是允许指令重排的，这个意思就是允许编译器对指令执行顺序进行重新排序以获得更好的性能，但是会带来的问题就是会影响程序的执行效果，那么 JVM 如何来保证多线程中的有序性呢？主要通过三个关键字 volatile 以及 synchronized 和 Lock，后两个很容易理解，因为规定了只能由一个线程访问所以相当于将多线程的问题直接转变成在单线程的情况下运行，自然就不会出现那样的问题，那么第一个关键字主要是通过什么呢？这个我们后面再说。其中 JVM 还规定了一个排序原则：happens-before 原则，这个是 JVM 推断语句变换顺序的时候会不会最终效果一样的准则，如果两个操作不能通过 happens-before 来进行推导那么就认为两个语句是可以进行重排序的。</p>
-<p> 注意 happens-before 原则适用于推导语句的前后顺序关系，如果语句不能从 happens-beofre 中推导出来，那么就认为这两个语句是无序的，不要搞混了</p>
-<p>下面就来具体介绍下 happens-before 原则（先行发生原则）：</p>
-<ul>
-<li>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作</li>
-<li>锁定规则：一个 unLock 操作先行发生于后面对同一个锁额 lock 操作</li>
-<li>volatile 变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作</li>
-<li>传递规则：如果操作 A 先行发生于操作 B，而操作 B 又先行发生于操作 C，则可以得出操作 A 先行发生于操作 C</li>
-<li>线程启动规则：Thread 对象的 start()方法先行发生于此线程的每个一个动作</li>
-<li>线程中断规则：对线程 interrupt()方法的调用先行发生于被中断线程的代码检测到中断事件的发生</li>
-<li>线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过 Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行</li>
-<li>对象终结规则：一个对象的初始化完成先行发生于他的 finalize()方法的开始</li>
-</ul>
-<p>关于 happens-before 解析详看这篇文章：<a class="link"   href="https://segmentfault.com/a/1190000011458941" >https://segmentfault.com/a/1190000011458941<i class="fas fa-external-link-alt"></i></a></p>
-<p>后面有时间了我也会详细的看一看，然后总结一下，哭 好忙~</p>
-<h3 id="讲解关于-Volatile-关键字"><a href="#讲解关于-Volatile-关键字" class="headerlink" title="讲解关于 Volatile 关键字"></a>讲解关于 Volatile 关键字</h3><p> 还是针对上面三个多线程中讨论的地方：可见性，原子性，有序性，我们来讨论一下 Volatile 关键字如何操作这三方面的</p>
-<h4 id="Volatile-可见性？"><a href="#Volatile-可见性？" class="headerlink" title="Volatile 可见性？"></a>Volatile 可见性？</h4><p> Volatile 可以保证可见性嘛？答案是肯定的，被 Volatile 修饰过的变量在被线程 A 修改过后必须马上写回到主存中，所以效果上来看，Volatile 这个关键字是保证了变量的可见性的，这个操作和我们前面提到的缓存一致性协议有着千丝万缕的关系，可以说 Volatile 底层就是缓存一致性协议的实现，具体可以看这篇文章(好文真多)：</p>
-<p><a class="link"   href="https://blog.csdn.net/mashaokang1314/article/details/96571818" >https://blog.csdn.net/mashaokang1314/article/details/96571818<i class="fas fa-external-link-alt"></i></a></p>
-<p>Volatile 实现内存可见性是通过 store 和 load 指令完成的；也就是对 volatile 变量执行写操作时，会在写操作后加入一条 store 指令，即强迫线程将最新的值刷新到主内存中；而在读操作时，会加入一条 load 指令，即强迫从主内存中读入变量的值。写操作之后紧跟着写回主存的操作，读必须从主存中读取，这个就是 volatile 保证可见性的方法。</p>
-<h4 id="Volatile-原子性？"><a href="#Volatile-原子性？" class="headerlink" title="Volatile 原子性？"></a>Volatile 原子性？</h4><p> 上面我们知道了 Volatile 是具有可见性的，那我们来查看一下下面的代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 十个线程各自循环 1000 次对一个 volatile 修饰的共享变量来进行自增</span><br><span class="line">public class Test &#123;</span><br><span class="line">    public volatile int inc = 0;</span><br><span class="line">     </span><br><span class="line">    public void increase() &#123;</span><br><span class="line">        inc++;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final Test test = new Test();</span><br><span class="line">        for(int i=0;i&lt;10;i++)&#123;</span><br><span class="line">            new Thread()&#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    for(int j=0;j&lt;1000;j++)</span><br><span class="line">                        test.increase();</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;.start();</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        while(Thread.activeCount()&gt;1)  // 保证前面的线程都执行完</span><br><span class="line">            Thread.yield();</span><br><span class="line">        System.out.println(test.inc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p> 上面的代码我们想当然的会觉得，既然已经被 Volatile 修饰了，那其中一个线程修改完成写回之后其他线程马上知道了，并且重新从主存中读取，那么最终的结果应该是 10*1000 = 10000，但是实验发现结果不是这样的，我们发现每次每次输出的都要比 10000 小，这是因为什么呢？</p>
-<p> 首先我们应该考虑一下我们给 test 这个共享变量 +1 的操作都有哪些，我们提到过自增变量是不具备原子性的，他需要先取回自己变量的值，+1，写回，这是三个原子性操作，而 volatile 保证的是如果这个共享变量被修改了，那么所有的线程中这个编程无效，重新读取，如果线程 A 只是读取了共享变量 test，然后线程 A 去忙别的了，这时候线程 B 又读取了共享变量 test 进行 +1 操作，然后将变量写回，这时候线程 A 已经读取了变量 test，紧接着他也进行 +1 然后写回，那么就是两个程序执行完毕之后 test 仅仅加了一次，这时候如果有疑惑建议回顾一下上面 volatile 如何保证可见性。</p>
-<p> 那如何保证原子性呢？使用 synchronized，Lock，AtomicInteger，操作都可以具体不展开了，因为我还需要查~</p>
-<h4 id="Volatile-顺序性"><a href="#Volatile-顺序性" class="headerlink" title="Volatile 顺序性"></a>Volatile 顺序性</h4><p> Volatile 可以保证程序的部分顺序执行，保证“部分”顺序执行是什么意思呢？下面举一个例子：</p>
-<p><a class="link"   href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >参考链接<i class="fas fa-external-link-alt"></i></a></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//x、y 为非 volatile 变量</span><br><span class="line">//flag 为 volatile 变量</span><br><span class="line"> </span><br><span class="line">x = 2;        // 语句 1</span><br><span class="line">y = 0;        // 语句 2</span><br><span class="line">flag = true;  // 语句 3</span><br><span class="line">x = 4;         // 语句 4</span><br><span class="line">y = -1;       // 语句 5</span><br></pre></td></tr></table></figure>
-
-<p>flag 是被 volatile 修饰的变量，那他会带来什么效果呢？</p>
-<p>（1）flag 之前的代码全部执行了，flag 后面的代码还没有开始执行</p>
-<p>（2）语句 1 和语句 2 的顺序不能确定，但是语句 1，2 肯定不能放在 flag 后面执行，同理语句 3，4 的顺序不能确定，但是不能放在 flag 之前执行</p>
-<h3 id="什么时候使用-Volatile？"><a href="#什么时候使用-Volatile？" class="headerlink" title="什么时候使用 Volatile？"></a>什么时候使用 Volatile？</h3><p> 我们知道多线程经常用的关键字就是 synchronized 以及 volatile，那么他们各自都有什么作用呢？synchronized 是防止多个线程同时执行一段代码，相当于给这段代码加锁了，不断线程过来请求访问这段代码，如果加锁了就只能等，所有 Volatile 在效率上是优于 synchronized 的，但是 Volatile 是不能保证操作的原子性的，所以有时候必须结合 synchronized 一起来用，那什么时候可以只用 Volatile 这个关键字呢？</p>
-<p>（1）对变量的写操作不依赖当前的变量值</p>
-<p>（2）该变量没有包含在具有其他变量的不变式中</p>
-<p>上面两个条件就是针对 Volatile 不能保证原子性，所以就不能随便改变共享变量的数值，哪怕是被 Volatile 修饰的，下面举例什么时候使用 Volatile</p>
-<h4 id="更改状态标记量："><a href="#更改状态标记量：" class="headerlink" title="更改状态标记量："></a>更改状态标记量：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">volatile boolean flag = false;</span><br><span class="line"> </span><br><span class="line">while(!flag)&#123;</span><br><span class="line">    doSomething();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">public void setFlag() &#123;</span><br><span class="line">    flag = true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面这段代码中的 setFlag 方法将 flag 置为 true，哪怕出现了原子性问题，线程 A 读取了然后停一会，期间线程 B 读取了重写会主存中为 true，这时候线程 A 再写一遍 true 也是无所谓的</p>
-<h4 id="double-check-volatile"><a href="#double-check-volatile" class="headerlink" title="double check+volatile:"></a>double check+volatile:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">class Singleton&#123;</span><br><span class="line">    private volatile static Singleton instance = null;</span><br><span class="line">     </span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">         </span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static Singleton getInstance() &#123;</span><br><span class="line">        if(instance==null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if(instance==null)</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面是为了实现单例模式使用了 double check，因为 synchronized 如果直接修饰整个 getInstance 方法会导致效率变低，我们只需要初始化的时候进行加锁即可，就是下面的代码：</p>
-<figure class="highlight plaintext"><figcaption><span>a</span></figcaption><table><tr><td class="code"><pre><span class="line">public static Singleton getInstance() &#123;</span><br><span class="line">        if(instance==null) &#123;</span><br><span class="line">            synchronized (Singleton.class) &#123;</span><br><span class="line">                if(instance==null)</span><br><span class="line">                    instance = new Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    return uniqueSingleton;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="双重检查锁（double-checked-locking）"><a href="#双重检查锁（double-checked-locking）" class="headerlink" title="双重检查锁（double checked locking）"></a>双重检查锁（double checked locking）</h5><p>先判断对象是否已经被初始化，再决定要不要加锁，双重检查流程如下：</p>
-<ol>
-<li>检查变量是否被初始化(不去获得锁)，如果已被初始化则立即返回。</li>
-<li>获取锁。</li>
-<li>再次检查变量是否已经被初始化，如果还没被初始化就初始化一个对象。</li>
-</ol>
-<p>执行双重检查是因为，如果多个线程同时了通过了第一次检查，并且其中一个线程首先通过了第二次检查并实例化了对象，那么剩余通过了第一次检查的线程就不会再去实例化对象。</p>
-<p>这样，除了初始化的时候会出现加锁的情况，后续的所有调用都会避免加锁而直接返回，解决了性能消耗的问题。否则每一次调用 getInstance()方法都会加锁，性能低下。</p>
-<h5 id="隐患"><a href="#隐患" class="headerlink" title="隐患"></a>隐患</h5><p>上述写法看似解决了问题，但是有个很大的隐患。实例化对象的那行代码（标记为 error 的那行），实际上可以分解成以下三个步骤：</p>
-<ol>
-<li>分配内存空间</li>
-<li>初始化对象</li>
-<li>将对象指向刚分配的内存空间</li>
-</ol>
-<p>但是有些编译器为了性能的原因，可能会将第二步和第三步进行 <strong>重排序</strong>，顺序就成了：</p>
-<ol>
-<li>分配内存空间</li>
-<li>将对象指向刚分配的内存空间</li>
-<li>初始化对象</li>
-</ol>
-<p>现在考虑重排序后，两个线程发生了以下调用：</p>
-<table>
-<thead>
-<tr>
-<th align="left">Time</th>
-<th align="left">Thread A</th>
-<th align="left">Thread B</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">T1</td>
-<td align="left">检查到 Singleton 为空</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">T2</td>
-<td align="left">获取锁</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">T3</td>
-<td align="left">再次检查到 Singleton 为空</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">T4</td>
-<td align="left">为 Singleton 分配内存空间</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">T5</td>
-<td align="left">将 Singleton 指向内存空间</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">T6</td>
-<td align="left"></td>
-<td align="left">检查到 Singleton 不为空</td>
-</tr>
-<tr>
-<td align="left">T7</td>
-<td align="left"></td>
-<td align="left">访问 Singleton（此时对象还未完成初始化）</td>
-</tr>
-<tr>
-<td align="left">T8</td>
-<td align="left">初始化 Singleton</td>
-<td align="left"></td>
-</tr>
-</tbody></table>
-<p>在这种情况下，T7 时刻线程 B 对 Singleton 的访问，访问的是一个 <strong>初始化未完成</strong> 的对象。</p>
-<p>为了解决上述问题，需要在 Singleton 前加入关键字<code>volatile</code>。使用了 volatile 关键字后，重排序被禁止，所有的写（write）操作都将发生在读（read）操作之前。</p>
-<p>至此，双重检查锁就可以完美工作了。</p>
-<p>参考：</p>
-<p><a class="link"   href="https://www.cnblogs.com/dolphin0520/p/3920373.html" >https://www.cnblogs.com/dolphin0520/p/3920373.html<i class="fas fa-external-link-alt"></i></a></p>
-<p><a class="link"   href="https://cloud.tencent.com/developer/article/1548942" >https://cloud.tencent.com/developer/article/1548942<i class="fas fa-external-link-alt"></i></a></p>
-<p><a class="link"   href="https://www.cnblogs.com/xz816111/p/8470048.html" >https://www.cnblogs.com/xz816111/p/8470048.html<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-  </entry>
-  <entry>
-    <title>如何使用JMX+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
-    <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
-    <content><![CDATA[<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>data Lake</tag>
         <tag>Iceberg</tag>
