@@ -167,7 +167,7 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>170 Words</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>328 Words</span>
         </span>
     
     
@@ -192,7 +192,11 @@
 <span id="more"></span>
 
 <h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警，那么我们应该如何从Hadoop等集群中提取指标信息呢？</p>
-<p>   首先我们打开Hadoop 官方文档，查看其中的<a class="link"   target="_blank" rel="noopener" href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >Hadoop metrics章节<i class="fas fa-external-link-alt"></i></a>，可以看到其中有非常多的指标，包括JVM，RPC，NameNode运行情况，DataNode等运行情况。</p>
+<p>​    Hadoop，Hbase集群都可以通过JMX来获取指标信息，具体通过在访问地址后面加上’/jmx’来实现，比如我们访问Hadoop的NameNode网页的时候地址是’localhost:50070’，那么在后面加上一个’/jmx’即为’localhost:50070/jmx’，访问即可得到下面的信息。</p>
+
+
+<p>​    上面的信息可以在Hadoop官方文档对应的<a class="link"   target="_blank" rel="noopener" href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >metrics章节<i class="fas fa-external-link-alt"></i></a>中找到，其中包括了Namenode以及Datanode相关信息，同理如果我们在8088端口后面加上’/jmx’即可获得关于resourcemanager以及nodemanager相关监控信息</p>
+<p>​    现在我们监控的信息有了，下一步就是需要一个时序数据库来存储这些数据并且在界面上展示了，目前比较常见的组合是普罗米修斯（时序数据库）+ Grafana（界面展示）</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
