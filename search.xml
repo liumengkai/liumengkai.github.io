@@ -1,45 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Mac安装grafana+Grafana连接ClickHouse</title>
-    <url>/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/</url>
-    <content><![CDATA[<p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
-<span id="more"></span>
-
-<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
-
-<p>安装完成后我们用命令检查一下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
-
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
-
-<p>使用brew启动grafana服务</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
-
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
-
-<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
-
-<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
-<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
-<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
-<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
-<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
-
-<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
-<p>参考文章：</p>
-<p><a class="link"   href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
-        <tag>Grafana</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Clickhouse 入门与实践</title>
     <url>/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<p>ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。</p>
@@ -293,34 +254,75 @@
       </tags>
   </entry>
   <entry>
-    <title>Superset查询会丢数据问题排查</title>
-    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
-    <content><![CDATA[<p>Superset版本 1.3.0</p>
-<p>查询结果会比正确结果少两条数据</p>
+    <title>Mac安装grafana+Grafana连接ClickHouse</title>
+    <url>/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/</url>
+    <content><![CDATA[<p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
 <span id="more"></span>
 
-<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
-<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
 
-<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+<p>安装完成后我们用命令检查一下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
 
-<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
-<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
-<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
-<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
-<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
-<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
-<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
-<p>参考连接：</p>
-<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
+
+<p>使用brew启动grafana服务</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
+
+<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
+
+<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
+<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
+<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
+<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
+<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
+
+<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
+<p>参考文章：</p>
+<p><a class="link"   href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>ClickHouse</tag>
-        <tag>Superset</tag>
+        <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用grafana监控预警表格类型数据</title>
+    <url>/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>监控clickhouse服务，我们使用的是grafana+grafana-clickhouse插件，grafana只能报警graph类型数据，不能报警类似Table样式的数据，反应出来就是panel有没有alter这个Tab</p>
+<span id="more"></span>
+
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/alter%E5%9B%BE%E6%A0%87.png" class="" title="中二是最后的热血">
+
+<p>对于graph类型数据比如CPU使用率，或者系统IO使用率的情况很容易就可以进行预警操作，但是对于一些表格数据，比如磁盘使用情况，如下图这种表格类型的数据就不能很好地支持预警，这时候需要我们对系统表简单的改造或者改写我们的查询SQL。</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%B2%A1%E6%9C%89alter.png" class="" title="中二是最后的热血">
+
+<h2 id="用’数据点’来预警"><a href="#用’数据点’来预警" class="headerlink" title="用’数据点’来预警"></a>用’数据点’来预警</h2><p>想要数据成graph或者Time series类型数据展示，我们肯定需要数据中存在一个时间字段，最好是连续的，首先我们使用的是grafana-clickhouse插件，查询的System.parts系统表来获取各个表大小然后求和，我们对parts表进行desc操作，查看其中的时间字段，发现有四个分别是‘modification_time’，‘remove_time’，‘min_time’，‘max_time’，四个时间字段分别的含义如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">remove_time (DateTime) – 数据片段变为非激活状态的时间。</span><br><span class="line">min_time (DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">max_time(DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">modification_time (DateTime) – 修改包含数据片段的目录的时间。这通常对应于创建数据部分的时间。</span><br></pre></td></tr></table></figure>
+
+<p>有点蒙，没事我们直接选十条数据简单看一看</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%97%B6%E9%97%B4%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看出<code>modification_time</code>就是我们想要的时间字段，代表了最后一次修改的时间，这个是最合适的了，当然更合适的是连续时间字段，但是这里没有。有了时间字段我们需要做的就是写查询SQL了，我们在grafana中写下如下的查询SQL。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">max</span>(modification_time) <span class="keyword">as</span> t,</span><br><span class="line">    (<span class="built_in">sum</span>(if(active, bytes, <span class="number">0</span>))) <span class="keyword">AS</span> size_on_disk</span><br><span class="line"><span class="keyword">FROM</span> monitor.parts</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> size_on_disk <span class="keyword">desc</span></span><br></pre></td></tr></table></figure>
+
+<p>时间我使用的是最大的修改时间，这样的话就是一个时间点，这也是最大的缺点，呈现出来的结果是这样的</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E7%9B%91%E6%8E%A7%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>这样设计的思想是<strong>这个graph只是为了预警的作用，如果整体磁盘容量超过了我们设置的限制，比如80%就会报警，起到一个通知的作用，然后上线grafana去查看各个表的详细容量情况，再做出一些操作，比如删除某些分区数据或者扩容等</strong></p>
+<h2 id="改变查询的系统表"><a href="#改变查询的系统表" class="headerlink" title="改变查询的系统表"></a>改变查询的系统表</h2><p>第二种方法是修改我们查询的系统表，首先我们查询的是system.parts表，其中因为没有合适的连续时间字段导致我们不能很好地创建关于CK磁盘使用情况的时序数据，那换一种思维，我们自己来手动创建一个满足条件的表呢？需要满足的条件有以下几个。<br>（1）有连续的时间字段<br>（2）每个时间字段有对应的CK占用磁盘大小<br>连续的时间字段应该怎么搞定呢，我这里使用的是Linux自带的Crontab，每隔30s通过<code>clickhouse-client</code>去查询一次CK占用磁盘的总大小，然后和当前时间字段一起插入到一个新表即可，下面是我运行一段时间的效果，可以看到这次是连续的了，如果怕产生的数据条数太多可以给数据设置上TTL，这样就完成了我们想要的效果，同样也可以进行预警了。</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E8%BF%9E%E7%BB%AD%E7%9B%91%E6%8E%A7.png" class="" title="中二是最后的热血">
+
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Grafana</tag>
       </tags>
   </entry>
   <entry>
@@ -491,15 +493,48 @@
   <entry>
     <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
     <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
-    <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，打算花时间自研一个类似的平台，所以花时间对集群监控这块下了点功夫研究了一下。</p>
+    <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，公司打算花时间自研一个类似的平台，我也对集群监控这块下了点功夫。</p>
 <span id="more"></span>
 
-<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警，那么我们应该如何从Hadoop等集群中提取指标信息呢？</p>
-<p>​    Hadoop，Hbase集群都可以通过JMX来获取指标信息，具体通过在访问地址后面加上’/jmx’来实现，比如我们访问Hadoop的NameNode网页的时候地址是’localhost:50070’，那么在后面加上一个’/jmx’即为’localhost:50070/jmx’，访问即可得到下面的信息。</p>
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警:-)，那么我们应该如何获取Hadoop等集群的信息呢？这时候需要简单了解一个知识点了：JMX。</p>
+<p>​    我们简单介绍一下Java的JMX是什么，JMX全程叫做Java Management Extensions，翻译过来就是Java内存管理，最常用到的就是对于 JVM 的监测和管理，比如 JVM 内存、CPU 使用率、线程数、垃圾收集情况等等。另外，还可以用作日志级别的动态修改，比如 log4j 就支持 JMX 方式动态修改线上服务的日志级别。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/JMX%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
+
+<p>总而言之，就是Java自己开发的用于监控JVM指标的一个工具，可以提供给一些界面JConsole，VisualVM使用，详细信息可以参考<a class="link"   href="https://juejin.cn/post/6856949531003748365" >这里!<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="获取集群的JMX信息"><a href="#获取集群的JMX信息" class="headerlink" title="获取集群的JMX信息"></a>获取集群的JMX信息</h2><p>​    Hadoop，Hbase集群都提供了便捷获取集群JMX信息的途径，具体通过在访问地址后面加上<code>/jmx</code>来实现，比如我们访问hdfs的NameNode页面的时候地址是<code>localhost:50070</code>，那么在后面加上一个<code>/jmx</code>即为<code>localhost:50070/jmx</code>，访问即可得到类似下面的信息。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/jmx%E7%9B%91%E6%8E%A7%E9%A1%B5%E9%9D%A2.png" class="" title="中二是最后的热血">
+
+<p>​    上面图中具体指标信息可以在Hadoop官方文档对应的<a class="link"   href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >metrics章节<i class="fas fa-external-link-alt"></i></a>中找到，其中包括了Namenode以及Datanode相关信息，同理如果我们在8088端口后面加上<code>/jmx</code>即可获得关于Yarn相关指标信息。</p>
+<p>​    现在我们监控的信息有了，接下来如果我们想将数据在监控折线图中展现出来的话就需要一个时序数据库，因为监控指标数据必须存在对应的时间才有意义，目前比较常见的时序数据库+界面组合是普罗米修斯（时序数据库）+ Grafana（界面展示），那么目前的问题就转换成了如何将Hadoop集群中的JMX信息传递给普罗米修斯，简单调研就可以发现，普罗米修斯自己开发了一款插件支持将java程序对应的jmx信息传递到自己的时序数据库中，<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
+<p>  根据自己Java环境版本下载插件，将插件放置到自己选定的位置，现在插件有了，就差如何在集群中使用插件了，我们开始着手修改集群中的配置。</p>
+<h2 id="Hadoop集群配置Jmx-expoter"><a href="#Hadoop集群配置Jmx-expoter" class="headerlink" title="Hadoop集群配置Jmx_expoter"></a>Hadoop集群配置Jmx_expoter</h2><p>在hadoop-env.sh中最后添加以下代码，注意将其中的路径修改成自己系统中的路径，这段代码的主要作用是添加我们下载的jar包，以及给jar包传递配置文件，以及指定该服务要占用的端口，这里的对应位置的配置文件<code>prometheus_config.yml</code>测试的时候可以直接创建一个空文件即可。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_NAMENODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_NAMENODE_OPTS=&quot;$HDFS_NAMENODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27001:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_DATANODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_DATANODE_OPTS=&quot;$HDFS_DATANODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27002:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意事项</strong> ：</p>
+<p>1.上面的代码不能直接写成类似以下模式，因为不能在<code>$HADOOP_OPTS</code>中出现<code>multiple -javaagent opts</code>，就是不能直接出现多个-javaagent选项，必须要换一种写法，将<code>-javaagent</code>写在if else代码中可以避免这个问题，详细可以参考这个<a class="link"   href="https://stackoverflow.com/questions/47121498/configuring-prometheus-jmx-exporter-for-hadoop2/59837822#59837822" >stackoverflow回答<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">写成这种模式会报错</span></span><br><span class="line">export HADOOP_NAMENODE_OPTS=&quot;$HADOOP_NAMENODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br><span class="line">export HADOOP_DATANODE_OPTS=&quot;$HADOOP_DATANODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br></pre></td></tr></table></figure>
+
+<p>2.同一台机器的每一个JMX服务端口必须区分开</p>
+<p>比如上面namenode的jmx服务所占用的端口为27001，datanode的jmx服务所占用的端口为27002，如果使用了相同的端口，那么在启动hdfs服务(./start-dfs.sh)的时候会报如下所示的错。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Starting namenodes on [localhost]</span><br><span class="line">Starting datanodes</span><br><span class="line">localhost: /usr/local/Cellar/hadoop/3.3.1/libexec/bin/../libexec/hadoop-functions.sh: line 1821: 11125 Abort trap: 6           hadoop_start_daemon &quot;$&#123;daemonname&#125;&quot; &quot;$class&quot; &quot;$&#123;pidfile&#125;&quot; &quot;$@&quot; &gt;&gt; &quot;$&#123;outfile&#125;&quot; 2&gt;&amp;1 &lt; /dev/null</span><br><span class="line">localhost: ERROR: Cannot set priority of datanode process 11125</span><br><span class="line">localhost: ERROR: Cannot disconnect datanode process 11125</span><br></pre></td></tr></table></figure>
 
 
-<p>​    上面的信息可以在Hadoop官方文档对应的<a class="link"   href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >metrics章节<i class="fas fa-external-link-alt"></i></a>中找到，其中包括了Namenode以及Datanode相关信息，同理如果我们在8088端口后面加上’/jmx’即可获得关于resourcemanager以及nodemanager相关监控信息</p>
-<p>​    现在我们监控的信息有了，下一步就是需要一个时序数据库来存储这些数据并且在界面上展示了，目前比较常见的组合是普罗米修斯（时序数据库）+ Grafana（界面展示）</p>
+
+<p>这样配置完成之后，Hadoop的jmx信息就被采集到指定的端口中了，接下来我们可以在网页上测试一下我们的采集数据，访问地址就是前面配置的端口 <code>localhost:27001</code></p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/27001.png" class="" title="中二是最后的热血">    
+
+<p>同理我们的Yarn相关信息采集也要在yarn-env.sh中配置上面类似的代码，其中同样要注意区分端口号，并且不要同时出现两个-javaagent，将两个javaagent放到不同的if else中。</p>
+<h2 id="Hbase集群配置"><a href="#Hbase集群配置" class="headerlink" title="Hbase集群配置"></a>Hbase集群配置</h2><p>因为我是启动的单机版本的Hbase，所以我只配置<code>HBASE_MASTER_OPTS</code>和<code>HBASE_JMX_BASE</code>选项，如果是集群模式可能还需要配置<code>HBASE_REGIONSERVER_OPTS</code>，将下面内容替换成自己的文件路径然后添加到hbase-env.sh的尾部。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">export HBASE_JMX_BASE=&quot;-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false&quot;</span><br><span class="line">export HBASE_MASTER_OPTS=&quot;$HBASE_MASTER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=20101 -javaagent:$HBASE_HOME/lib/jmx_prometheus_javaagent-0.16.1.jar=27000:$HBASE_HOME/conf/hbase_jmx_config.yaml&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就可以通过指定端口访问各个集群的JMX信息了，下一步就是配置Prometheus将数据导入到时序数据库中。</p>
+<h2 id="配置Prometheus"><a href="#配置Prometheus" class="headerlink" title="配置Prometheus"></a>配置Prometheus</h2><p>打开Prometheus配置文件，并且在后面增加关于Hadoop集群的NameNode，DataNode以及Hbase的jmx数据配置，增加如下代码，重启普罗米修斯服务。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">- job_name: &quot;hbase&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27000&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop namenode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27001&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop datanode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27002&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br></pre></td></tr></table></figure>
+
+<p>我们打开Prometheus的页面查看对应的target，查看我们配置的任务，如果出现下面几个选项并且是绿色的说明是正常的，打开采集的结果网址会发现其中Prometheus采集的指标名称相比于原先集群50070/jmx的指标名称是经过处理的，比如Prometheus中有一个指标叫做<code>hadoop_namenode_memnonheapmaxm</code>他在50070/jmx中是名称是<code>memnonheapmaxm</code>，然后前面加上service name等，其中的匹配规则应该在插件的配置文件<code>prometheus_config.yml</code>中设置的，详细可以看<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/prometheus.png" class="" title="中二是最后的热血">
+
+<p>最后选出来我们需要的指标之和在Grafana中展示出来即可，具体方法这里不再展示，可以参考<a class="link"   href="https://www.daimajiaoliu.com/daima/4796909c8100406" >这篇教程<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>JMX_Expoter</tag>
@@ -507,42 +542,80 @@
       </tags>
   </entry>
   <entry>
-    <title>使用grafana监控预警表格类型数据</title>
-    <url>/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/</url>
-    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>监控clickhouse服务，我们使用的是grafana+grafana-clickhouse插件，grafana只能报警graph类型数据，不能报警类似Table样式的数据，反应出来就是panel有没有alter这个Tab</p>
+    <title>学习clickhouse详细知识</title>
+    <url>/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/</url>
+    <content><![CDATA[<p>ClickHouse基础应用与内部原理</p>
 <span id="more"></span>
 
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/alter%E5%9B%BE%E6%A0%87.png" class="" title="中二是最后的热血">
+<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h2 id="基础类型"><a href="#基础类型" class="headerlink" title="基础类型"></a>基础类型</h2><h3 id="数值"><a href="#数值" class="headerlink" title="数值"></a>数值</h3><h4 id="有符号整数"><a href="#有符号整数" class="headerlink" title="有符号整数"></a>有符号整数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/int.png" class="" title="中二是最后的热血">
 
-<p>对于graph类型数据比如CPU使用率，或者系统IO使用率的情况很容易就可以进行预警操作，但是对于一些表格数据，比如磁盘使用情况，如下图这种表格类型的数据就不能很好地支持预警，这时候需要我们对系统表简单的改造或者改写我们的查询SQL。</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%B2%A1%E6%9C%89alter.png" class="" title="中二是最后的热血">
+<h4 id="无符号的整数"><a href="#无符号的整数" class="headerlink" title="无符号的整数"></a>无符号的整数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/wufuhao_int.png" class="" title="中二是最后的热血">
 
-<h2 id="用’数据点’来预警"><a href="#用’数据点’来预警" class="headerlink" title="用’数据点’来预警"></a>用’数据点’来预警</h2><p>想要数据成graph或者Time series类型数据展示，我们肯定需要数据中存在一个时间字段，最好是连续的，首先我们使用的是grafana-clickhouse插件，查询的System.parts系统表来获取各个表大小然后求和，我们对parts表进行desc操作，查看其中的时间字段，发现有四个分别是‘modification_time’，‘remove_time’，‘min_time’，‘max_time’，四个时间字段分别的含义如下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">remove_time (DateTime) – 数据片段变为非激活状态的时间。</span><br><span class="line">min_time (DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">max_time(DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">modification_time (DateTime) – 修改包含数据片段的目录的时间。这通常对应于创建数据部分的时间。</span><br></pre></td></tr></table></figure>
+<h4 id="浮点数"><a href="#浮点数" class="headerlink" title="浮点数"></a>浮点数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/float.png" class="" title="中二是最后的热血">
 
-<p>有点蒙，没事我们直接选十条数据简单看一看</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%97%B6%E9%97%B4%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+<h4 id="Decimal"><a href="#Decimal" class="headerlink" title="Decimal"></a>Decimal</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/decimal.png" class="" title="中二是最后的热血">
 
-<p>可以看出<code>modification_time</code>就是我们想要的时间字段，代表了最后一次修改的时间，这个是最合适的了，当然更合适的是连续时间字段，但是这里没有。有了时间字段我们需要做的就是写查询SQL了，我们在grafana中写下如下的查询SQL。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">max</span>(modification_time) <span class="keyword">as</span> t,</span><br><span class="line">    (<span class="built_in">sum</span>(if(active, bytes, <span class="number">0</span>))) <span class="keyword">AS</span> size_on_disk</span><br><span class="line"><span class="keyword">FROM</span> monitor.parts</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> size_on_disk <span class="keyword">desc</span></span><br></pre></td></tr></table></figure>
+<h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><h4 id="String"><a href="#String" class="headerlink" title="String"></a>String</h4><p>字符串由String定义，长度不限。因此在使用String的时候无须声明大小。它完全代替了传统意义上数据库的Varchar、Text、Clob和Blob等字符类型。String类型不限定字符集。</p>
+<h4 id="FixedString"><a href="#FixedString" class="headerlink" title="FixedString"></a>FixedString</h4><p>FixedString类型和传统意义上的Char类型有些类似，对于一些字符有明确长度的场合，可以使用固定长度的字符串。定长字符串通过FixedString(N)声明，其中N表示字符串长度。但与Char不同的是，FixedString使用null字节填充末尾字符</p>
+<h4 id="UUID"><a href="#UUID" class="headerlink" title="UUID"></a>UUID</h4><p>UUID是一种数据库常见的主键类型，在ClickHouse中直接把它作为一种数据类型。UUID共有32位，它的格式为8-4-4-4-12。如果一个UUID类型的字段在写入数据时没有被赋值，则会依照格式使用0填充</p>
+<h3 id="时间类型"><a href="#时间类型" class="headerlink" title="时间类型"></a>时间类型</h3><h4 id="DateTime"><a href="#DateTime" class="headerlink" title="DateTime"></a>DateTime</h4><p>DateTime类型包含时、分、秒信息，精确到秒</p>
+<h4 id="DateTime64"><a href="#DateTime64" class="headerlink" title="DateTime64"></a>DateTime64</h4><p>DateTime64可以记录亚秒，它在DateTime之上增加了精度的设置</p>
+<h4 id="Date"><a href="#Date" class="headerlink" title="Date"></a>Date</h4><p>Date类型不包含具体的时间信息，只精确到天</p>
+<h2 id="复合类型"><a href="#复合类型" class="headerlink" title="复合类型"></a>复合类型</h2><p>数组、元组、枚举和嵌套</p>
+<p>这里不多记录，详细参考<a class="link"   href="https://clickhouse.com/docs/zh/sql-reference/data-types/enum/%E7%AD%89%E5%AE%98%E7%BD%91%E4%BF%A1%E6%81%AF" >https://clickhouse.com/docs/zh/sql-reference/data-types/enum/等官网信息<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="特殊类型"><a href="#特殊类型" class="headerlink" title="特殊类型"></a>特殊类型</h2><h4 id="Nullable"><a href="#Nullable" class="headerlink" title="Nullable"></a>Nullable</h4><p>Nullable并不能算是一种独立的数据类型，它更像是一种辅助的修饰符，需要与基础数据类型一起搭配使用。不能用于数组和元组这些复合类型，也不能作为索引字段；其次，应该慎用Nullable类型，包括Nullable的数据表，不然会使查询和写入性能变慢。因为在正常情况下，每个列字段的数据会被存储在对应的[Column].bin文件中。如果一个列字段被Nullable类型修饰后，会额外生成一个[Column].null.bin文件专门保存它的Null值。这意味着在读取和写入数据时，需要一倍的额外文件操作。</p>
+<h4 id="Domain"><a href="#Domain" class="headerlink" title="Domain"></a>Domain</h4><p>域名类型分为IPv4和IPv6两类，本质上它们是对整型和字符串的进一步封装。</p>
+<p>（1）出于便捷性的考量，例如IPv4类型支持格式检查，格式错误的IP数据是无法被写入的</p>
+<p>（2）出于性能的考量，同样以IPv4为例，IPv4使用UInt32存储，相比String更加紧凑，占用的空间更小，查询性能更快。IPv6类型是基于FixedString(16)封装的，它的使用方法与IPv4别无二致。</p>
+<h1 id="MergeTree原理解析"><a href="#MergeTree原理解析" class="headerlink" title="MergeTree原理解析"></a>MergeTree原理解析</h1><p>MergeTree是家族中最基础的表引擎，提供了主键索引、数据分区、数据副本和数据采样等基本能力，而家族中其他的表引擎则在MergeTree的基础之上各有所长。</p>
+<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/yinqing.png" class="" title="中二是最后的热血">
 
-<p>时间我使用的是最大的修改时间，这样的话就是一个时间点，这也是最大的缺点，呈现出来的结果是这样的</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E7%9B%91%E6%8E%A7%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>这样设计的思想是<strong>这个graph只是为了预警的作用，如果整体磁盘容量超过了我们设置的限制，比如80%就会报警，起到一个通知的作用，然后上线grafana去查看各个表的详细容量情况，再做出一些操作，比如删除某些分区数据或者扩容等</strong></p>
-<h2 id="改变查询的系统表"><a href="#改变查询的系统表" class="headerlink" title="改变查询的系统表"></a>改变查询的系统表</h2><p>第二种方法是修改我们查询的系统表，首先我们查询的是system.parts表，其中因为没有合适的连续时间字段导致我们不能很好地创建关于CK磁盘使用情况的时序数据，那换一种思维，我们自己来手动创建一个满足条件的表呢？需要满足的条件有以下几个。<br>（1）有连续的时间字段<br>（2）每个时间字段有对应的CK占用磁盘大小<br>连续的时间字段应该怎么搞定呢，我这里使用的是Linux自带的Crontab，每隔30s通过<code>clickhouse-client</code>去查询一次CK占用磁盘的总大小，然后和当前时间字段一起插入到一个新表即可，下面是我运行一段时间的效果，可以看到这次是连续的了，如果怕产生的数据条数太多可以给数据设置上TTL，这样就完成了我们想要的效果，同样也可以进行预警了。</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E8%BF%9E%E7%BB%AD%E7%9B%91%E6%8E%A7.png" class="" title="中二是最后的热血">
-
+<p>MergeTree建表语句</p>
+<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/mtreejianbiao.png" class="" title="中二是最后的热血">
+<p>其中重要的参数：</p>
+<p>（1）PARTITION BY [选填]：分区键，用于指定表数据以何种标准进行分区。分区键既可以是单个列字段，也可以通过元组的形式使用多个列字段，同时它也支持使用列表达式。如果不声明分区键，则ClickHouse会生成一个名为all的分区。合理使用数据分区，可以有效减少查询时数据文件的扫描范围。</p>
+<p>（2）ORDER BY [必填]：排序键，用于指定在一个数据片段内，数据以何种标准排序。默认情况下主键（PRIMARY KEY）与排序键相同。排序键既可以是单个列字段，例如ORDER BY CounterID，也可以通过元组的形式使用多个列字段，例如ORDERBY（CounterID,EventDate）。当使用多个列字段排序时，以ORDERBY（CounterID,EventDate）为例，在单个数据片段内，数据首先会以CounterID排序，相同CounterID的数据再按EventDate排序。</p>
+<p>（3）PRIMARY KEY [选填]：主键，顾名思义，声明后会依照主键字段生成一级索引，用于加速表查询。默认情况下，主键与排序键(ORDER BY)相同，所以通常直接使用ORDER BY代为指定主键，无须刻意通过PRIMARY KEY声明。所以在一般情况下，在单个数据片段内，数据与一级索引以相同的规则升序排列。与其他数据库不同，MergeTree主键允许存在重复数据（ReplacingMergeTree可以去重）。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>ClickHouse</tag>
-        <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Superset查询会丢数据问题排查</title>
+    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
+    <content><![CDATA[<p>Superset版本 1.3.0</p>
+<p>查询结果会比正确结果少两条数据</p>
+<span id="more"></span>
+
+<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
+<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
+<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
+<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
+<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
+<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
+<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
+<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
+<p>参考连接：</p>
+<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Superset</tag>
       </tags>
   </entry>
   <entry>
     <title>数据湖基础知识以及Mac安装Iceberg教程</title>
     <url>/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/</url>
-    <content><![CDATA[<h2 id="数据湖基础知识"><a href="#数据湖基础知识" class="headerlink" title="数据湖基础知识"></a>数据湖基础知识</h2><p>​    <strong>计算机科学领域的任何问题都可以通过增加一个间接地中间层来解决</strong></p>
+    <content><![CDATA[<p><strong>计算机科学领域的任何问题都可以通过增加一个间接地中间层来解决</strong></p>
 <span id="more"></span>
 
 <img src="/2021/10/20/%E6%95%B0%E6%8D%AE%E6%B9%96%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%90%86%E8%AE%BA%EF%BC%8CIceberg/%E6%95%B0%E6%8D%AE%E6%B9%96.png" class="" title="中二是最后的热血">
@@ -703,46 +776,6 @@
       <tags>
         <tag>data Lake</tag>
         <tag>Iceberg</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>学习clickhouse详细知识</title>
-    <url>/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/</url>
-    <content><![CDATA[<p>ClickHouse基础应用与内部原理</p>
-<span id="more"></span>
-
-<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h2 id="基础类型"><a href="#基础类型" class="headerlink" title="基础类型"></a>基础类型</h2><h3 id="数值"><a href="#数值" class="headerlink" title="数值"></a>数值</h3><h4 id="有符号整数"><a href="#有符号整数" class="headerlink" title="有符号整数"></a>有符号整数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/int.png" class="" title="中二是最后的热血">
-
-<h4 id="无符号的整数"><a href="#无符号的整数" class="headerlink" title="无符号的整数"></a>无符号的整数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/wufuhao_int.png" class="" title="中二是最后的热血">
-
-<h4 id="浮点数"><a href="#浮点数" class="headerlink" title="浮点数"></a>浮点数</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/float.png" class="" title="中二是最后的热血">
-
-<h4 id="Decimal"><a href="#Decimal" class="headerlink" title="Decimal"></a>Decimal</h4><img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/decimal.png" class="" title="中二是最后的热血">
-
-<h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><h4 id="String"><a href="#String" class="headerlink" title="String"></a>String</h4><p>字符串由String定义，长度不限。因此在使用String的时候无须声明大小。它完全代替了传统意义上数据库的Varchar、Text、Clob和Blob等字符类型。String类型不限定字符集。</p>
-<h4 id="FixedString"><a href="#FixedString" class="headerlink" title="FixedString"></a>FixedString</h4><p>FixedString类型和传统意义上的Char类型有些类似，对于一些字符有明确长度的场合，可以使用固定长度的字符串。定长字符串通过FixedString(N)声明，其中N表示字符串长度。但与Char不同的是，FixedString使用null字节填充末尾字符</p>
-<h4 id="UUID"><a href="#UUID" class="headerlink" title="UUID"></a>UUID</h4><p>UUID是一种数据库常见的主键类型，在ClickHouse中直接把它作为一种数据类型。UUID共有32位，它的格式为8-4-4-4-12。如果一个UUID类型的字段在写入数据时没有被赋值，则会依照格式使用0填充</p>
-<h3 id="时间类型"><a href="#时间类型" class="headerlink" title="时间类型"></a>时间类型</h3><h4 id="DateTime"><a href="#DateTime" class="headerlink" title="DateTime"></a>DateTime</h4><p>DateTime类型包含时、分、秒信息，精确到秒</p>
-<h4 id="DateTime64"><a href="#DateTime64" class="headerlink" title="DateTime64"></a>DateTime64</h4><p>DateTime64可以记录亚秒，它在DateTime之上增加了精度的设置</p>
-<h4 id="Date"><a href="#Date" class="headerlink" title="Date"></a>Date</h4><p>Date类型不包含具体的时间信息，只精确到天</p>
-<h2 id="复合类型"><a href="#复合类型" class="headerlink" title="复合类型"></a>复合类型</h2><p>数组、元组、枚举和嵌套</p>
-<p>这里不多记录，详细参考<a class="link"   href="https://clickhouse.com/docs/zh/sql-reference/data-types/enum/%E7%AD%89%E5%AE%98%E7%BD%91%E4%BF%A1%E6%81%AF" >https://clickhouse.com/docs/zh/sql-reference/data-types/enum/等官网信息<i class="fas fa-external-link-alt"></i></a></p>
-<h2 id="特殊类型"><a href="#特殊类型" class="headerlink" title="特殊类型"></a>特殊类型</h2><h4 id="Nullable"><a href="#Nullable" class="headerlink" title="Nullable"></a>Nullable</h4><p>Nullable并不能算是一种独立的数据类型，它更像是一种辅助的修饰符，需要与基础数据类型一起搭配使用。不能用于数组和元组这些复合类型，也不能作为索引字段；其次，应该慎用Nullable类型，包括Nullable的数据表，不然会使查询和写入性能变慢。因为在正常情况下，每个列字段的数据会被存储在对应的[Column].bin文件中。如果一个列字段被Nullable类型修饰后，会额外生成一个[Column].null.bin文件专门保存它的Null值。这意味着在读取和写入数据时，需要一倍的额外文件操作。</p>
-<h4 id="Domain"><a href="#Domain" class="headerlink" title="Domain"></a>Domain</h4><p>域名类型分为IPv4和IPv6两类，本质上它们是对整型和字符串的进一步封装。</p>
-<p>（1）出于便捷性的考量，例如IPv4类型支持格式检查，格式错误的IP数据是无法被写入的</p>
-<p>（2）出于性能的考量，同样以IPv4为例，IPv4使用UInt32存储，相比String更加紧凑，占用的空间更小，查询性能更快。IPv6类型是基于FixedString(16)封装的，它的使用方法与IPv4别无二致。</p>
-<h1 id="MergeTree原理解析"><a href="#MergeTree原理解析" class="headerlink" title="MergeTree原理解析"></a>MergeTree原理解析</h1><p>MergeTree是家族中最基础的表引擎，提供了主键索引、数据分区、数据副本和数据采样等基本能力，而家族中其他的表引擎则在MergeTree的基础之上各有所长。</p>
-<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/yinqing.png" class="" title="中二是最后的热血">
-
-<p>MergeTree建表语句</p>
-<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/mtreejianbiao.png" class="" title="中二是最后的热血">
-<p>其中重要的参数：</p>
-<p>（1）PARTITION BY [选填]：分区键，用于指定表数据以何种标准进行分区。分区键既可以是单个列字段，也可以通过元组的形式使用多个列字段，同时它也支持使用列表达式。如果不声明分区键，则ClickHouse会生成一个名为all的分区。合理使用数据分区，可以有效减少查询时数据文件的扫描范围。</p>
-<p>（2）ORDER BY [必填]：排序键，用于指定在一个数据片段内，数据以何种标准排序。默认情况下主键（PRIMARY KEY）与排序键相同。排序键既可以是单个列字段，例如ORDER BY CounterID，也可以通过元组的形式使用多个列字段，例如ORDERBY（CounterID,EventDate）。当使用多个列字段排序时，以ORDERBY（CounterID,EventDate）为例，在单个数据片段内，数据首先会以CounterID排序，相同CounterID的数据再按EventDate排序。</p>
-<p>（3）PRIMARY KEY [选填]：主键，顾名思义，声明后会依照主键字段生成一级索引，用于加速表查询。默认情况下，主键与排序键(ORDER BY)相同，所以通常直接使用ORDER BY代为指定主键，无须刻意通过PRIMARY KEY声明。所以在一般情况下，在单个数据片段内，数据与一级索引以相同的规则升序排列。与其他数据库不同，MergeTree主键允许存在重复数据（ReplacingMergeTree可以去重）。</p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
       </tags>
   </entry>
 </search>
