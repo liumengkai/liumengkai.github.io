@@ -254,120 +254,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Mac安装grafana+Grafana连接ClickHouse</title>
-    <url>/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/</url>
-    <content><![CDATA[<p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
-<span id="more"></span>
-
-<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
-
-<p>安装完成后我们用命令检查一下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
-
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
-
-<p>使用brew启动grafana服务</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
-
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
-
-<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
-
-<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
-<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
-<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
-<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
-<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
-
-<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
-<p>参考文章：</p>
-<p><a class="link"   href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
-        <tag>Grafana</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Superset查询会丢数据问题排查</title>
-    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
-    <content><![CDATA[<p>Superset版本 1.3.0</p>
-<p>查询结果会比正确结果少两条数据</p>
-<span id="more"></span>
-
-<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
-<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
-<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
-<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
-<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
-<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
-<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
-<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
-<p>参考连接：</p>
-<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
-        <tag>Superset</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何备份hexo博客</title>
-    <url>/2022/03/29/test2/</url>
-    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
-<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
-<p>不用再执行hexo init命令</p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>blog</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用grafana监控预警表格类型数据</title>
-    <url>/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/</url>
-    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>监控clickhouse服务，我们使用的是grafana+grafana-clickhouse插件，grafana只能报警graph类型数据，不能报警类似Table样式的数据，反应出来就是panel有没有alter这个Tab</p>
-<span id="more"></span>
-
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/alter%E5%9B%BE%E6%A0%87.png" class="" title="中二是最后的热血">
-
-<p>对于graph类型数据比如CPU使用率，或者系统IO使用率的情况很容易就可以进行预警操作，但是对于一些表格数据，比如磁盘使用情况，如下图这种表格类型的数据就不能很好地支持预警，这时候需要我们对系统表简单的改造或者改写我们的查询SQL。</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%B2%A1%E6%9C%89alter.png" class="" title="中二是最后的热血">
-
-<h2 id="用’数据点’来预警"><a href="#用’数据点’来预警" class="headerlink" title="用’数据点’来预警"></a>用’数据点’来预警</h2><p>想要数据成graph或者Time series类型数据展示，我们肯定需要数据中存在一个时间字段，最好是连续的，首先我们使用的是grafana-clickhouse插件，查询的System.parts系统表来获取各个表大小然后求和，我们对parts表进行desc操作，查看其中的时间字段，发现有四个分别是‘modification_time’，‘remove_time’，‘min_time’，‘max_time’，四个时间字段分别的含义如下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">remove_time (DateTime) – 数据片段变为非激活状态的时间。</span><br><span class="line">min_time (DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">max_time(DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">modification_time (DateTime) – 修改包含数据片段的目录的时间。这通常对应于创建数据部分的时间。</span><br></pre></td></tr></table></figure>
-
-<p>有点蒙，没事我们直接选十条数据简单看一看</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%97%B6%E9%97%B4%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>可以看出<code>modification_time</code>就是我们想要的时间字段，代表了最后一次修改的时间，这个是最合适的了，当然更合适的是连续时间字段，但是这里没有。有了时间字段我们需要做的就是写查询SQL了，我们在grafana中写下如下的查询SQL。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">max</span>(modification_time) <span class="keyword">as</span> t,</span><br><span class="line">    (<span class="built_in">sum</span>(if(active, bytes, <span class="number">0</span>))) <span class="keyword">AS</span> size_on_disk</span><br><span class="line"><span class="keyword">FROM</span> monitor.parts</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> size_on_disk <span class="keyword">desc</span></span><br></pre></td></tr></table></figure>
-
-<p>时间我使用的是最大的修改时间，这样的话就是一个时间点，这也是最大的缺点，呈现出来的结果是这样的</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E7%9B%91%E6%8E%A7%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>这样设计的思想是<strong>这个graph只是为了预警的作用，如果整体磁盘容量超过了我们设置的限制，比如80%就会报警，起到一个通知的作用，然后上线grafana去查看各个表的详细容量情况，再做出一些操作，比如删除某些分区数据或者扩容等</strong></p>
-<h2 id="改变查询的系统表"><a href="#改变查询的系统表" class="headerlink" title="改变查询的系统表"></a>改变查询的系统表</h2><p>第二种方法是修改我们查询的系统表，首先我们查询的是system.parts表，其中因为没有合适的连续时间字段导致我们不能很好地创建关于CK磁盘使用情况的时序数据，那换一种思维，我们自己来手动创建一个满足条件的表呢？需要满足的条件有以下几个。<br>（1）有连续的时间字段<br>（2）每个时间字段有对应的CK占用磁盘大小<br>连续的时间字段应该怎么搞定呢，我这里使用的是Linux自带的Crontab，每隔30s通过<code>clickhouse-client</code>去查询一次CK占用磁盘的总大小，然后和当前时间字段一起插入到一个新表即可，下面是我运行一段时间的效果，可以看到这次是连续的了，如果怕产生的数据条数太多可以给数据设置上TTL，这样就完成了我们想要的效果，同样也可以进行预警了。</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E8%BF%9E%E7%BB%AD%E7%9B%91%E6%8E%A7.png" class="" title="中二是最后的热血">
-
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
-        <tag>Grafana</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>多线程编程基础</title>
     <url>/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/</url>
     <content><![CDATA[<p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
@@ -531,6 +417,78 @@
 <p><a class="link"   href="https://cloud.tencent.com/developer/article/1548942" >https://cloud.tencent.com/developer/article/1548942<i class="fas fa-external-link-alt"></i></a></p>
 <p><a class="link"   href="https://www.cnblogs.com/xz816111/p/8470048.html" >https://www.cnblogs.com/xz816111/p/8470048.html<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+  </entry>
+  <entry>
+    <title>Mac安装grafana+Grafana连接ClickHouse</title>
+    <url>/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/</url>
+    <content><![CDATA[<p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
+<span id="more"></span>
+
+<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后我们用命令检查一下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
+
+<p>使用brew启动grafana服务</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
+
+<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
+
+<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
+<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
+<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
+<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
+<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
+
+<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
+<p>参考文章：</p>
+<p><a class="link"   href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用grafana监控预警表格类型数据</title>
+    <url>/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>监控clickhouse服务，我们使用的是grafana+grafana-clickhouse插件，grafana只能报警graph类型数据，不能报警类似Table样式的数据，反应出来就是panel有没有alter这个Tab</p>
+<span id="more"></span>
+
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/alter%E5%9B%BE%E6%A0%87.png" class="" title="中二是最后的热血">
+
+<p>对于graph类型数据比如CPU使用率，或者系统IO使用率的情况很容易就可以进行预警操作，但是对于一些表格数据，比如磁盘使用情况，如下图这种表格类型的数据就不能很好地支持预警，这时候需要我们对系统表简单的改造或者改写我们的查询SQL。</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%B2%A1%E6%9C%89alter.png" class="" title="中二是最后的热血">
+
+<h2 id="用’数据点’来预警"><a href="#用’数据点’来预警" class="headerlink" title="用’数据点’来预警"></a>用’数据点’来预警</h2><p>想要数据成graph或者Time series类型数据展示，我们肯定需要数据中存在一个时间字段，最好是连续的，首先我们使用的是grafana-clickhouse插件，查询的System.parts系统表来获取各个表大小然后求和，我们对parts表进行desc操作，查看其中的时间字段，发现有四个分别是‘modification_time’，‘remove_time’，‘min_time’，‘max_time’，四个时间字段分别的含义如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">remove_time (DateTime) – 数据片段变为非激活状态的时间。</span><br><span class="line">min_time (DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">max_time(DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">modification_time (DateTime) – 修改包含数据片段的目录的时间。这通常对应于创建数据部分的时间。</span><br></pre></td></tr></table></figure>
+
+<p>有点蒙，没事我们直接选十条数据简单看一看</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%97%B6%E9%97%B4%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看出<code>modification_time</code>就是我们想要的时间字段，代表了最后一次修改的时间，这个是最合适的了，当然更合适的是连续时间字段，但是这里没有。有了时间字段我们需要做的就是写查询SQL了，我们在grafana中写下如下的查询SQL。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">max</span>(modification_time) <span class="keyword">as</span> t,</span><br><span class="line">    (<span class="built_in">sum</span>(if(active, bytes, <span class="number">0</span>))) <span class="keyword">AS</span> size_on_disk</span><br><span class="line"><span class="keyword">FROM</span> monitor.parts</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> size_on_disk <span class="keyword">desc</span></span><br></pre></td></tr></table></figure>
+
+<p>时间我使用的是最大的修改时间，这样的话就是一个时间点，这也是最大的缺点，呈现出来的结果是这样的</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E7%9B%91%E6%8E%A7%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>这样设计的思想是<strong>这个graph只是为了预警的作用，如果整体磁盘容量超过了我们设置的限制，比如80%就会报警，起到一个通知的作用，然后上线grafana去查看各个表的详细容量情况，再做出一些操作，比如删除某些分区数据或者扩容等</strong></p>
+<h2 id="改变查询的系统表"><a href="#改变查询的系统表" class="headerlink" title="改变查询的系统表"></a>改变查询的系统表</h2><p>第二种方法是修改我们查询的系统表，首先我们查询的是system.parts表，其中因为没有合适的连续时间字段导致我们不能很好地创建关于CK磁盘使用情况的时序数据，那换一种思维，我们自己来手动创建一个满足条件的表呢？需要满足的条件有以下几个。<br>（1）有连续的时间字段<br>（2）每个时间字段有对应的CK占用磁盘大小<br>连续的时间字段应该怎么搞定呢，我这里使用的是Linux自带的Crontab，每隔30s通过<code>clickhouse-client</code>去查询一次CK占用磁盘的总大小，然后和当前时间字段一起插入到一个新表即可，下面是我运行一段时间的效果，可以看到这次是连续的了，如果怕产生的数据条数太多可以给数据设置上TTL，这样就完成了我们想要的效果，同样也可以进行预警了。</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E8%BF%9E%E7%BB%AD%E7%9B%91%E6%8E%A7.png" class="" title="中二是最后的热血">
+
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Grafana</tag>
+      </tags>
   </entry>
   <entry>
     <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
@@ -768,6 +726,49 @@
       <tags>
         <tag>data Lake</tag>
         <tag>Iceberg</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Superset查询会丢数据问题排查</title>
+    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
+    <content><![CDATA[<p>Superset版本 1.3.0</p>
+<p>查询结果会比正确结果少两条数据</p>
+<span id="more"></span>
+
+<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
+<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
+<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
+<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
+<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
+<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
+<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
+<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
+<p>参考连接：</p>
+<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Superset</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何备份hexo博客</title>
+    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
+<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
+<p>不用再执行hexo init命令</p>
+<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>blog</tag>
       </tags>
   </entry>
 </search>
