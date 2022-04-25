@@ -536,18 +536,6 @@
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
   </entry>
   <entry>
-    <title>如何备份hexo博客</title>
-    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
-<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
-<p>不用再执行hexo init命令</p>
-<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>blog</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
     <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
     <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，公司打算花时间自研一个类似的平台，我也对集群监控这块下了点功夫。</p>
@@ -596,6 +584,18 @@
       <tags>
         <tag>JMX_Expoter</tag>
         <tag>监控</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何备份hexo博客</title>
+    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
+<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
+<p>不用再执行hexo init命令</p>
+<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>blog</tag>
       </tags>
   </entry>
   <entry>
