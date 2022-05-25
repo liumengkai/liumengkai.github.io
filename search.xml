@@ -40,51 +40,6 @@
       </tags>
   </entry>
   <entry>
-    <title>git new repository hint</title>
-    <url>/2022/04/14/git-new-repository-hint/</url>
-    <content><![CDATA[<p>when you new a github repository,this is what github will show you,a single back up </p>
-<h3 id="create-a-new-repository-on-the-command-line"><a href="#create-a-new-repository-on-the-command-line" class="headerlink" title="create a new repository on the command line"></a>create a new repository on the command line</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">create a new repository on the command line</span><br><span class="line"></span><br><span class="line">echo &quot;# -&quot; &gt;&gt; README.md</span><br><span class="line">git init</span><br><span class="line">git add README.md</span><br><span class="line">git commit -m &quot;first commit&quot;</span><br><span class="line">git branch -M main</span><br><span class="line">git remote add origin git@github.com:liumengkai/-.git</span><br><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
-
-<h3 id="push-an-existing-repository-from-the-command-line"><a href="#push-an-existing-repository-from-the-command-line" class="headerlink" title="push an existing repository from the command line"></a>push an existing repository from the command line</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git remote add origin git@github.com:liumengkai/-.git</span><br><span class="line">git branch -M main</span><br><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
-
-<h3 id="import-code-from-another-repository"><a href="#import-code-from-another-repository" class="headerlink" title="import code from another repository"></a>import code from another repository</h3><p>You can initialize this repository with code from a Subversion, Mercurial, or TFS project.</p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>git</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Superset查询会丢数据问题排查</title>
-    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
-    <content><![CDATA[<p>Superset版本 1.3.0</p>
-<p>查询结果会比正确结果少两条数据</p>
-<span id="more"></span>
-
-<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
-<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
-<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
-<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
-<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
-<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
-<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
-<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
-<p>参考连接：</p>
-<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
-        <tag>Superset</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Clickhouse 入门与实践</title>
     <url>/2021/08/26/Clickhouse-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<p>ClickHouse是一个用于联机分析(OLAP)的列式数据库管理系统(DBMS)。</p>
@@ -338,6 +293,195 @@
       </tags>
   </entry>
   <entry>
+    <title>StarRocks笔记</title>
+    <url>/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h3 id="什么是StarRocks"><a href="#什么是StarRocks" class="headerlink" title="什么是StarRocks"></a>什么是StarRocks</h3><p>StarRocks 是<strong>新一代极速全场景MPP数据库</strong>。StarRocks 的愿景是能够让用户的<strong>数据分析变得更加简单和敏捷</strong>。用户无需经过复杂的预处理，就可以用 StarRocks 来支持多种数据分析场景的极速分析。</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
+
+<span id="more"></span>
+
+<h3 id="StarRocks适用哪些场景"><a href="#StarRocks适用哪些场景" class="headerlink" title="StarRocks适用哪些场景"></a>StarRocks适用哪些场景</h3><p>StarRocks 可以满足企业级用户的多种分析需求，包括 OLAP 多维分析、定制报表、实时数据分析和 Ad-hoc 数据分析等。</p>
+<h3 id="StarRocks三种数据模型"><a href="#StarRocks三种数据模型" class="headerlink" title="StarRocks三种数据模型"></a>StarRocks三种数据模型</h3><p>StarRocks根据数据摄入时候的映射关系，分为了三种数据关系，分别是明细、聚合、以及更新数据关系，三种数据关系在StarRocks中分别对应着不同的数据模型:</p>
+<p>明细表对应明细模型（Duplicate Key）</p>
+<p>聚合表对应聚合模型（Aggregate Key）</p>
+<p>更新表对应更新模型（Unique Key）和主键模型（Primary Key）</p>
+<h4 id="明细模型（Duplicate-Key）"><a href="#明细模型（Duplicate-Key）" class="headerlink" title="明细模型（Duplicate Key）"></a>明细模型（Duplicate Key）</h4><ol>
+<li><p>需要保留原始的数据（例如原始日志，原始操作记录等）来进行分析；</p>
+</li>
+<li><p>查询方式灵活, 不局限于预先定义的分析方式, 传统的预聚合方式难以命中;</p>
+</li>
+<li><p>数据更新不频繁。导入数据的来源一般为日志数据或者是时序数据,  以追加写为主要特点, 数据产生后就不会发生太多变化。</p>
+<p><strong>注意：</strong>明细模型不会根据设置的主键覆盖数据，导入完全相同的两行数据也会认为是不同的两行插入进来，比如我们日志中经常出现含义相同的信息，但是我们一般不会希望存在覆盖的情况。</p>
+</li>
+</ol>
+<h4 id="聚合模型（Aggregate-Key）"><a href="#聚合模型（Aggregate-Key）" class="headerlink" title="聚合模型（Aggregate Key）"></a>聚合模型（Aggregate Key）</h4><ul>
+<li><p>分析网站或APP访问流量，统计用户的访问总时长、访问总次数;</p>
+</li>
+<li><p>广告厂商为广告主提供的广告点击总量、展示总量、消费统计等;</p>
+</li>
+<li><p>分析电商的全年的交易数据, 获得某指定季度或者月份的, 各人口分类(geographic)的爆款商品。</p>
+<p><strong>注意：</strong></p>
+<p>1.只要是指定聚合函数的字段即视为指标列，表即视为聚合表，聚合表中不带聚合函数的列即为维度列</p>
+<p>2.建表语句中维度列必须在指标列前面</p>
+<p>3.聚合模型是根据按照相同的指标列进行聚合，多条数据具有相同的维度列的时候，会按照聚合函数将指标列数据进行聚合，这样可以减少数据量</p>
+<p>4.触发数据聚合有三种方式 : </p>
+<p>(1)数据导入时，数据落盘前的聚合 </p>
+<p>(2) 数据落盘后，后台的多版本异步聚合 </p>
+<p>(3)数据查询时，多版本多路归并聚合</p>
+</li>
+</ul>
+<h3 id="StarRocks表设计"><a href="#StarRocks表设计" class="headerlink" title="StarRocks表设计"></a>StarRocks表设计</h3><p>StarRocks和其他OLAP数据库存储设计类似，采用的列式存储，可以提高数据查询效率，每一列的数据类型一致，这样可以提高数据的压缩率，</p>
+<p>StarRocks的数据列可以分为两种，分别是维度列以及指标列，维度列用于分组和排序，指标列通过聚合函数在维度列基础上进行SUM，COUNT，BITMAP_UNION等操作。</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/SR%E8%A1%A8%E7%BB%93%E6%9E%84.png" class="" title="中二是最后的热血">
+
+<h4 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h4><p>我们从一张StarRocks表中进行scan的时候，经历了哪些过程呢？这时候就需要我们了解一下SR的大概索引结构。</p>
+<p>1.shortkey index表：表中数据每1024行, 构成一个逻辑block</p>
+<p>2.Per-column cardinal index：表中的每列数据有各自的行号索引表</p>
+<p>3.Per-column data blocks：表中每一列数据按64KB分块存储</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/StarRocks%E8%A1%A8%E7%B4%A2%E5%BC%95.png" class="" title="中二是最后的热血">
+
+<p>每个部分的详细功能：</p>
+<p><strong>shortkey index表:</strong> 稀疏索引和行号之间的对应关系，首先表中数据会按照排序键进行排序，然后每1024行会构成一个逻辑块，并且获得一个shortkey index，这个key是由排序键进行拼接而成，不会超过36个字节，我们在查询的时候首先会根据要查询的排序键值来确定所属的数据块的行号，这个行号就是数据在第多少行。</p>
+<p><strong>Per-column cardinal index:</strong> 数据块和行号之间的对应关系，每一列都会有一个行号和数据块之间的对应关系，因为我们是列式存储，所以不同列之间是独立存储的，存在不同的对应关系，根据前面找到的行号找到对应的数据块地址</p>
+<p><strong>Per-column data blocks</strong>：表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
+<p>需要注意的是，这种使用范围查找的需要有前提条件，就是你的条件可以构成表维度的前缀</p>
+<p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找。</p>
+<p>既然shortkey index需要依赖维度列排列次序，如果使用的是非前缀的维度列进行查询就不能发挥shortkey index作用，这时候我们可以通过建立<strong>Roll up</strong>来实现</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>StarRocks</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Superset查询会丢数据问题排查</title>
+    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
+    <content><![CDATA[<p>Superset版本 1.3.0</p>
+<p>查询结果会比正确结果少两条数据</p>
+<span id="more"></span>
+
+<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
+<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
+<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
+<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
+<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
+<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
+<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
+<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
+<p>参考连接：</p>
+<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Superset</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>git new repository hint</title>
+    <url>/2022/04/14/git-new-repository-hint/</url>
+    <content><![CDATA[<p>when you new a github repository,this is what github will show you,a single back up </p>
+<h3 id="create-a-new-repository-on-the-command-line"><a href="#create-a-new-repository-on-the-command-line" class="headerlink" title="create a new repository on the command line"></a>create a new repository on the command line</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">create a new repository on the command line</span><br><span class="line"></span><br><span class="line">echo &quot;# -&quot; &gt;&gt; README.md</span><br><span class="line">git init</span><br><span class="line">git add README.md</span><br><span class="line">git commit -m &quot;first commit&quot;</span><br><span class="line">git branch -M main</span><br><span class="line">git remote add origin git@github.com:liumengkai/-.git</span><br><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
+
+<h3 id="push-an-existing-repository-from-the-command-line"><a href="#push-an-existing-repository-from-the-command-line" class="headerlink" title="push an existing repository from the command line"></a>push an existing repository from the command line</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git remote add origin git@github.com:liumengkai/-.git</span><br><span class="line">git branch -M main</span><br><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
+
+<h3 id="import-code-from-another-repository"><a href="#import-code-from-another-repository" class="headerlink" title="import code from another repository"></a>import code from another repository</h3><p>You can initialize this repository with code from a Subversion, Mercurial, or TFS project.</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用grafana监控预警表格类型数据</title>
+    <url>/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>监控clickhouse服务，我们使用的是grafana+grafana-clickhouse插件，grafana只能报警graph类型数据，不能报警类似Table样式的数据，反应出来就是panel有没有alter这个Tab</p>
+<span id="more"></span>
+
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/alter%E5%9B%BE%E6%A0%87.png" class="" title="中二是最后的热血">
+
+<p>对于graph类型数据比如CPU使用率，或者系统IO使用率的情况很容易就可以进行预警操作，但是对于一些表格数据，比如磁盘使用情况，如下图这种表格类型的数据就不能很好地支持预警，这时候需要我们对系统表简单的改造或者改写我们的查询SQL。</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%B2%A1%E6%9C%89alter.png" class="" title="中二是最后的热血">
+
+<h2 id="用’数据点’来预警"><a href="#用’数据点’来预警" class="headerlink" title="用’数据点’来预警"></a>用’数据点’来预警</h2><p>想要数据成graph或者Time series类型数据展示，我们肯定需要数据中存在一个时间字段，最好是连续的，首先我们使用的是grafana-clickhouse插件，查询的System.parts系统表来获取各个表大小然后求和，我们对parts表进行desc操作，查看其中的时间字段，发现有四个分别是‘modification_time’，‘remove_time’，‘min_time’，‘max_time’，四个时间字段分别的含义如下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">remove_time (DateTime) – 数据片段变为非激活状态的时间。</span><br><span class="line">min_time (DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">max_time(DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">modification_time (DateTime) – 修改包含数据片段的目录的时间。这通常对应于创建数据部分的时间。</span><br></pre></td></tr></table></figure>
+
+<p>有点蒙，没事我们直接选十条数据简单看一看</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%97%B6%E9%97%B4%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看出<code>modification_time</code>就是我们想要的时间字段，代表了最后一次修改的时间，这个是最合适的了，当然更合适的是连续时间字段，但是这里没有。有了时间字段我们需要做的就是写查询SQL了，我们在grafana中写下如下的查询SQL。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">max</span>(modification_time) <span class="keyword">as</span> t,</span><br><span class="line">    (<span class="built_in">sum</span>(if(active, bytes, <span class="number">0</span>))) <span class="keyword">AS</span> size_on_disk</span><br><span class="line"><span class="keyword">FROM</span> monitor.parts</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> size_on_disk <span class="keyword">desc</span></span><br></pre></td></tr></table></figure>
+
+<p>时间我使用的是最大的修改时间，这样的话就是一个时间点，这也是最大的缺点，呈现出来的结果是这样的</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E7%9B%91%E6%8E%A7%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>这样设计的思想是<strong>这个graph只是为了预警的作用，如果整体磁盘容量超过了我们设置的限制，比如80%就会报警，起到一个通知的作用，然后上线grafana去查看各个表的详细容量情况，再做出一些操作，比如删除某些分区数据或者扩容等</strong></p>
+<h2 id="改变查询的系统表"><a href="#改变查询的系统表" class="headerlink" title="改变查询的系统表"></a>改变查询的系统表</h2><p>第二种方法是修改我们查询的系统表，首先我们查询的是system.parts表，其中因为没有合适的连续时间字段导致我们不能很好地创建关于CK磁盘使用情况的时序数据，那换一种思维，我们自己来手动创建一个满足条件的表呢？需要满足的条件有以下几个。<br>（1）有连续的时间字段<br>（2）每个时间字段有对应的CK占用磁盘大小<br>连续的时间字段应该怎么搞定呢，我这里使用的是Linux自带的Crontab，每隔30s通过<code>clickhouse-client</code>去查询一次CK占用磁盘的总大小，然后和当前时间字段一起插入到一个新表即可，下面是我运行一段时间的效果，可以看到这次是连续的了，如果怕产生的数据条数太多可以给数据设置上TTL，这样就完成了我们想要的效果，同样也可以进行预警了。</p>
+<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E8%BF%9E%E7%BB%AD%E7%9B%91%E6%8E%A7.png" class="" title="中二是最后的热血">
+
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
+    <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
+    <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，公司打算花时间自研一个类似的平台，我也对集群监控这块下了点功夫。</p>
+<span id="more"></span>
+
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警:-)，那么我们应该如何获取Hadoop等集群的信息呢？这时候需要简单了解一个知识点了：JMX。</p>
+<p>​    我们简单介绍一下Java的JMX是什么，JMX全程叫做Java Management Extensions，翻译过来就是Java内存管理，最常用到的就是对于 JVM 的监测和管理，比如 JVM 内存、CPU 使用率、线程数、垃圾收集情况等等。另外，还可以用作日志级别的动态修改，比如 log4j 就支持 JMX 方式动态修改线上服务的日志级别。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/JMX%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
+
+<p>总而言之，就是Java自己开发的用于监控JVM指标的一个工具，可以提供给一些界面JConsole，VisualVM使用，详细信息可以参考<a class="link"   href="https://juejin.cn/post/6856949531003748365" >这里!<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="获取集群的JMX信息"><a href="#获取集群的JMX信息" class="headerlink" title="获取集群的JMX信息"></a>获取集群的JMX信息</h2><p>​    Hadoop，Hbase集群都提供了便捷获取集群JMX信息的途径，具体通过在访问地址后面加上<code>/jmx</code>来实现，比如我们访问hdfs的NameNode页面的时候地址是<code>localhost:50070</code>，那么在后面加上一个<code>/jmx</code>即为<code>localhost:50070/jmx</code>，访问即可得到类似下面的信息。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/jmx%E7%9B%91%E6%8E%A7%E9%A1%B5%E9%9D%A2.png" class="" title="中二是最后的热血">
+
+<p>​    上面图中具体指标信息可以在Hadoop官方文档对应的<a class="link"   href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >metrics章节<i class="fas fa-external-link-alt"></i></a>中找到，其中包括了Namenode以及Datanode相关信息，同理如果我们在8088端口后面加上<code>/jmx</code>即可获得关于Yarn相关指标信息。</p>
+<p>​    现在我们监控的信息有了，接下来如果我们想将数据在监控折线图中展现出来的话就需要一个时序数据库，因为监控指标数据必须存在对应的时间才有意义，目前比较常见的时序数据库+界面组合是普罗米修斯（时序数据库）+ Grafana（界面展示），那么目前的问题就转换成了如何将Hadoop集群中的JMX信息传递给普罗米修斯，简单调研就可以发现，普罗米修斯自己开发了一款插件支持将java程序对应的jmx信息传递到自己的时序数据库中，<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
+<p>  根据自己Java环境版本下载插件，将插件放置到自己选定的位置，现在插件有了，就差如何在集群中使用插件了，我们开始着手修改集群中的配置。</p>
+<h2 id="Hadoop集群配置Jmx-expoter"><a href="#Hadoop集群配置Jmx-expoter" class="headerlink" title="Hadoop集群配置Jmx_expoter"></a>Hadoop集群配置Jmx_expoter</h2><p>在hadoop-env.sh中最后添加以下代码，注意将其中的路径修改成自己系统中的路径，这段代码的主要作用是添加我们下载的jar包，以及给jar包传递配置文件，以及指定该服务要占用的端口，这里的对应位置的配置文件<code>prometheus_config.yml</code>测试的时候可以直接创建一个空文件即可。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_NAMENODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_NAMENODE_OPTS=&quot;$HDFS_NAMENODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27001:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_DATANODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_DATANODE_OPTS=&quot;$HDFS_DATANODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27002:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意事项</strong> ：</p>
+<p>1.上面的代码不能直接写成类似以下模式，因为不能在<code>$HADOOP_OPTS</code>中出现<code>multiple -javaagent opts</code>，就是不能直接出现多个-javaagent选项，必须要换一种写法，将<code>-javaagent</code>写在if else代码中可以避免这个问题，详细可以参考这个<a class="link"   href="https://stackoverflow.com/questions/47121498/configuring-prometheus-jmx-exporter-for-hadoop2/59837822#59837822" >stackoverflow回答<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">写成这种模式会报错</span></span><br><span class="line">export HADOOP_NAMENODE_OPTS=&quot;$HADOOP_NAMENODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br><span class="line">export HADOOP_DATANODE_OPTS=&quot;$HADOOP_DATANODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br></pre></td></tr></table></figure>
+
+<p>2.同一台机器的每一个JMX服务端口必须区分开</p>
+<p>比如上面namenode的jmx服务所占用的端口为27001，datanode的jmx服务所占用的端口为27002，如果使用了相同的端口，那么在启动hdfs服务(./start-dfs.sh)的时候会报如下所示的错。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Starting namenodes on [localhost]</span><br><span class="line">Starting datanodes</span><br><span class="line">localhost: /usr/local/Cellar/hadoop/3.3.1/libexec/bin/../libexec/hadoop-functions.sh: line 1821: 11125 Abort trap: 6           hadoop_start_daemon &quot;$&#123;daemonname&#125;&quot; &quot;$class&quot; &quot;$&#123;pidfile&#125;&quot; &quot;$@&quot; &gt;&gt; &quot;$&#123;outfile&#125;&quot; 2&gt;&amp;1 &lt; /dev/null</span><br><span class="line">localhost: ERROR: Cannot set priority of datanode process 11125</span><br><span class="line">localhost: ERROR: Cannot disconnect datanode process 11125</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这样配置完成之后，Hadoop的jmx信息就被采集到指定的端口中了，接下来我们可以在网页上测试一下我们的采集数据，访问地址就是前面配置的端口 <code>localhost:27001</code></p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/27001.png" class="" title="中二是最后的热血">    
+
+<p>同理我们的Yarn相关信息采集也要在yarn-env.sh中配置上面类似的代码，其中同样要注意区分端口号，并且不要同时出现两个-javaagent，将两个javaagent放到不同的if else中。</p>
+<h2 id="Hbase集群配置"><a href="#Hbase集群配置" class="headerlink" title="Hbase集群配置"></a>Hbase集群配置</h2><p>因为我是启动的单机版本的Hbase，所以我只配置<code>HBASE_MASTER_OPTS</code>和<code>HBASE_JMX_BASE</code>选项，如果是集群模式可能还需要配置<code>HBASE_REGIONSERVER_OPTS</code>，将下面内容替换成自己的文件路径然后添加到hbase-env.sh的尾部。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">export HBASE_JMX_BASE=&quot;-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false&quot;</span><br><span class="line">export HBASE_MASTER_OPTS=&quot;$HBASE_MASTER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=20101 -javaagent:$HBASE_HOME/lib/jmx_prometheus_javaagent-0.16.1.jar=27000:$HBASE_HOME/conf/hbase_jmx_config.yaml&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就可以通过指定端口访问各个集群的JMX信息了，下一步就是配置Prometheus将数据导入到时序数据库中。</p>
+<h2 id="配置Prometheus"><a href="#配置Prometheus" class="headerlink" title="配置Prometheus"></a>配置Prometheus</h2><p>打开Prometheus配置文件，并且在后面增加关于Hadoop集群的NameNode，DataNode以及Hbase的jmx数据配置，增加如下代码，重启普罗米修斯服务。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">- job_name: &quot;hbase&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27000&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop namenode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27001&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop datanode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27002&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br></pre></td></tr></table></figure>
+
+<p>我们打开Prometheus的页面查看对应的target，查看我们配置的任务，如果出现下面几个选项并且是绿色的说明是正常的，打开采集的结果网址会发现其中Prometheus采集的指标名称相比于原先集群50070/jmx的指标名称是经过处理的，比如Prometheus中有一个指标叫做<code>hadoop_namenode_memnonheapmaxm</code>他在50070/jmx中是名称是<code>memnonheapmaxm</code>，然后前面加上service name等，其中的匹配规则应该在插件的配置文件<code>prometheus_config.yml</code>中设置的，详细可以看<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/prometheus.png" class="" title="中二是最后的热血">
+
+<p>最后选出来我们需要的指标之和在Grafana中展示出来即可，具体方法这里不再展示，可以参考<a class="link"   href="https://www.daimajiaoliu.com/daima/4796909c8100406" >这篇教程<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>JMX_Expoter</tag>
+        <tag>监控</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>多线程编程基础</title>
     <url>/2021/08/26/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/</url>
     <content><![CDATA[<p>本文记载了关于多线程编程的一些基础知识，不断补充</p>
@@ -503,54 +647,36 @@
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
   </entry>
   <entry>
-    <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
-    <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
-    <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，公司打算花时间自研一个类似的平台，我也对集群监控这块下了点功夫。</p>
-<span id="more"></span>
-
-<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警:-)，那么我们应该如何获取Hadoop等集群的信息呢？这时候需要简单了解一个知识点了：JMX。</p>
-<p>​    我们简单介绍一下Java的JMX是什么，JMX全程叫做Java Management Extensions，翻译过来就是Java内存管理，最常用到的就是对于 JVM 的监测和管理，比如 JVM 内存、CPU 使用率、线程数、垃圾收集情况等等。另外，还可以用作日志级别的动态修改，比如 log4j 就支持 JMX 方式动态修改线上服务的日志级别。</p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/JMX%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
-
-<p>总而言之，就是Java自己开发的用于监控JVM指标的一个工具，可以提供给一些界面JConsole，VisualVM使用，详细信息可以参考<a class="link"   href="https://juejin.cn/post/6856949531003748365" >这里!<i class="fas fa-external-link-alt"></i></a></p>
-<h2 id="获取集群的JMX信息"><a href="#获取集群的JMX信息" class="headerlink" title="获取集群的JMX信息"></a>获取集群的JMX信息</h2><p>​    Hadoop，Hbase集群都提供了便捷获取集群JMX信息的途径，具体通过在访问地址后面加上<code>/jmx</code>来实现，比如我们访问hdfs的NameNode页面的时候地址是<code>localhost:50070</code>，那么在后面加上一个<code>/jmx</code>即为<code>localhost:50070/jmx</code>，访问即可得到类似下面的信息。</p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/jmx%E7%9B%91%E6%8E%A7%E9%A1%B5%E9%9D%A2.png" class="" title="中二是最后的热血">
-
-<p>​    上面图中具体指标信息可以在Hadoop官方文档对应的<a class="link"   href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >metrics章节<i class="fas fa-external-link-alt"></i></a>中找到，其中包括了Namenode以及Datanode相关信息，同理如果我们在8088端口后面加上<code>/jmx</code>即可获得关于Yarn相关指标信息。</p>
-<p>​    现在我们监控的信息有了，接下来如果我们想将数据在监控折线图中展现出来的话就需要一个时序数据库，因为监控指标数据必须存在对应的时间才有意义，目前比较常见的时序数据库+界面组合是普罗米修斯（时序数据库）+ Grafana（界面展示），那么目前的问题就转换成了如何将Hadoop集群中的JMX信息传递给普罗米修斯，简单调研就可以发现，普罗米修斯自己开发了一款插件支持将java程序对应的jmx信息传递到自己的时序数据库中，<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
-<p>  根据自己Java环境版本下载插件，将插件放置到自己选定的位置，现在插件有了，就差如何在集群中使用插件了，我们开始着手修改集群中的配置。</p>
-<h2 id="Hadoop集群配置Jmx-expoter"><a href="#Hadoop集群配置Jmx-expoter" class="headerlink" title="Hadoop集群配置Jmx_expoter"></a>Hadoop集群配置Jmx_expoter</h2><p>在hadoop-env.sh中最后添加以下代码，注意将其中的路径修改成自己系统中的路径，这段代码的主要作用是添加我们下载的jar包，以及给jar包传递配置文件，以及指定该服务要占用的端口，这里的对应位置的配置文件<code>prometheus_config.yml</code>测试的时候可以直接创建一个空文件即可。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_NAMENODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_NAMENODE_OPTS=&quot;$HDFS_NAMENODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27001:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_DATANODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_DATANODE_OPTS=&quot;$HDFS_DATANODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27002:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意事项</strong> ：</p>
-<p>1.上面的代码不能直接写成类似以下模式，因为不能在<code>$HADOOP_OPTS</code>中出现<code>multiple -javaagent opts</code>，就是不能直接出现多个-javaagent选项，必须要换一种写法，将<code>-javaagent</code>写在if else代码中可以避免这个问题，详细可以参考这个<a class="link"   href="https://stackoverflow.com/questions/47121498/configuring-prometheus-jmx-exporter-for-hadoop2/59837822#59837822" >stackoverflow回答<i class="fas fa-external-link-alt"></i></a></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">写成这种模式会报错</span></span><br><span class="line">export HADOOP_NAMENODE_OPTS=&quot;$HADOOP_NAMENODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br><span class="line">export HADOOP_DATANODE_OPTS=&quot;$HADOOP_DATANODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br></pre></td></tr></table></figure>
-
-<p>2.同一台机器的每一个JMX服务端口必须区分开</p>
-<p>比如上面namenode的jmx服务所占用的端口为27001，datanode的jmx服务所占用的端口为27002，如果使用了相同的端口，那么在启动hdfs服务(./start-dfs.sh)的时候会报如下所示的错。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Starting namenodes on [localhost]</span><br><span class="line">Starting datanodes</span><br><span class="line">localhost: /usr/local/Cellar/hadoop/3.3.1/libexec/bin/../libexec/hadoop-functions.sh: line 1821: 11125 Abort trap: 6           hadoop_start_daemon &quot;$&#123;daemonname&#125;&quot; &quot;$class&quot; &quot;$&#123;pidfile&#125;&quot; &quot;$@&quot; &gt;&gt; &quot;$&#123;outfile&#125;&quot; 2&gt;&amp;1 &lt; /dev/null</span><br><span class="line">localhost: ERROR: Cannot set priority of datanode process 11125</span><br><span class="line">localhost: ERROR: Cannot disconnect datanode process 11125</span><br></pre></td></tr></table></figure>
-
-
-
-<p>这样配置完成之后，Hadoop的jmx信息就被采集到指定的端口中了，接下来我们可以在网页上测试一下我们的采集数据，访问地址就是前面配置的端口 <code>localhost:27001</code></p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/27001.png" class="" title="中二是最后的热血">    
-
-<p>同理我们的Yarn相关信息采集也要在yarn-env.sh中配置上面类似的代码，其中同样要注意区分端口号，并且不要同时出现两个-javaagent，将两个javaagent放到不同的if else中。</p>
-<h2 id="Hbase集群配置"><a href="#Hbase集群配置" class="headerlink" title="Hbase集群配置"></a>Hbase集群配置</h2><p>因为我是启动的单机版本的Hbase，所以我只配置<code>HBASE_MASTER_OPTS</code>和<code>HBASE_JMX_BASE</code>选项，如果是集群模式可能还需要配置<code>HBASE_REGIONSERVER_OPTS</code>，将下面内容替换成自己的文件路径然后添加到hbase-env.sh的尾部。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">export HBASE_JMX_BASE=&quot;-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false&quot;</span><br><span class="line">export HBASE_MASTER_OPTS=&quot;$HBASE_MASTER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=20101 -javaagent:$HBASE_HOME/lib/jmx_prometheus_javaagent-0.16.1.jar=27000:$HBASE_HOME/conf/hbase_jmx_config.yaml&quot;</span><br></pre></td></tr></table></figure>
-
-<p>这样我们就可以通过指定端口访问各个集群的JMX信息了，下一步就是配置Prometheus将数据导入到时序数据库中。</p>
-<h2 id="配置Prometheus"><a href="#配置Prometheus" class="headerlink" title="配置Prometheus"></a>配置Prometheus</h2><p>打开Prometheus配置文件，并且在后面增加关于Hadoop集群的NameNode，DataNode以及Hbase的jmx数据配置，增加如下代码，重启普罗米修斯服务。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">- job_name: &quot;hbase&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27000&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop namenode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27001&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop datanode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27002&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br></pre></td></tr></table></figure>
-
-<p>我们打开Prometheus的页面查看对应的target，查看我们配置的任务，如果出现下面几个选项并且是绿色的说明是正常的，打开采集的结果网址会发现其中Prometheus采集的指标名称相比于原先集群50070/jmx的指标名称是经过处理的，比如Prometheus中有一个指标叫做<code>hadoop_namenode_memnonheapmaxm</code>他在50070/jmx中是名称是<code>memnonheapmaxm</code>，然后前面加上service name等，其中的匹配规则应该在插件的配置文件<code>prometheus_config.yml</code>中设置的，详细可以看<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/prometheus.png" class="" title="中二是最后的热血">
-
-<p>最后选出来我们需要的指标之和在Grafana中展示出来即可，具体方法这里不再展示，可以参考<a class="link"   href="https://www.daimajiaoliu.com/daima/4796909c8100406" >这篇教程<i class="fas fa-external-link-alt"></i></a></p>
+    <title>如何备份hexo博客</title>
+    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
+<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
+<p>不用再执行hexo init命令</p>
+<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
-        <tag>JMX_Expoter</tag>
-        <tag>监控</tag>
+        <tag>blog</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>学习clickhouse详细知识</title>
+    <url>/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/</url>
+    <content><![CDATA[<p>ClickHouse基础应用与内部原理</p>
+<span id="more"></span>
+
+<h1 id="MergeTree原理解析"><a href="#MergeTree原理解析" class="headerlink" title="MergeTree原理解析"></a>MergeTree原理解析</h1><p>MergeTree是家族中最基础的表引擎，提供了主键索引、数据分区、数据副本和数据采样等基本能力，而家族中其他的表引擎则在MergeTree的基础之上各有所长。</p>
+<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/yinqing.png" class="" title="中二是最后的热血">
+
+<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/mtreejianbiao.png" class="" title="中二是最后的热血">
+<p>MergeTree建表语句中重要的参数：</p>
+<p>（1）PARTITION BY [选填]：分区键，用于指定表数据以何种标准进行分区。分区键既可以是单个列字段，也可以通过元组的形式使用多个列字段，同时它也支持使用列表达式。如果不声明分区键，则ClickHouse会生成一个名为all的分区。合理使用数据分区，可以有效减少查询时数据文件的扫描范围。</p>
+<p>（2）ORDER BY [必填]：排序键，用于指定在一个数据片段内，数据以何种标准排序。默认情况下主键（PRIMARY KEY）与排序键相同。排序键既可以是单个列字段，例如ORDER BY CounterID，也可以通过元组的形式使用多个列字段，例如ORDERBY（CounterID,EventDate）。当使用多个列字段排序时，以ORDERBY（CounterID,EventDate）为例，在单个数据片段内，数据首先会以CounterID排序，相同CounterID的数据再按EventDate排序。</p>
+<p>（3）PRIMARY KEY [选填]：主键，顾名思义，声明后会依照主键字段生成一级索引，用于加速表查询。默认情况下，主键与排序键(ORDER BY)相同，所以通常直接使用ORDER BY代为指定主键，无须刻意通过PRIMARY KEY声明。所以在一般情况下，在单个数据片段内，数据与一级索引以相同的规则升序排列。与其他数据库不同，MergeTree主键允许存在重复数据（ReplacingMergeTree可以去重）。</p>
+<h2 id="数据存储结构"><a href="#数据存储结构" class="headerlink" title="数据存储结构"></a>数据存储结构</h2><p>​    MergeTree中的主键一般通过order by指定，主键可以是单个字段也可以是多个字段，根据主键建立索引，这里涉及到两个参数<code>index_granularity</code>以及<code>enable_mixed_granularity_parts</code>，前者是指定我们创建稀疏索引时候的索引间隔，默认是8192，后者是我们选择是否开启根据写入数据体量大小的自适应索引的参数，默认是开启的，两者支持同时开启并同时生效，详细参考这篇<a class="link"   href="https://blog.csdn.net/nazeniwaresakini/article/details/109143116" >文章<i class="fas fa-external-link-alt"></i></a>，设置<code>index_granularity_bytes=0</code>即为关闭自适应索引</p>
+<p> 数据存储结构主要文件有以下几个，.idx文件是一级索引文件，.bin是数据文件，.mrk是数据标记文件，首先根据idx稀疏索引文件找到要读取的数据段，因为idx文件和mrk文件是一一对应的，找到下一步找到mrk文件中压缩后偏移量和压缩前偏移量</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
       </tags>
   </entry>
   <entry>
@@ -717,72 +843,6 @@
       <tags>
         <tag>data Lake</tag>
         <tag>Iceberg</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何备份hexo博客</title>
-    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
-<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
-<p>不用再执行hexo init命令</p>
-<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>blog</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用grafana监控预警表格类型数据</title>
-    <url>/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/</url>
-    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>监控clickhouse服务，我们使用的是grafana+grafana-clickhouse插件，grafana只能报警graph类型数据，不能报警类似Table样式的数据，反应出来就是panel有没有alter这个Tab</p>
-<span id="more"></span>
-
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/alter%E5%9B%BE%E6%A0%87.png" class="" title="中二是最后的热血">
-
-<p>对于graph类型数据比如CPU使用率，或者系统IO使用率的情况很容易就可以进行预警操作，但是对于一些表格数据，比如磁盘使用情况，如下图这种表格类型的数据就不能很好地支持预警，这时候需要我们对系统表简单的改造或者改写我们的查询SQL。</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%B2%A1%E6%9C%89alter.png" class="" title="中二是最后的热血">
-
-<h2 id="用’数据点’来预警"><a href="#用’数据点’来预警" class="headerlink" title="用’数据点’来预警"></a>用’数据点’来预警</h2><p>想要数据成graph或者Time series类型数据展示，我们肯定需要数据中存在一个时间字段，最好是连续的，首先我们使用的是grafana-clickhouse插件，查询的System.parts系统表来获取各个表大小然后求和，我们对parts表进行desc操作，查看其中的时间字段，发现有四个分别是‘modification_time’，‘remove_time’，‘min_time’，‘max_time’，四个时间字段分别的含义如下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">remove_time (DateTime) – 数据片段变为非激活状态的时间。</span><br><span class="line">min_time (DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">max_time(DateTime) – 数据片段中日期和时间键的最小值。</span><br><span class="line">modification_time (DateTime) – 修改包含数据片段的目录的时间。这通常对应于创建数据部分的时间。</span><br></pre></td></tr></table></figure>
-
-<p>有点蒙，没事我们直接选十条数据简单看一看</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E6%97%B6%E9%97%B4%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>可以看出<code>modification_time</code>就是我们想要的时间字段，代表了最后一次修改的时间，这个是最合适的了，当然更合适的是连续时间字段，但是这里没有。有了时间字段我们需要做的就是写查询SQL了，我们在grafana中写下如下的查询SQL。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">max</span>(modification_time) <span class="keyword">as</span> t,</span><br><span class="line">    (<span class="built_in">sum</span>(if(active, bytes, <span class="number">0</span>))) <span class="keyword">AS</span> size_on_disk</span><br><span class="line"><span class="keyword">FROM</span> monitor.parts</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> size_on_disk <span class="keyword">desc</span></span><br></pre></td></tr></table></figure>
-
-<p>时间我使用的是最大的修改时间，这样的话就是一个时间点，这也是最大的缺点，呈现出来的结果是这样的</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E7%9B%91%E6%8E%A7%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>这样设计的思想是<strong>这个graph只是为了预警的作用，如果整体磁盘容量超过了我们设置的限制，比如80%就会报警，起到一个通知的作用，然后上线grafana去查看各个表的详细容量情况，再做出一些操作，比如删除某些分区数据或者扩容等</strong></p>
-<h2 id="改变查询的系统表"><a href="#改变查询的系统表" class="headerlink" title="改变查询的系统表"></a>改变查询的系统表</h2><p>第二种方法是修改我们查询的系统表，首先我们查询的是system.parts表，其中因为没有合适的连续时间字段导致我们不能很好地创建关于CK磁盘使用情况的时序数据，那换一种思维，我们自己来手动创建一个满足条件的表呢？需要满足的条件有以下几个。<br>（1）有连续的时间字段<br>（2）每个时间字段有对应的CK占用磁盘大小<br>连续的时间字段应该怎么搞定呢，我这里使用的是Linux自带的Crontab，每隔30s通过<code>clickhouse-client</code>去查询一次CK占用磁盘的总大小，然后和当前时间字段一起插入到一个新表即可，下面是我运行一段时间的效果，可以看到这次是连续的了，如果怕产生的数据条数太多可以给数据设置上TTL，这样就完成了我们想要的效果，同样也可以进行预警了。</p>
-<img src="/2021/10/20/%E4%BD%BF%E7%94%A8grafana%E7%9B%91%E6%8E%A7%E9%A2%84%E8%AD%A6%E8%A1%A8%E6%A0%BC%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE/%E8%BF%9E%E7%BB%AD%E7%9B%91%E6%8E%A7.png" class="" title="中二是最后的热血">
-
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
-        <tag>Grafana</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>学习clickhouse详细知识</title>
-    <url>/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/</url>
-    <content><![CDATA[<p>ClickHouse基础应用与内部原理</p>
-<span id="more"></span>
-
-<h1 id="MergeTree原理解析"><a href="#MergeTree原理解析" class="headerlink" title="MergeTree原理解析"></a>MergeTree原理解析</h1><p>MergeTree是家族中最基础的表引擎，提供了主键索引、数据分区、数据副本和数据采样等基本能力，而家族中其他的表引擎则在MergeTree的基础之上各有所长。</p>
-<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/yinqing.png" class="" title="中二是最后的热血">
-
-<img src="/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/mtreejianbiao.png" class="" title="中二是最后的热血">
-<p>MergeTree建表语句中重要的参数：</p>
-<p>（1）PARTITION BY [选填]：分区键，用于指定表数据以何种标准进行分区。分区键既可以是单个列字段，也可以通过元组的形式使用多个列字段，同时它也支持使用列表达式。如果不声明分区键，则ClickHouse会生成一个名为all的分区。合理使用数据分区，可以有效减少查询时数据文件的扫描范围。</p>
-<p>（2）ORDER BY [必填]：排序键，用于指定在一个数据片段内，数据以何种标准排序。默认情况下主键（PRIMARY KEY）与排序键相同。排序键既可以是单个列字段，例如ORDER BY CounterID，也可以通过元组的形式使用多个列字段，例如ORDERBY（CounterID,EventDate）。当使用多个列字段排序时，以ORDERBY（CounterID,EventDate）为例，在单个数据片段内，数据首先会以CounterID排序，相同CounterID的数据再按EventDate排序。</p>
-<p>（3）PRIMARY KEY [选填]：主键，顾名思义，声明后会依照主键字段生成一级索引，用于加速表查询。默认情况下，主键与排序键(ORDER BY)相同，所以通常直接使用ORDER BY代为指定主键，无须刻意通过PRIMARY KEY声明。所以在一般情况下，在单个数据片段内，数据与一级索引以相同的规则升序排列。与其他数据库不同，MergeTree主键允许存在重复数据（ReplacingMergeTree可以去重）。</p>
-<h2 id="数据存储结构"><a href="#数据存储结构" class="headerlink" title="数据存储结构"></a>数据存储结构</h2><p>​    MergeTree中的主键一般通过order by指定，主键可以是单个字段也可以是多个字段，根据主键建立索引，这里涉及到两个参数<code>index_granularity</code>以及<code>enable_mixed_granularity_parts</code>，前者是指定我们创建稀疏索引时候的索引间隔，默认是8192，后者是我们选择是否开启根据写入数据体量大小的自适应索引的参数，默认是开启的，两者支持同时开启并同时生效，详细参考这篇<a class="link"   href="https://blog.csdn.net/nazeniwaresakini/article/details/109143116" >文章<i class="fas fa-external-link-alt"></i></a>，设置<code>index_granularity_bytes=0</code>即为关闭自适应索引</p>
-<p> 数据存储结构主要文件有以下几个，.idx文件是一级索引文件，.bin是数据文件，.mrk是数据标记文件，首先根据idx稀疏索引文件找到要读取的数据段，因为idx文件和mrk文件是一一对应的，找到下一步找到mrk文件中压缩后偏移量和压缩前偏移量</p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
       </tags>
   </entry>
 </search>
