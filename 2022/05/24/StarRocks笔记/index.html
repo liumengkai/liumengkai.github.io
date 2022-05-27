@@ -64,7 +64,7 @@
                             <a class=""
                                href="/"
                             >
-                                首页
+                                HOME
                             </a>
                         </li>
                     
@@ -72,7 +72,7 @@
                             <a class=""
                                href="/archives"
                             >
-                                归档
+                                ARCHIVES
                             </a>
                         </li>
                     
@@ -80,7 +80,7 @@
                             <a class=""
                                href="/about"
                             >
-                                关于
+                                ABOUT
                             </a>
                         </li>
                     
@@ -115,17 +115,17 @@
             
                 <li class="drawer-menu-item flex-center">
                     <a class=""
-                       href="/">首页</a>
+                       href="/">HOME</a>
                 </li>
             
                 <li class="drawer-menu-item flex-center">
                     <a class=""
-                       href="/archives">归档</a>
+                       href="/archives">ARCHIVES</a>
                 </li>
             
                 <li class="drawer-menu-item flex-center">
                     <a class=""
-                       href="/about">关于</a>
+                       href="/about">ABOUT</a>
                 </li>
             
                 <li class="drawer-menu-item flex-center">
@@ -189,12 +189,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>1.3k 字</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>1.5k Words</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fas fa-clock"></i>&nbsp;<span>4 分钟</span>
+            <i class="fas fa-clock"></i>&nbsp;<span>5 Mins</span>
         </span>
     
     
@@ -210,10 +210,11 @@
         
 
         <div class="article-content markdown-body">
-            <h3 id="什么是StarRocks"><a href="#什么是StarRocks" class="headerlink" title="什么是StarRocks"></a>什么是StarRocks</h3><p>StarRocks 是<strong>新一代极速全场景MPP数据库</strong>。StarRocks 的愿景是能够让用户的<strong>数据分析变得更加简单和敏捷</strong>。用户无需经过复杂的预处理，就可以用 StarRocks 来支持多种数据分析场景的极速分析。</p>
-<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
-
+            <p>好记性不如烂笔头</p>
 <span id="more"></span>
+
+<h3 id="什么是StarRocks"><a href="#什么是StarRocks" class="headerlink" title="什么是StarRocks"></a>什么是StarRocks</h3><p>StarRocks 是<strong>新一代极速全场景MPP数据库</strong>。StarRocks 的愿景是能够让用户的<strong>数据分析变得更加简单和敏捷</strong>。用户无需经过复杂的预处理，就可以用 StarRocks 来支持多种数据分析场景的极速分析。</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
 
 <h3 id="StarRocks适用哪些场景"><a href="#StarRocks适用哪些场景" class="headerlink" title="StarRocks适用哪些场景"></a>StarRocks适用哪些场景</h3><p>StarRocks 可以满足企业级用户的多种分析需求，包括 OLAP 多维分析、定制报表、实时数据分析和 Ad-hoc 数据分析等。</p>
 <h3 id="StarRocks三种数据模型"><a href="#StarRocks三种数据模型" class="headerlink" title="StarRocks三种数据模型"></a>StarRocks三种数据模型</h3><p>StarRocks根据数据摄入时候的映射关系，分为了三种数据关系，分别是明细、聚合、以及更新数据关系，三种数据关系在StarRocks中分别对应着不同的数据模型:</p>
@@ -245,23 +246,35 @@
 <p>(3)数据查询时，多版本多路归并聚合</p>
 </li>
 </ul>
+<h3 id="更新模型-Unique-Key-amp-Primary-Key"><a href="#更新模型-Unique-Key-amp-Primary-Key" class="headerlink" title="更新模型(Unique Key &amp; Primary Key)"></a>更新模型(Unique Key &amp; Primary Key)</h3><p><a class="link"   target="_blank" rel="noopener" href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B" >Unique Key 官网讲解<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E4%B8%BB%E9%94%AE%E6%A8%A1%E5%9E%8B" >Primary Key官网讲解<i class="fas fa-external-link-alt"></i></a></p>
 <h3 id="StarRocks表设计"><a href="#StarRocks表设计" class="headerlink" title="StarRocks表设计"></a>StarRocks表设计</h3><p>StarRocks和其他OLAP数据库存储设计类似，采用的列式存储，可以提高数据查询效率，每一列的数据类型一致，这样可以提高数据的压缩率，</p>
 <p>StarRocks的数据列可以分为两种，分别是维度列以及指标列，维度列用于分组和排序，指标列通过聚合函数在维度列基础上进行SUM，COUNT，BITMAP_UNION等操作。</p>
 <img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/SR%E8%A1%A8%E7%BB%93%E6%9E%84.png" class="" title="中二是最后的热血">
 
-<h4 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h4><p>我们从一张StarRocks表中进行scan的时候，经历了哪些过程呢？这时候就需要我们了解一下SR的大概索引结构。</p>
-<p>1.shortkey index表：表中数据每1024行, 构成一个逻辑block</p>
-<p>2.Per-column cardinal index：表中的每列数据有各自的行号索引表</p>
-<p>3.Per-column data blocks：表中每一列数据按64KB分块存储</p>
+<h4 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h4><p>Doris 不支持在任意列上创建索引，本质上，Doris 的数据存储在类似 SSTable（Sorted String Table）的数据结构中。该结构是一种有序的数据结构，可以按照指定的列进行排序存储。在这种数据结构上，以排序列作为条件进行查找，会非常的高效。</p>
+<p>比如我们建立的前缀索引为(user_id,age,message)，那么下面第一种查询要比第二种快得多</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> user_id<span class="operator">=</span><span class="number">1829239</span> <span class="keyword">and</span> age<span class="operator">=</span><span class="number">20</span>；</span><br><span class="line"># 没有命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> age<span class="operator">=</span><span class="number">20</span>；</span><br></pre></td></tr></table></figure>
+
+<p>下面我们看一下索引文件的结构</p>
 <img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/StarRocks%E8%A1%A8%E7%B4%A2%E5%BC%95.png" class="" title="中二是最后的热血">
 
-<p>每个部分的详细功能：</p>
-<p><strong>shortkey index表:</strong> 稀疏索引和行号之间的对应关系，首先表中数据会按照排序键进行排序，然后每1024行会构成一个逻辑块，并且获得一个shortkey index，这个key是由排序键进行拼接而成，不会超过36个字节，我们在查询的时候首先会根据要查询的排序键值来确定所属的数据块的行号，这个行号就是数据在第多少行。</p>
-<p><strong>Per-column cardinal index:</strong> 数据块和行号之间的对应关系，每一列都会有一个行号和数据块之间的对应关系，因为我们是列式存储，所以不同列之间是独立存储的，存在不同的对应关系，根据前面找到的行号找到对应的数据块地址</p>
-<p><strong>Per-column data blocks</strong>：表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
-<p>需要注意的是，这种使用范围查找的需要有前提条件，就是你的条件可以构成表维度的前缀</p>
-<p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找。</p>
-<p>既然shortkey index需要依赖维度列排列次序，如果使用的是非前缀的维度列进行查询就不能发挥shortkey index作用，这时候我们可以通过建立<strong>Roll up</strong>来实现</p>
+<p>每个部分的描述与详细功能：</p>
+<p><strong>short key index表:</strong></p>
+<p>稀疏索引和行号之间的对应关系，首先表中数据会按照排序键进行排序，然后每1024行会构成一个逻辑块，并且获得一个shortkey index，这个key是由排序键进行拼接而成，不会超过36个字节，我们在查询的时候首先会根据要查询的排序键值来确定所属的数据块的行号，这个行号就是数据在第多少行。</p>
+<p> <strong>Per-column cardinal index:</strong> </p>
+<p>列式存储，列与列之间是独立存储，所以每列都会有一个自己的行号和块号的对应关系，划分块是通过每块大概是64kb来进行划分，根据前面找到的行号找到对应的数据块地址</p>
+<p><strong>Per-column data blocks:</strong></p>
+<p>表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
+<p>需要注意的是，这种使用范围查找的需要有前提条件，就是查询时, 如果指定了维度列的<strong>等值条件</strong>或者<strong>范围条件</strong>, 并且这些条件中维度列<strong>可构成表维度列的前缀</strong>, 则可以利用数据的有序性</p>
+<p>使用索引范围查找的条件:</p>
+<p>（1）维度列的等值或者范围条件，像 in (…) 这种是不能索引</p>
+<p>（2）条件中的维度列可以构成前缀</p>
+<p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找，或者查询条件是 where code = 4这种也是不能适用范围查找，没有命中。</p>
+<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><p>在没有物化视图功能之前，用户一般都是使用 Rollup 功能通过预聚合方式提升查询效率的。但是 Rollup 具有一定的局限性：</p>
+<p>1.Rollup不能做明细模型的聚合</p>
+<p>2.Rollup在更新表模型中必须是包含所有维度列</p>
+<p><strong>详细解释:</strong></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
@@ -269,14 +282,14 @@
             <div class="post-copyright-info">
                 <div class="article-copyright-info-container">
     <ul>
-        <li>本文标题：StarRocks笔记</li>
-        <li>本文作者：刘梦凯</li>
-        <li>创建时间：2022-05-24 17:46:23</li>
+        <li>Post title：StarRocks笔记</li>
+        <li>Post author：刘梦凯</li>
+        <li>Create time：2022-05-24 17:46:23</li>
         <li>
-            本文链接：https://liumengkai.github.io/2022/05/24/StarRocks笔记/
+            Post link：https://liumengkai.github.io/2022/05/24/StarRocks笔记/
         </li>
         <li>
-            版权声明：本博客所有文章除特别声明外，均采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> 许可协议。转载请注明出处！
+            Copyright Notice：All articles in this blog are licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> unless stating additionally.
         </li>
     </ul>
 </div>
@@ -295,7 +308,7 @@
                         >
                             <span class="title flex-center">
                                 <span class="post-nav-title-item">git new repository hint</span>
-                                <span class="post-nav-item">下一篇</span>
+                                <span class="post-nav-item">Next posts</span>
                             </span>
                             <span class="right arrow-icon flex-center">
                               <i class="fas fa-chevron-right"></i>
@@ -311,7 +324,7 @@
                 <div class="comments-container">
     <div id="comment-anchor"></div>
     <div class="comment-area-title">
-        <i class="fas fa-comments">&nbsp;评论</i>
+        <i class="fas fa-comments">&nbsp;Comments</i>
     </div>
     
 
@@ -388,18 +401,18 @@
             <div class="website-count info-item">
                 
                     <span id="busuanzi_container_site_uv">
-                        访问人数&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
+                        Visitor Count&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
                     </span>
                 
                 
                     <span id="busuanzi_container_site_pv">
-                        总访问量&nbsp;<span id="busuanzi_value_site_pv"></span>
+                        Totalview&nbsp;<span id="busuanzi_value_site_pv"></span>
                     </span>
                 
             </div>
         
         <div class="theme-info info-item">
-            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+            Powered by <a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;|&nbsp;Theme&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
         </div>
         
     </div>
@@ -478,7 +491,7 @@
         <aside class="page-aside">
             <div class="post-toc-wrap">
     <div class="post-toc">
-        <ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFStarRocks"><span class="nav-number">1.</span> <span class="nav-text">什么是StarRocks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E9%80%82%E7%94%A8%E5%93%AA%E4%BA%9B%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">StarRocks适用哪些场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E4%B8%89%E7%A7%8D%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">StarRocks三种数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%BB%86%E6%A8%A1%E5%9E%8B%EF%BC%88Duplicate-Key%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">明细模型（Duplicate Key）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E6%A8%A1%E5%9E%8B%EF%BC%88Aggregate-Key%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">聚合模型（Aggregate Key）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E8%A1%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">StarRocks表设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="nav-number">4.1.</span> <span class="nav-text">索引</span></a></li></ol></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFStarRocks"><span class="nav-number">1.</span> <span class="nav-text">什么是StarRocks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E9%80%82%E7%94%A8%E5%93%AA%E4%BA%9B%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">StarRocks适用哪些场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E4%B8%89%E7%A7%8D%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">StarRocks三种数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%BB%86%E6%A8%A1%E5%9E%8B%EF%BC%88Duplicate-Key%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">明细模型（Duplicate Key）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E6%A8%A1%E5%9E%8B%EF%BC%88Aggregate-Key%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">聚合模型（Aggregate Key）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B-Unique-Key-amp-Primary-Key"><span class="nav-number">4.</span> <span class="nav-text">更新模型(Unique Key &amp; Primary Key)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E8%A1%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.</span> <span class="nav-text">StarRocks表设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95"><span class="nav-number">5.1.</span> <span class="nav-text">前缀索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RollUp%E4%BB%A5%E5%8F%8A%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE"><span class="nav-number">6.</span> <span class="nav-text">RollUp以及物化视图</span></a></li></ol>
     </div>
 </div>
         </aside>
@@ -500,7 +513,7 @@
                 <input autocomplete="off"
                        autocorrect="off"
                        autocapitalize="off"
-                       placeholder="搜索..."
+                       placeholder="Search..."
                        spellcheck="false"
                        type="search"
                        class="search-input"

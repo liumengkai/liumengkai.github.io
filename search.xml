@@ -295,10 +295,11 @@
   <entry>
     <title>StarRocks笔记</title>
     <url>/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h3 id="什么是StarRocks"><a href="#什么是StarRocks" class="headerlink" title="什么是StarRocks"></a>什么是StarRocks</h3><p>StarRocks 是<strong>新一代极速全场景MPP数据库</strong>。StarRocks 的愿景是能够让用户的<strong>数据分析变得更加简单和敏捷</strong>。用户无需经过复杂的预处理，就可以用 StarRocks 来支持多种数据分析场景的极速分析。</p>
-<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
-
+    <content><![CDATA[<p>好记性不如烂笔头</p>
 <span id="more"></span>
+
+<h3 id="什么是StarRocks"><a href="#什么是StarRocks" class="headerlink" title="什么是StarRocks"></a>什么是StarRocks</h3><p>StarRocks 是<strong>新一代极速全场景MPP数据库</strong>。StarRocks 的愿景是能够让用户的<strong>数据分析变得更加简单和敏捷</strong>。用户无需经过复杂的预处理，就可以用 StarRocks 来支持多种数据分析场景的极速分析。</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
 
 <h3 id="StarRocks适用哪些场景"><a href="#StarRocks适用哪些场景" class="headerlink" title="StarRocks适用哪些场景"></a>StarRocks适用哪些场景</h3><p>StarRocks 可以满足企业级用户的多种分析需求，包括 OLAP 多维分析、定制报表、实时数据分析和 Ad-hoc 数据分析等。</p>
 <h3 id="StarRocks三种数据模型"><a href="#StarRocks三种数据模型" class="headerlink" title="StarRocks三种数据模型"></a>StarRocks三种数据模型</h3><p>StarRocks根据数据摄入时候的映射关系，分为了三种数据关系，分别是明细、聚合、以及更新数据关系，三种数据关系在StarRocks中分别对应着不同的数据模型:</p>
@@ -330,23 +331,35 @@
 <p>(3)数据查询时，多版本多路归并聚合</p>
 </li>
 </ul>
+<h3 id="更新模型-Unique-Key-amp-Primary-Key"><a href="#更新模型-Unique-Key-amp-Primary-Key" class="headerlink" title="更新模型(Unique Key &amp; Primary Key)"></a>更新模型(Unique Key &amp; Primary Key)</h3><p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B" >Unique Key 官网讲解<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E4%B8%BB%E9%94%AE%E6%A8%A1%E5%9E%8B" >Primary Key官网讲解<i class="fas fa-external-link-alt"></i></a></p>
 <h3 id="StarRocks表设计"><a href="#StarRocks表设计" class="headerlink" title="StarRocks表设计"></a>StarRocks表设计</h3><p>StarRocks和其他OLAP数据库存储设计类似，采用的列式存储，可以提高数据查询效率，每一列的数据类型一致，这样可以提高数据的压缩率，</p>
 <p>StarRocks的数据列可以分为两种，分别是维度列以及指标列，维度列用于分组和排序，指标列通过聚合函数在维度列基础上进行SUM，COUNT，BITMAP_UNION等操作。</p>
 <img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/SR%E8%A1%A8%E7%BB%93%E6%9E%84.png" class="" title="中二是最后的热血">
 
-<h4 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h4><p>我们从一张StarRocks表中进行scan的时候，经历了哪些过程呢？这时候就需要我们了解一下SR的大概索引结构。</p>
-<p>1.shortkey index表：表中数据每1024行, 构成一个逻辑block</p>
-<p>2.Per-column cardinal index：表中的每列数据有各自的行号索引表</p>
-<p>3.Per-column data blocks：表中每一列数据按64KB分块存储</p>
+<h4 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h4><p>Doris 不支持在任意列上创建索引，本质上，Doris 的数据存储在类似 SSTable（Sorted String Table）的数据结构中。该结构是一种有序的数据结构，可以按照指定的列进行排序存储。在这种数据结构上，以排序列作为条件进行查找，会非常的高效。</p>
+<p>比如我们建立的前缀索引为(user_id,age,message)，那么下面第一种查询要比第二种快得多</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># 命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> user_id<span class="operator">=</span><span class="number">1829239</span> <span class="keyword">and</span> age<span class="operator">=</span><span class="number">20</span>；</span><br><span class="line"># 没有命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> age<span class="operator">=</span><span class="number">20</span>；</span><br></pre></td></tr></table></figure>
+
+<p>下面我们看一下索引文件的结构</p>
 <img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/StarRocks%E8%A1%A8%E7%B4%A2%E5%BC%95.png" class="" title="中二是最后的热血">
 
-<p>每个部分的详细功能：</p>
-<p><strong>shortkey index表:</strong> 稀疏索引和行号之间的对应关系，首先表中数据会按照排序键进行排序，然后每1024行会构成一个逻辑块，并且获得一个shortkey index，这个key是由排序键进行拼接而成，不会超过36个字节，我们在查询的时候首先会根据要查询的排序键值来确定所属的数据块的行号，这个行号就是数据在第多少行。</p>
-<p><strong>Per-column cardinal index:</strong> 数据块和行号之间的对应关系，每一列都会有一个行号和数据块之间的对应关系，因为我们是列式存储，所以不同列之间是独立存储的，存在不同的对应关系，根据前面找到的行号找到对应的数据块地址</p>
-<p><strong>Per-column data blocks</strong>：表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
-<p>需要注意的是，这种使用范围查找的需要有前提条件，就是你的条件可以构成表维度的前缀</p>
-<p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找。</p>
-<p>既然shortkey index需要依赖维度列排列次序，如果使用的是非前缀的维度列进行查询就不能发挥shortkey index作用，这时候我们可以通过建立<strong>Roll up</strong>来实现</p>
+<p>每个部分的描述与详细功能：</p>
+<p><strong>short key index表:</strong></p>
+<p>稀疏索引和行号之间的对应关系，首先表中数据会按照排序键进行排序，然后每1024行会构成一个逻辑块，并且获得一个shortkey index，这个key是由排序键进行拼接而成，不会超过36个字节，我们在查询的时候首先会根据要查询的排序键值来确定所属的数据块的行号，这个行号就是数据在第多少行。</p>
+<p> <strong>Per-column cardinal index:</strong> </p>
+<p>列式存储，列与列之间是独立存储，所以每列都会有一个自己的行号和块号的对应关系，划分块是通过每块大概是64kb来进行划分，根据前面找到的行号找到对应的数据块地址</p>
+<p><strong>Per-column data blocks:</strong></p>
+<p>表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
+<p>需要注意的是，这种使用范围查找的需要有前提条件，就是查询时, 如果指定了维度列的<strong>等值条件</strong>或者<strong>范围条件</strong>, 并且这些条件中维度列<strong>可构成表维度列的前缀</strong>, 则可以利用数据的有序性</p>
+<p>使用索引范围查找的条件:</p>
+<p>（1）维度列的等值或者范围条件，像 in (…) 这种是不能索引</p>
+<p>（2）条件中的维度列可以构成前缀</p>
+<p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找，或者查询条件是 where code = 4这种也是不能适用范围查找，没有命中。</p>
+<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><p>在没有物化视图功能之前，用户一般都是使用 Rollup 功能通过预聚合方式提升查询效率的。但是 Rollup 具有一定的局限性：</p>
+<p>1.Rollup不能做明细模型的聚合</p>
+<p>2.Rollup在更新表模型中必须是包含所有维度列</p>
+<p><strong>详细解释:</strong></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>StarRocks</tag>
@@ -428,57 +441,6 @@
       <tags>
         <tag>ClickHouse</tag>
         <tag>Grafana</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
-    <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
-    <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，公司打算花时间自研一个类似的平台，我也对集群监控这块下了点功夫。</p>
-<span id="more"></span>
-
-<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警:-)，那么我们应该如何获取Hadoop等集群的信息呢？这时候需要简单了解一个知识点了：JMX。</p>
-<p>​    我们简单介绍一下Java的JMX是什么，JMX全程叫做Java Management Extensions，翻译过来就是Java内存管理，最常用到的就是对于 JVM 的监测和管理，比如 JVM 内存、CPU 使用率、线程数、垃圾收集情况等等。另外，还可以用作日志级别的动态修改，比如 log4j 就支持 JMX 方式动态修改线上服务的日志级别。</p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/JMX%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
-
-<p>总而言之，就是Java自己开发的用于监控JVM指标的一个工具，可以提供给一些界面JConsole，VisualVM使用，详细信息可以参考<a class="link"   href="https://juejin.cn/post/6856949531003748365" >这里!<i class="fas fa-external-link-alt"></i></a></p>
-<h2 id="获取集群的JMX信息"><a href="#获取集群的JMX信息" class="headerlink" title="获取集群的JMX信息"></a>获取集群的JMX信息</h2><p>​    Hadoop，Hbase集群都提供了便捷获取集群JMX信息的途径，具体通过在访问地址后面加上<code>/jmx</code>来实现，比如我们访问hdfs的NameNode页面的时候地址是<code>localhost:50070</code>，那么在后面加上一个<code>/jmx</code>即为<code>localhost:50070/jmx</code>，访问即可得到类似下面的信息。</p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/jmx%E7%9B%91%E6%8E%A7%E9%A1%B5%E9%9D%A2.png" class="" title="中二是最后的热血">
-
-<p>​    上面图中具体指标信息可以在Hadoop官方文档对应的<a class="link"   href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >metrics章节<i class="fas fa-external-link-alt"></i></a>中找到，其中包括了Namenode以及Datanode相关信息，同理如果我们在8088端口后面加上<code>/jmx</code>即可获得关于Yarn相关指标信息。</p>
-<p>​    现在我们监控的信息有了，接下来如果我们想将数据在监控折线图中展现出来的话就需要一个时序数据库，因为监控指标数据必须存在对应的时间才有意义，目前比较常见的时序数据库+界面组合是普罗米修斯（时序数据库）+ Grafana（界面展示），那么目前的问题就转换成了如何将Hadoop集群中的JMX信息传递给普罗米修斯，简单调研就可以发现，普罗米修斯自己开发了一款插件支持将java程序对应的jmx信息传递到自己的时序数据库中，<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
-<p>  根据自己Java环境版本下载插件，将插件放置到自己选定的位置，现在插件有了，就差如何在集群中使用插件了，我们开始着手修改集群中的配置。</p>
-<h2 id="Hadoop集群配置Jmx-expoter"><a href="#Hadoop集群配置Jmx-expoter" class="headerlink" title="Hadoop集群配置Jmx_expoter"></a>Hadoop集群配置Jmx_expoter</h2><p>在hadoop-env.sh中最后添加以下代码，注意将其中的路径修改成自己系统中的路径，这段代码的主要作用是添加我们下载的jar包，以及给jar包传递配置文件，以及指定该服务要占用的端口，这里的对应位置的配置文件<code>prometheus_config.yml</code>测试的时候可以直接创建一个空文件即可。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_NAMENODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_NAMENODE_OPTS=&quot;$HDFS_NAMENODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27001:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_DATANODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_DATANODE_OPTS=&quot;$HDFS_DATANODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27002:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意事项</strong> ：</p>
-<p>1.上面的代码不能直接写成类似以下模式，因为不能在<code>$HADOOP_OPTS</code>中出现<code>multiple -javaagent opts</code>，就是不能直接出现多个-javaagent选项，必须要换一种写法，将<code>-javaagent</code>写在if else代码中可以避免这个问题，详细可以参考这个<a class="link"   href="https://stackoverflow.com/questions/47121498/configuring-prometheus-jmx-exporter-for-hadoop2/59837822#59837822" >stackoverflow回答<i class="fas fa-external-link-alt"></i></a></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">写成这种模式会报错</span></span><br><span class="line">export HADOOP_NAMENODE_OPTS=&quot;$HADOOP_NAMENODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br><span class="line">export HADOOP_DATANODE_OPTS=&quot;$HADOOP_DATANODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br></pre></td></tr></table></figure>
-
-<p>2.同一台机器的每一个JMX服务端口必须区分开</p>
-<p>比如上面namenode的jmx服务所占用的端口为27001，datanode的jmx服务所占用的端口为27002，如果使用了相同的端口，那么在启动hdfs服务(./start-dfs.sh)的时候会报如下所示的错。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Starting namenodes on [localhost]</span><br><span class="line">Starting datanodes</span><br><span class="line">localhost: /usr/local/Cellar/hadoop/3.3.1/libexec/bin/../libexec/hadoop-functions.sh: line 1821: 11125 Abort trap: 6           hadoop_start_daemon &quot;$&#123;daemonname&#125;&quot; &quot;$class&quot; &quot;$&#123;pidfile&#125;&quot; &quot;$@&quot; &gt;&gt; &quot;$&#123;outfile&#125;&quot; 2&gt;&amp;1 &lt; /dev/null</span><br><span class="line">localhost: ERROR: Cannot set priority of datanode process 11125</span><br><span class="line">localhost: ERROR: Cannot disconnect datanode process 11125</span><br></pre></td></tr></table></figure>
-
-
-
-<p>这样配置完成之后，Hadoop的jmx信息就被采集到指定的端口中了，接下来我们可以在网页上测试一下我们的采集数据，访问地址就是前面配置的端口 <code>localhost:27001</code></p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/27001.png" class="" title="中二是最后的热血">    
-
-<p>同理我们的Yarn相关信息采集也要在yarn-env.sh中配置上面类似的代码，其中同样要注意区分端口号，并且不要同时出现两个-javaagent，将两个javaagent放到不同的if else中。</p>
-<h2 id="Hbase集群配置"><a href="#Hbase集群配置" class="headerlink" title="Hbase集群配置"></a>Hbase集群配置</h2><p>因为我是启动的单机版本的Hbase，所以我只配置<code>HBASE_MASTER_OPTS</code>和<code>HBASE_JMX_BASE</code>选项，如果是集群模式可能还需要配置<code>HBASE_REGIONSERVER_OPTS</code>，将下面内容替换成自己的文件路径然后添加到hbase-env.sh的尾部。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">export HBASE_JMX_BASE=&quot;-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false&quot;</span><br><span class="line">export HBASE_MASTER_OPTS=&quot;$HBASE_MASTER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=20101 -javaagent:$HBASE_HOME/lib/jmx_prometheus_javaagent-0.16.1.jar=27000:$HBASE_HOME/conf/hbase_jmx_config.yaml&quot;</span><br></pre></td></tr></table></figure>
-
-<p>这样我们就可以通过指定端口访问各个集群的JMX信息了，下一步就是配置Prometheus将数据导入到时序数据库中。</p>
-<h2 id="配置Prometheus"><a href="#配置Prometheus" class="headerlink" title="配置Prometheus"></a>配置Prometheus</h2><p>打开Prometheus配置文件，并且在后面增加关于Hadoop集群的NameNode，DataNode以及Hbase的jmx数据配置，增加如下代码，重启普罗米修斯服务。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">- job_name: &quot;hbase&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27000&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop namenode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27001&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop datanode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27002&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br></pre></td></tr></table></figure>
-
-<p>我们打开Prometheus的页面查看对应的target，查看我们配置的任务，如果出现下面几个选项并且是绿色的说明是正常的，打开采集的结果网址会发现其中Prometheus采集的指标名称相比于原先集群50070/jmx的指标名称是经过处理的，比如Prometheus中有一个指标叫做<code>hadoop_namenode_memnonheapmaxm</code>他在50070/jmx中是名称是<code>memnonheapmaxm</code>，然后前面加上service name等，其中的匹配规则应该在插件的配置文件<code>prometheus_config.yml</code>中设置的，详细可以看<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
-<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/prometheus.png" class="" title="中二是最后的热血">
-
-<p>最后选出来我们需要的指标之和在Grafana中展示出来即可，具体方法这里不再展示，可以参考<a class="link"   href="https://www.daimajiaoliu.com/daima/4796909c8100406" >这篇教程<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>JMX_Expoter</tag>
-        <tag>监控</tag>
       </tags>
   </entry>
   <entry>
@@ -647,15 +609,54 @@
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
   </entry>
   <entry>
-    <title>如何备份hexo博客</title>
-    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
-<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
-<p>不用再执行hexo init命令</p>
-<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
+    <title>如何使用JMX_Expoter+Prometheus+Grafana监控Hadoop集群&amp;Hbase集群</title>
+    <url>/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/</url>
+    <content><![CDATA[<p>因为目前CDH以及HDP后续要合并闭源，公司打算花时间自研一个类似的平台，我也对集群监控这块下了点功夫。</p>
+<span id="more"></span>
+
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>​    对于一个集群管理平台，首当其冲的就是其中的监控如何实现，毕竟很多时候我们打开它只是因为邮箱里收到了报警:-)，那么我们应该如何获取Hadoop等集群的信息呢？这时候需要简单了解一个知识点了：JMX。</p>
+<p>​    我们简单介绍一下Java的JMX是什么，JMX全程叫做Java Management Extensions，翻译过来就是Java内存管理，最常用到的就是对于 JVM 的监测和管理，比如 JVM 内存、CPU 使用率、线程数、垃圾收集情况等等。另外，还可以用作日志级别的动态修改，比如 log4j 就支持 JMX 方式动态修改线上服务的日志级别。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/JMX%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
+
+<p>总而言之，就是Java自己开发的用于监控JVM指标的一个工具，可以提供给一些界面JConsole，VisualVM使用，详细信息可以参考<a class="link"   href="https://juejin.cn/post/6856949531003748365" >这里!<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="获取集群的JMX信息"><a href="#获取集群的JMX信息" class="headerlink" title="获取集群的JMX信息"></a>获取集群的JMX信息</h2><p>​    Hadoop，Hbase集群都提供了便捷获取集群JMX信息的途径，具体通过在访问地址后面加上<code>/jmx</code>来实现，比如我们访问hdfs的NameNode页面的时候地址是<code>localhost:50070</code>，那么在后面加上一个<code>/jmx</code>即为<code>localhost:50070/jmx</code>，访问即可得到类似下面的信息。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/jmx%E7%9B%91%E6%8E%A7%E9%A1%B5%E9%9D%A2.png" class="" title="中二是最后的热血">
+
+<p>​    上面图中具体指标信息可以在Hadoop官方文档对应的<a class="link"   href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/Metrics.html" >metrics章节<i class="fas fa-external-link-alt"></i></a>中找到，其中包括了Namenode以及Datanode相关信息，同理如果我们在8088端口后面加上<code>/jmx</code>即可获得关于Yarn相关指标信息。</p>
+<p>​    现在我们监控的信息有了，接下来如果我们想将数据在监控折线图中展现出来的话就需要一个时序数据库，因为监控指标数据必须存在对应的时间才有意义，目前比较常见的时序数据库+界面组合是普罗米修斯（时序数据库）+ Grafana（界面展示），那么目前的问题就转换成了如何将Hadoop集群中的JMX信息传递给普罗米修斯，简单调研就可以发现，普罗米修斯自己开发了一款插件支持将java程序对应的jmx信息传递到自己的时序数据库中，<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
+<p>  根据自己Java环境版本下载插件，将插件放置到自己选定的位置，现在插件有了，就差如何在集群中使用插件了，我们开始着手修改集群中的配置。</p>
+<h2 id="Hadoop集群配置Jmx-expoter"><a href="#Hadoop集群配置Jmx-expoter" class="headerlink" title="Hadoop集群配置Jmx_expoter"></a>Hadoop集群配置Jmx_expoter</h2><p>在hadoop-env.sh中最后添加以下代码，注意将其中的路径修改成自己系统中的路径，这段代码的主要作用是添加我们下载的jar包，以及给jar包传递配置文件，以及指定该服务要占用的端口，这里的对应位置的配置文件<code>prometheus_config.yml</code>测试的时候可以直接创建一个空文件即可。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_NAMENODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_NAMENODE_OPTS=&quot;$HDFS_NAMENODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27001:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br><span class="line">if ! grep -q &lt;&lt;&lt;&quot;$HDFS_DATANODE_OPTS&quot; jmx_prometheus_javaagent; then</span><br><span class="line">HDFS_DATANODE_OPTS=&quot;$HDFS_DATANODE_OPTS -javaagent:/usr/local/Cellar/hadoop/3.3.1/jmx_prometheus_javaagent-0.16.1.jar=27002:/usr/local/Cellar/hadoop/3.3.1/libexec/etc/hadoop/prometheus_config.yml&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意事项</strong> ：</p>
+<p>1.上面的代码不能直接写成类似以下模式，因为不能在<code>$HADOOP_OPTS</code>中出现<code>multiple -javaagent opts</code>，就是不能直接出现多个-javaagent选项，必须要换一种写法，将<code>-javaagent</code>写在if else代码中可以避免这个问题，详细可以参考这个<a class="link"   href="https://stackoverflow.com/questions/47121498/configuring-prometheus-jmx-exporter-for-hadoop2/59837822#59837822" >stackoverflow回答<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">写成这种模式会报错</span></span><br><span class="line">export HADOOP_NAMENODE_OPTS=&quot;$HADOOP_NAMENODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br><span class="line">export HADOOP_DATANODE_OPTS=&quot;$HADOOP_DATANODE_OPTS -javaagent:/home/ec2-user/jmx_exporter/jmx_prometheus_javaagent-0.10.jar=9102:/home/ec2-user/jmx_exporter/prometheus_config.yml&quot;</span><br></pre></td></tr></table></figure>
+
+<p>2.同一台机器的每一个JMX服务端口必须区分开</p>
+<p>比如上面namenode的jmx服务所占用的端口为27001，datanode的jmx服务所占用的端口为27002，如果使用了相同的端口，那么在启动hdfs服务(./start-dfs.sh)的时候会报如下所示的错。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Starting namenodes on [localhost]</span><br><span class="line">Starting datanodes</span><br><span class="line">localhost: /usr/local/Cellar/hadoop/3.3.1/libexec/bin/../libexec/hadoop-functions.sh: line 1821: 11125 Abort trap: 6           hadoop_start_daemon &quot;$&#123;daemonname&#125;&quot; &quot;$class&quot; &quot;$&#123;pidfile&#125;&quot; &quot;$@&quot; &gt;&gt; &quot;$&#123;outfile&#125;&quot; 2&gt;&amp;1 &lt; /dev/null</span><br><span class="line">localhost: ERROR: Cannot set priority of datanode process 11125</span><br><span class="line">localhost: ERROR: Cannot disconnect datanode process 11125</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这样配置完成之后，Hadoop的jmx信息就被采集到指定的端口中了，接下来我们可以在网页上测试一下我们的采集数据，访问地址就是前面配置的端口 <code>localhost:27001</code></p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/27001.png" class="" title="中二是最后的热血">    
+
+<p>同理我们的Yarn相关信息采集也要在yarn-env.sh中配置上面类似的代码，其中同样要注意区分端口号，并且不要同时出现两个-javaagent，将两个javaagent放到不同的if else中。</p>
+<h2 id="Hbase集群配置"><a href="#Hbase集群配置" class="headerlink" title="Hbase集群配置"></a>Hbase集群配置</h2><p>因为我是启动的单机版本的Hbase，所以我只配置<code>HBASE_MASTER_OPTS</code>和<code>HBASE_JMX_BASE</code>选项，如果是集群模式可能还需要配置<code>HBASE_REGIONSERVER_OPTS</code>，将下面内容替换成自己的文件路径然后添加到hbase-env.sh的尾部。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">export HBASE_JMX_BASE=&quot;-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false&quot;</span><br><span class="line">export HBASE_MASTER_OPTS=&quot;$HBASE_MASTER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=20101 -javaagent:$HBASE_HOME/lib/jmx_prometheus_javaagent-0.16.1.jar=27000:$HBASE_HOME/conf/hbase_jmx_config.yaml&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就可以通过指定端口访问各个集群的JMX信息了，下一步就是配置Prometheus将数据导入到时序数据库中。</p>
+<h2 id="配置Prometheus"><a href="#配置Prometheus" class="headerlink" title="配置Prometheus"></a>配置Prometheus</h2><p>打开Prometheus配置文件，并且在后面增加关于Hadoop集群的NameNode，DataNode以及Hbase的jmx数据配置，增加如下代码，重启普罗米修斯服务。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">- job_name: &quot;hbase&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27000&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop namenode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27001&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br><span class="line">  - job_name: &quot;hadoop datanode&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&quot;localhost:27002&quot;]</span><br><span class="line">      labels:</span><br><span class="line">          instance: localhost</span><br></pre></td></tr></table></figure>
+
+<p>我们打开Prometheus的页面查看对应的target，查看我们配置的任务，如果出现下面几个选项并且是绿色的说明是正常的，打开采集的结果网址会发现其中Prometheus采集的指标名称相比于原先集群50070/jmx的指标名称是经过处理的，比如Prometheus中有一个指标叫做<code>hadoop_namenode_memnonheapmaxm</code>他在50070/jmx中是名称是<code>memnonheapmaxm</code>，然后前面加上service name等，其中的匹配规则应该在插件的配置文件<code>prometheus_config.yml</code>中设置的，详细可以看<a class="link"   href="https://github.com/prometheus/jmx_exporter" >插件地址<i class="fas fa-external-link-alt"></i></a>。</p>
+<img src="/2021/11/03/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JMX-Prometheus-Grafana%E7%9B%91%E6%8E%A7Hadoop%E9%9B%86%E7%BE%A4-Hbase%E9%9B%86%E7%BE%A4/prometheus.png" class="" title="中二是最后的热血">
+
+<p>最后选出来我们需要的指标之和在Grafana中展示出来即可，具体方法这里不再展示，可以参考<a class="link"   href="https://www.daimajiaoliu.com/daima/4796909c8100406" >这篇教程<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
-        <tag>blog</tag>
+        <tag>JMX_Expoter</tag>
+        <tag>监控</tag>
       </tags>
   </entry>
   <entry>
@@ -843,6 +844,18 @@
       <tags>
         <tag>data Lake</tag>
         <tag>Iceberg</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何备份hexo博客</title>
+    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
+<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
+<p>不用再执行hexo init命令</p>
+<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>blog</tag>
       </tags>
   </entry>
 </search>
