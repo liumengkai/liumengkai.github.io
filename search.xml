@@ -1,42 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Mac安装grafana+Grafana连接ClickHouse</title>
-    <url>/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/</url>
-    <content><![CDATA[<p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
+    <title>go语言笔记</title>
+    <url>/2022/06/02/Go%E8%AF%AD%E8%A8%80%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<p>go语言学习笔记</p>
 <span id="more"></span>
 
-<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>因为我是Mac本，所以在安装go以及beego上吃了不少亏，网上大多都是针对Windows或者Linux来安装，这里总结一下教训，如果你非Mac可以忽略这一点。</p>
+<p><strong>注意：</strong></p>
+<ol>
+<li><p>Mac本安装go的时候可以用<a class="link"   href="https://go.dev/dl/" >官网下载<i class="fas fa-external-link-alt"></i></a>安装包的方式，注意m1的mac需要选arm架构的下载包，但是这种方式我在安装beego的时候出现问题，执行完下面的安装命令之后我的$GOPATH/bin下面<strong>不会出现</strong>bee可执行文件，相当于显示安装成功但是没有结果，经过许久探索无果，遂决定更换homebrew安装go &amp; beego。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> install beego &amp;&amp; bee</span></span><br><span class="line">go get github.com/astaxie/beego</span><br><span class="line">go get github.com/beego/bee</span><br></pre></td></tr></table></figure></li>
+<li><p>改用homebrew安装go</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> install go with home brew</span></span><br><span class="line">brew install go</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 找到go安装路径</span></span><br><span class="line">brew list go</span><br><span class="line"></span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/bin/go</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/bin/gofmt</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/api/ (21 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/bin/ (2 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/doc/ (4 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/lib/ (3 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/misc/ (371 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/pkg/ (669 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/src/ (7192 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/test/ (2539 files)</span><br><span class="line">/opt/homebrew/Cellar/go/1.17.2/libexec/ (6 files)</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置go相关的环境变量 修改你所使用的bash</span></span><br><span class="line">vim ~/.zshrc</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在末尾添加go环境变量 注意把路径修改为你的go安装路径</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> GOROOT</span></span><br><span class="line">export GOROOT=/opt/homebrew/Cellar/go/1.17.2/libexec</span><br><span class="line"><span class="meta">#</span><span class="bash"> GOPATH</span></span><br><span class="line">export GOPATH=$HOME/go</span><br><span class="line"><span class="meta">#</span><span class="bash"> Bin</span></span><br><span class="line">export PATH=$&#123;PATH&#125;:$GOPATH/bin</span><br></pre></td></tr></table></figure>
 
-<p>安装完成后我们用命令检查一下</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
+<p>其中的 Bin(export PATH=${PATH}:$GOPATH/bin) 就是我们安装beego会在下面生成bee可执行文件</p>
+</li>
+<li><p>安装beego</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装完成之后bee可执行文件生成在<span class="variable">$GOPATH</span>/bin下</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果执行失败试试先执行 go env -w GO111MODULE=on 打开go module在安装</span></span><br><span class="line">go get github.com/beego/bee</span><br></pre></td></tr></table></figure>
 
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
-
-<p>使用brew启动grafana服务</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
-
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
-
-<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
-
-<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
-<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
-<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
-<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
-<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
-<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
-
-<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
-<p>参考文章：</p>
-<p><a class="link"   href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
+<p>这次安装完成之后会在GOPATH/bin下出现bee可执行命令，并且终端直接输入bee也会输出bee相关信息</p>
+<img src="/2022/06/02/Go%E8%AF%AD%E8%A8%80%E7%AC%94%E8%AE%B0/bee.png" class="" title="中二是最后的热血"></li>
+<li><p>目前go推荐使用go module这个自带的go依赖管理库，配置GO111MODULE=true打开，默认就是打开，关于go module的详细资料可以<a class="link"   href="https://www.cnblogs.com/wongbingming/p/12941021.html" >看这里<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">go env -w GO111MODULE=on</span><br></pre></td></tr></table></figure></li>
+</ol>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
-        <tag>ClickHouse</tag>
-        <tag>Grafana</tag>
+        <tag>Go</tag>
       </tags>
   </entry>
   <entry>
@@ -331,8 +321,11 @@
 <p>(3)数据查询时，多版本多路归并聚合</p>
 </li>
 </ul>
-<h3 id="更新模型-Unique-Key-amp-Primary-Key"><a href="#更新模型-Unique-Key-amp-Primary-Key" class="headerlink" title="更新模型(Unique Key &amp; Primary Key)"></a>更新模型(Unique Key &amp; Primary Key)</h3><p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B" >Unique Key 官网讲解<i class="fas fa-external-link-alt"></i></a></p>
+<h4 id="更新模型-Unique-Key-amp-Primary-Key"><a href="#更新模型-Unique-Key-amp-Primary-Key" class="headerlink" title="更新模型(Unique Key &amp; Primary Key)"></a>更新模型(Unique Key &amp; Primary Key)</h4><p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B" >Unique Key 官网讲解<i class="fas fa-external-link-alt"></i></a></p>
 <p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E4%B8%BB%E9%94%AE%E6%A8%A1%E5%9E%8B" >Primary Key官网讲解<i class="fas fa-external-link-alt"></i></a></p>
+<p><strong>注意:</strong></p>
+<p>即 Unique 模型完全可以用聚合模型中的 REPLACE 方式替代。</p>
+<p>Primary Key模型是starrocks全新设计模型，主键模型的表要求有唯一的主键，支持对表中的行按主键进行更新和删除操作。相较更新模型，主键模型可以更好地支持<strong>实时和频繁更新</strong>等场景。</p>
 <h3 id="StarRocks表设计"><a href="#StarRocks表设计" class="headerlink" title="StarRocks表设计"></a>StarRocks表设计</h3><p>StarRocks和其他OLAP数据库存储设计类似，采用的列式存储，可以提高数据查询效率，每一列的数据类型一致，这样可以提高数据的压缩率，</p>
 <p>StarRocks的数据列可以分为两种，分别是维度列以及指标列，维度列用于分组和排序，指标列通过聚合函数在维度列基础上进行SUM，COUNT，BITMAP_UNION等操作。</p>
 <img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/SR%E8%A1%A8%E7%BB%93%E6%9E%84.png" class="" title="中二是最后的热血">
@@ -351,49 +344,22 @@
 <p>列式存储，列与列之间是独立存储，所以每列都会有一个自己的行号和块号的对应关系，划分块是通过每块大概是64kb来进行划分，根据前面找到的行号找到对应的数据块地址</p>
 <p><strong>Per-column data blocks:</strong></p>
 <p>表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
-<p>需要注意的是，这种使用范围查找的需要有前提条件，就是查询时, 如果指定了维度列的<strong>等值条件</strong>或者<strong>范围条件</strong>, 并且这些条件中维度列<strong>可构成表维度列的前缀</strong>, 则可以利用数据的有序性</p>
+<p><strong>注意:</strong></p>
+<p>这种使用范围查找的需要有前提条件，就是查询时, 如果指定了维度列的<strong>等值条件</strong>或者<strong>范围条件</strong>, 并且这些条件中维度列<strong>可构成表维度列的前缀</strong>, 则可以利用数据的有序性</p>
 <p>使用索引范围查找的条件:</p>
 <p>（1）维度列的等值或者范围条件，像 in (…) 这种是不能索引</p>
 <p>（2）条件中的维度列可以构成前缀</p>
 <p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找，或者查询条件是 where code = 4这种也是不能适用范围查找，没有命中。</p>
-<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><p>在没有物化视图功能之前，用户一般都是使用 Rollup 功能通过预聚合方式提升查询效率的。但是 Rollup 具有一定的局限性：</p>
+<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><h4 id="Rollup"><a href="#Rollup" class="headerlink" title="Rollup"></a>Rollup</h4><p>Rollup意味着在多维分析中“上卷操作”，上卷意味着在数据立方体上进行一个维度的合并，与之对应的还有“钻取”操作(Drill-down)，钻取意味着在某些维度上进一步打开扩展维度，详细可以参考<a class="link"   href="https://www.zhihu.com/question/19955124" >这个回答<i class="fas fa-external-link-alt"></i></a></p>
+<h5 id="Aggregate-Key-amp-Roll-up"><a href="#Aggregate-Key-amp-Roll-up" class="headerlink" title="Aggregate Key &amp; Roll up"></a>Aggregate Key &amp; Roll up</h5><p>Rollup在聚合模型上可以发挥很好地作用，基于Base表创建Rollup可以获得更好的聚合数据效果以及调整key顺序，可以提高Rollup命中率</p>
+<h5 id="Unique-Key-amp-Roll-up"><a href="#Unique-Key-amp-Roll-up" class="headerlink" title="Unique Key &amp; Roll up"></a>Unique Key &amp; Roll up</h5><p>更新模型中的Unique Key相当于聚合模型中聚合函数被固定为Replace，所以每次在Unique上创建Rollup的时候必须选中所有的维度列，即在Unique Key模型上创建Rollup只能调整维度key的顺序，可以获得更高的Rollup命中率，但是因为Rollup数据是需要独立存储的，这样的话数据是否直接全部被存储了两遍？还需要后面验证下。</p>
+<h5 id="Duplicate-Key-amp-Roll-up"><a href="#Duplicate-Key-amp-Roll-up" class="headerlink" title="Duplicate Key &amp; Roll up"></a>Duplicate Key &amp; Roll up</h5><p>Duplicate Key模型和Unique Key模型类似，同样因为 Duplicate 模型没有聚合的语意。所以该模型中的 ROLLUP，已经失去了“上卷”这一层含义。而仅仅是作为调整列顺序，以命中前缀索引的作用。我们将在<a class="link"   href="https://doris.apache.org/zh-CN/data-table/index/prefix-index.html" >前缀索引<i class="fas fa-external-link-alt"></i></a>详细介绍前缀索引，以及如何使用ROLLUP改变前缀索引，以获得更好的查询效率。</p>
+<h4 id="物化视图"><a href="#物化视图" class="headerlink" title="物化视图"></a>物化视图</h4><p>在没有物化视图功能之前，用户一般都是使用 Rollup 功能通过预聚合方式提升查询效率的。但是 Rollup 具有一定的局限性：</p>
 <p>1.Rollup不能做明细模型的聚合</p>
-<p>2.Rollup在更新表模型中必须是包含所有维度列</p>
-<p><strong>详细解释:</strong></p>
+<p>2.Rollup的聚合函数必须和Base table保持一致，物化视图的聚合函数可以和base表不同</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>StarRocks</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Superset查询会丢数据问题排查</title>
-    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
-    <content><![CDATA[<p>Superset版本 1.3.0</p>
-<p>查询结果会比正确结果少两条数据</p>
-<span id="more"></span>
-
-<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
-<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
-<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
-
-<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
-<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
-<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
-<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
-<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
-<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
-<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
-<p>参考连接：</p>
-<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
-<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>ClickHouse</tag>
-        <tag>Superset</tag>
       </tags>
   </entry>
   <entry>
@@ -660,6 +626,57 @@
       </tags>
   </entry>
   <entry>
+    <title>Mac安装grafana+Grafana连接ClickHouse</title>
+    <url>/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/</url>
+    <content><![CDATA[<p>Mac安装Grafana &amp; 使用第三方插件Grafana连接ClickHouse</p>
+<span id="more"></span>
+
+<h2 id="Mac安装grafana"><a href="#Mac安装grafana" class="headerlink" title="Mac安装grafana"></a>Mac安装grafana</h2><p>使用brew安装grafana</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.安装grafana</span><br><span class="line">brew install grafana</span><br><span class="line">2.已安装grafana，需要升级</span><br><span class="line">brew reinstall grafana</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后我们用命令检查一下</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">brew list | grep grafana</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%A3%80%E6%9F%A5grafana%E5%AE%89%E8%A3%85.png" class="" title="中二是最后的热血">
+
+<p>使用brew启动grafana服务</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E5%90%AF%E5%8A%A8grafana.png" class="" title="中二是最后的热血">
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">停止grafana服务:</span><br><span class="line">brew service stop grafana</span><br><span class="line">重启grafana服务：</span><br><span class="line">brew service restart grafana</span><br></pre></td></tr></table></figure>
+
+<p>启动成功之后我们可以在本地访问grafana页面，输入<code>localhost:3000</code></p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/grafana.png" class="" title="中二是最后的热血">
+
+<h2 id="安装grafana-clickhouse插件"><a href="#安装grafana-clickhouse插件" class="headerlink" title="安装grafana-clickhouse插件"></a>安装grafana-clickhouse插件</h2><p>参考grafana官网上安装教程<a class="link"   href="https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation" >https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/?tab=installation<i class="fas fa-external-link-alt"></i></a> 有两种安装方式。</p>
+<p>1.通过grafana cloud安装，应该是创建grafana账号连接grafana的在线服务器下载安装，这个有兴趣的可以研究一下，我这里没有用到</p>
+<p>2.<code>grafana-cli plugins install vertamedia-clickhouse-datasource</code> 使用grafana-cli安装，然后重启grafana服务，但是页面的plugin tab或者datasource中依然是没有clickhouse选项的，接下来开始排查问题出在哪里。</p>
+<p>排查过程：<br>（1）卸载brew安装的grafana，使用zip压缩包重新安装grafana，依然存在这个问题<br>（2）卸载<code>grafana-clickhouse</code>插件，使用zip压缩包重新安装一次，没有解决<br>（3）使用find命令查找使用grafana-cli安装的<code>grafana-clickhouse</code>插件位置，发现是在<code>/usr/local/var/lib/grafana/plugins/vertamedia-clickhouse-datasource</code>文件夹下，并且发现在<code>/Users/liu/grafana-8.1.0/public/app/plugins/datasource/</code>中有默认已经存在的插件的文件夹，手动将<code>vertamedia-clickhouse-datasource</code>目录移到默认的文件夹中，重启grafana服务，发现plugin页面以及datasource上出现了clickhouse选项，但是点击报错<code>Fetch error404</code>:</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%8A%A5%E9%94%99.png" class="" title="中二是最后的热血">
+<p>（4）查看grafana配置文件default.ini，发现其中有这么一行<br><code># Directory where grafana will automatically scan and look for plugins plugins = data/plugins</code><br>将插件目录手动移到对应目录下面，重启grafana服务，everything is fine!</p>
+<img src="/2021/10/13/Mac%E5%AE%89%E8%A3%85grafana-ClickHouse%E9%93%BE%E6%8E%A5Grafana/%E6%88%90%E5%8A%9F.png" class="" title="中二是最后的热血">
+
+<p>我也在插件的github提出了问题issue，感兴趣的可以看一下插件开发者解释，我们都初步认为是grafana的bug<br><a class="link"   href="https://github.com/Vertamedia/clickhouse-grafana/issues?q=is:issue+author:@me+is:closed" >https://github.com/Vertamedia/clickhouse-grafana/issues?q=is%3Aissue+author%3A%40me+is%3Aclosed<i class="fas fa-external-link-alt"></i></a></p>
+<p>参考文章：</p>
+<p><a class="link"   href="https://grafana.com/docs/grafana/latest/installation/mac/" >https://grafana.com/docs/grafana/latest/installation/mac/<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何备份hexo博客</title>
+    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
+<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
+<p>不用再执行hexo init命令</p>
+<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>blog</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>学习clickhouse详细知识</title>
     <url>/2021/10/08/%E5%AD%A6%E4%B9%A0clickhouse%E8%AF%A6%E7%BB%86%E7%9F%A5%E8%AF%86/</url>
     <content><![CDATA[<p>ClickHouse基础应用与内部原理</p>
@@ -678,6 +695,37 @@
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>ClickHouse</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Superset查询会丢数据问题排查</title>
+    <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
+    <content><![CDATA[<p>Superset版本 1.3.0</p>
+<p>查询结果会比正确结果少两条数据</p>
+<span id="more"></span>
+
+<p>首先我先讲述我是如何发现这个问题的，准确的说是运营如何发现这个问题的。</p>
+<p>数据有四列，分别是’Time’ ‘pid’ ‘eid’ ‘cnt’ ，首先我们在clickhouse客户端进行操作，其中我限定pid=’609’，然后eid进行group by 操作，然后sum(cnt)，可以看到数据有三条</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/client%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>我从superset进行同样的操作，需要注意的是我上面在clickhouse客户端操作的SQL就是在superset上操作view sql生成的SQL语句，所以他们肯定是相同的操作。</p>
+<img src="/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/superset%E7%BB%93%E6%9E%9C.png" class="" title="中二是最后的热血">
+
+<p>可以看到superset只有一条结果返回，经过我监控query_log日志中的SQL语句发现superset请求的SQL语句确实没有什么问题，但是他在接收到结果之后进行了一些操作会导致数据少两条。</p>
+<p>经过多方排查以及询问，发现最后是superset连接clickhouse使用的协议导致的，首先superset连接clickhouse使用的是开源的第三方的库叫做 <strong>clickhouse-sqlalchemy</strong> ，它支持两种连接clickhouse的协议，分别是http以及native(TCP)协议其中我们默认使用的是http协议，反映出来的url就是这么写 ：</p>
+<p><code>clickhouse://bigdata:XXXXXXXXXX@127.0.0.1:8123/default</code></p>
+<p>还有一种native(TCP)协议，它的url是这么写，需要注意的是必须要去掉端口号，加上端口号superset不能正常解析。</p>
+<p><code>clickhouse+native://bigdata:XXXXXXXXXX@127.0.0.1/default</code></p>
+<p>而第一种协议需要我们在执行底层查询的时候指定查询结果的format，否则返回的结果就是不正确的。</p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14#issuecomment-390755088<i class="fas fa-external-link-alt"></i></a></p>
+<p>改用第二种native的形式并且去掉端口号之和superset返回的数据和clickhouse客户端一致了。</p>
+<p>参考连接：</p>
+<p><a class="link"   href="https://github.com/apache/superset/issues/15190" >https://github.com/apache/superset/issues/15190<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14" >https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/14<i class="fas fa-external-link-alt"></i></a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>ClickHouse</tag>
+        <tag>Superset</tag>
       </tags>
   </entry>
   <entry>
@@ -847,15 +895,42 @@
       </tags>
   </entry>
   <entry>
-    <title>如何备份hexo博客</title>
-    <url>/2022/03/29/%E5%A6%82%E4%BD%95%E5%A4%87%E4%BB%BDhexo%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h1><p>1.需要将整个博客文件夹和github上一个新项目关联起来 命令类似git set-url…<br>2.需要删除你使用的主题主文件夹中的.git目录 否则会被看做是一个子module<br>3.git push origin master推送上去<br>4.git pull origin master拉下来 并且还需要用npm下载一些包</p>
-<p>npm install hexo-cli<br>npm install<br>npm install hexo-deployer-git</p>
-<p>不用再执行hexo init命令</p>
-<p>参考:<br><a class="link"   href="https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/" >https://lrscy.github.io/2018/01/26/Hexo-Github-Backup/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://finisky.github.io/2020/09/06/hexobackuptogithub/" >https://finisky.github.io/2020/09/06/hexobackuptogithub/<i class="fas fa-external-link-alt"></i></a></p>
+    <title>谓词下推</title>
+    <url>/2022/06/07/%E8%B0%93%E8%AF%8D%E4%B8%8B%E6%8E%A8/</url>
+    <content><![CDATA[<p>学习谓词下推相关笔记</p>
+<span id="more"></span>
+
+<h1 id="谓词下推"><a href="#谓词下推" class="headerlink" title="谓词下推"></a>谓词下推</h1><h2 id="谓词"><a href="#谓词" class="headerlink" title="谓词"></a>谓词</h2><p>​    概念：计算机科学中谓词解释，谓词不是像语言中的某一种词性，比如英语中的动词或者名词，谓词是一个特定的返回True/False/Unknow的函数，一般以元素列表的形式应用于给定的函数，并且根据函数返回值决定是否返回该元素，这个函数就叫做谓词。</p>
+<p>​    SQL中哪些常见的谓词：Like、Between、Is Null、Is Not Null 等等</p>
+<h2 id="下推"><a href="#下推" class="headerlink" title="下推"></a>下推</h2><p>​    概念：<strong>将过滤表达式尽可能移动至靠近数据源的位置，以使真正执行时能直接跳过无关的数据。</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># A,B 两表进行<span class="keyword">join</span>操作 并且有过滤条件 A.a <span class="operator">&gt;</span> <span class="number">10</span> <span class="keyword">and</span> B.b <span class="operator">&lt;</span> <span class="number">100</span></span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="number">1</span>) <span class="keyword">from</span> A <span class="keyword">Join</span> B <span class="keyword">on</span> A.id <span class="operator">=</span> B.id <span class="keyword">where</span> A.a <span class="operator">&gt;</span> <span class="number">10</span> <span class="keyword">and</span> B.b <span class="operator">&lt;</span> <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​    执行的时候会先将过滤条件尽可能的前提到对表进行TableScan的时候进行，在提取每一行数据的时候会进行一个判断该表是否满足条件，如果不满足直接不会读取，最后再进行Join操作，这样可以大大降低数据量，比如上面例子我们执行的时候优化筛选条件 A.a &gt; 10 and B.b &lt; 100 放到扫描表的时候进行，可以提高性能。</p>
+<p>​    像Parquet这种特殊的格式对谓词下推做了特殊的处理 <a class="link"   href="https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/cdh_ig_predicate_pushdown_parquet.html" >Parquet谓词下推参考连接<i class="fas fa-external-link-alt"></i></a></p>
+<p>​    这块值得展开学习：</p>
+<ol>
+<li>Parquet谓词下推如何优化</li>
+<li>行存储数据库以及列存储数据库谓词下推的方法不同。</li>
+</ol>
+<h2 id="Outer-Join中的谓词下推"><a href="#Outer-Join中的谓词下推" class="headerlink" title="Outer Join中的谓词下推"></a>Outer Join中的谓词下推</h2><p>​    如果阅读英文文档没有问题最好阅读一遍<a class="link"   href="https://cwiki.apache.org/confluence/display/Hive/OuterJoinBehavior" >官方文档<i class="fas fa-external-link-alt"></i></a></p>
+<p>​    在弄清楚Hive如何处理谓词下推之前需要搞清楚四个概念：</p>
+<p>​    <strong>Preserved Row table</strong>：Outer Join操作中必须返回所有行的表，例如left join的时候左表就是Preserved Row table，相当于固定住了一个表的内容</p>
+<p>​    <strong>Null Supplying table</strong>：Outer Join操作中<strong>不用</strong>必须返回所有行的表，比如left join的时候左表是全部都要返回，当右表不满足on条件的时候他就会返回null，所以形象的称为Null Supplying Table</p>
+<p>​    <strong>During Join predicate</strong>：指join…on…中的谓词</p>
+<p>​    <strong>After Join predicate</strong>：指在join操作后，where中的谓词</p>
+<p>了解上面四个概念之后，开始看一下Hive的谓词下推原理概念(Predicate Pushdown PPD)</p>
+<ol>
+<li><p><strong>During Join predicates</strong> cannot be pushed past <strong>Preserved Row tables</strong>.</p>
+<p>在join..on…条件中Preserved Row tables表的谓词不能下推，举一个例子就是left join的时候on中的左表的条件不能下推。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># E.eid<span class="operator">=</span><span class="string">&#x27;HZ001&#x27;</span>不能下推 因为此时左表需要全部保留</span><br><span class="line"><span class="keyword">select</span> ename,dept_name <span class="keyword">from</span> E <span class="keyword">left</span> <span class="keyword">outer</span> <span class="keyword">join</span> D <span class="keyword">on</span> ( E.dept_id <span class="operator">=</span> D.dept_id <span class="keyword">and</span> E.eid<span class="operator">=</span><span class="string">&#x27;HZ001&#x27;</span>);</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>After Join predicates</strong> cannot be pushed past <strong>Null Supplying tables</strong>.</p>
+<p>在After Join predicate中 Null Supplying tables表的谓词是不能下推的，这个也比较好理解，还是以left join举例，左关联的时候左表全部保留，右表数据是否保留应该取决于on中的关联条件是否满足，其次取决于where中右表条件，而不能先使用where中右表的条件过滤右表数据。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># D.dept_id<span class="operator">=</span><span class="string">&#x27;D001&#x27;</span> 不能下推 因为此时右表数据应取决于<span class="keyword">on</span>中关联</span><br><span class="line"><span class="keyword">select</span> ename,dept_name <span class="keyword">from</span> E <span class="keyword">left</span> <span class="keyword">outer</span> <span class="keyword">join</span> D <span class="keyword">on</span> E.dept_id <span class="operator">=</span> D.dept_id <span class="keyword">where</span> D.dept_id<span class="operator">=</span><span class="string">&#x27;D001&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="Inner-Join中的谓词下推"><a href="#Inner-Join中的谓词下推" class="headerlink" title="Inner Join中的谓词下推"></a>Inner Join中的谓词下推</h2><p>​    对于inner join情况，因为左右表都不是Preserved Row table 或者Null Supplying table，都需要被条件过滤，此时During Join predicate条件的谓词全都可以前提，也就是join on中条件，同时After Join predicate，也就是where中的条件也可以被前置。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
-        <tag>blog</tag>
+        <tag>Sql</tag>
       </tags>
   </entry>
 </search>
