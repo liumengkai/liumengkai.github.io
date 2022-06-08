@@ -26,7 +26,8 @@
     KEEP.theme_config = {"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.png","favicon":"/images/logo.svg","article_img_align":"center","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":false,"scale":true},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"人生如逆旅，我亦是行人"},"scroll":{"progress_bar":{"enable":true},"percent":{"enable":false}}},"local_search":{"enable":true,"trigger":"auto","preload":false},"code_copy":{"enable":true,"style":"mac"},"pjax":{"enable":false},"lazyload":{"enable":false},"version":"3.4.3"};
     KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
   </script>
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="Liu's blog" type="application/atom+xml">
+</head>
 
 
 <body>
@@ -189,12 +190,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>958 Words</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>1.2k Words</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fas fa-clock"></i>&nbsp;<span>3 Mins</span>
+            <i class="fas fa-clock"></i>&nbsp;<span>4 Mins</span>
         </span>
     
     
@@ -218,7 +219,7 @@
 <h2 id="下推"><a href="#下推" class="headerlink" title="下推"></a>下推</h2><p>​    概念：<strong>将过滤表达式尽可能移动至靠近数据源的位置，以使真正执行时能直接跳过无关的数据。</strong></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># A,B 两表进行<span class="keyword">join</span>操作 并且有过滤条件 A.a <span class="operator">&gt;</span> <span class="number">10</span> <span class="keyword">and</span> B.b <span class="operator">&lt;</span> <span class="number">100</span></span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="number">1</span>) <span class="keyword">from</span> A <span class="keyword">Join</span> B <span class="keyword">on</span> A.id <span class="operator">=</span> B.id <span class="keyword">where</span> A.a <span class="operator">&gt;</span> <span class="number">10</span> <span class="keyword">and</span> B.b <span class="operator">&lt;</span> <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
 
-<p>​    执行的时候会先将过滤条件尽可能的前提到对表进行TableScan的时候进行，在提取每一行数据的时候会进行一个判断该表是否满足条件，如果不满足直接不会读取，最后再进行Join操作，这样可以大大降低数据量，比如上面例子我们执行的时候优化筛选条件 A.a &gt; 10 and B.b &lt; 100 放到扫描表的时候进行，可以提高性能。</p>
+<p>​    执行的时候会先将过滤条件尽可能的前提，比如到对表进行TableScan的时候进行，在提取每一行数据的时候会进行一个判断该表是否满足条件，如果不满足直接不会读取，最后再进行Join操作，这样可以大大降低数据量，比如上面例子我们执行的时候优化筛选条件 A.a &gt; 10 and B.b &lt; 100 放到扫描表的时候进行，可以提高性能。</p>
 <p>​    像Parquet这种特殊的格式对谓词下推做了特殊的处理 <a class="link"   target="_blank" rel="noopener" href="https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/cdh_ig_predicate_pushdown_parquet.html" >Parquet谓词下推参考连接<i class="fas fa-external-link-alt"></i></a></p>
 <p>​    这块值得展开学习：</p>
 <ol>
@@ -232,6 +233,9 @@
 <p>​    <strong>During Join predicate</strong>：指join…on…中的谓词</p>
 <p>​    <strong>After Join predicate</strong>：指在join操作后，where中的谓词</p>
 <p>了解上面四个概念之后，开始看一下Hive的谓词下推原理概念(Predicate Pushdown PPD)</p>
+<p>Hive中的谓词下推主要有两个原理，下面我们讲解这两个原理</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Hive Predicate Pushdown</span></span><br><span class="line">During Join predicates cannot be pushed past Preserved Row tables.</span><br><span class="line">After Join predicates cannot be pushed past Null Supplying tables.</span><br></pre></td></tr></table></figure>
+
 <ol>
 <li><p><strong>During Join predicates</strong> cannot be pushed past <strong>Preserved Row tables</strong>.</p>
 <p>在join..on…条件中Preserved Row tables表的谓词不能下推，举一个例子就是left join的时候on中的左表的条件不能下推。</p>
@@ -239,8 +243,13 @@
 <li><p><strong>After Join predicates</strong> cannot be pushed past <strong>Null Supplying tables</strong>.</p>
 <p>在After Join predicate中 Null Supplying tables表的谓词是不能下推的，这个也比较好理解，还是以left join举例，左关联的时候左表全部保留，右表数据是否保留应该取决于on中的关联条件是否满足，其次取决于where中右表条件，而不能先使用where中右表的条件过滤右表数据。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># D.dept_id<span class="operator">=</span><span class="string">&#x27;D001&#x27;</span> 不能下推 因为此时右表数据应取决于<span class="keyword">on</span>中关联</span><br><span class="line"><span class="keyword">select</span> ename,dept_name <span class="keyword">from</span> E <span class="keyword">left</span> <span class="keyword">outer</span> <span class="keyword">join</span> D <span class="keyword">on</span> E.dept_id <span class="operator">=</span> D.dept_id <span class="keyword">where</span> D.dept_id<span class="operator">=</span><span class="string">&#x27;D001&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+<li><p>Full Outer Join形式是任何条件都不能下推谓词，因为需要左右两表全都保留数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">full</span> <span class="keyword">outer</span> <span class="keyword">join</span> 任何条件都不能下推 下面四个都不能下推</span><br><span class="line"><span class="keyword">select</span> ename,dept_name <span class="keyword">from</span> E <span class="keyword">full</span> <span class="keyword">outer</span> <span class="keyword">join</span> D <span class="keyword">on</span> ( E.dept_id <span class="operator">=</span> D.dept_id <span class="keyword">and</span> E.eid<span class="operator">=</span><span class="string">&#x27;HZ001&#x27;</span>);</span><br><span class="line"><span class="keyword">select</span> ename,dept_name <span class="keyword">from</span> E <span class="keyword">full</span> <span class="keyword">outer</span> <span class="keyword">join</span> D <span class="keyword">on</span> E.dept_id <span class="operator">=</span> D.dept_id <span class="keyword">where</span> E.eid<span class="operator">=</span><span class="string">&#x27;HZ001&#x27;</span>;</span><br><span class="line"><span class="keyword">select</span> ename,dept_name <span class="keyword">from</span> E <span class="keyword">full</span> <span class="keyword">outer</span> <span class="keyword">join</span> D <span class="keyword">on</span> ( E.dept_id <span class="operator">=</span> D.dept_id <span class="keyword">and</span> D.dept_id<span class="operator">=</span><span class="string">&#x27;D001&#x27;</span>);</span><br><span class="line"><span class="keyword">select</span> ename,dept_name <span class="keyword">from</span> E <span class="keyword">full</span> <span class="keyword">outer</span> <span class="keyword">join</span> D <span class="keyword">on</span> E.dept_id <span class="operator">=</span> D.dept_id <span class="keyword">where</span> D.dept_id<span class="operator">=</span><span class="string">&#x27;D001&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h2 id="Inner-Join中的谓词下推"><a href="#Inner-Join中的谓词下推" class="headerlink" title="Inner Join中的谓词下推"></a>Inner Join中的谓词下推</h2><p>​    对于inner join情况，因为左右表都不是Preserved Row table 或者Null Supplying table，都需要被条件过滤，此时During Join predicate条件的谓词全都可以前提，也就是join on中条件，同时After Join predicate，也就是where中的条件也可以被前置。</p>
+<p>参考文献：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/strongyoung88/article/details/81156271" >https://blog.csdn.net/strongyoung88/article/details/81156271<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://cwiki.apache.org/confluence/display/Hive/OuterJoinBehavior" >https://cwiki.apache.org/confluence/display/Hive/OuterJoinBehavior<i class="fas fa-external-link-alt"></i></a></p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
@@ -285,63 +294,6 @@
             </div>
         
 
-        
-            <div class="comment-container">
-                <div class="comments-container">
-    <div id="comment-anchor"></div>
-    <div class="comment-area-title">
-        <i class="fas fa-comments">&nbsp;Comments</i>
-    </div>
-    
-
-        
-            
-    <div id="gitalk-container"></div>
-    <script 
-            src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
-    <script >
-
-        function loadGitalk() {
-            let __gitalk__pathname = decodeURI(location.pathname);
-            const __gitalk__pathnameLength = __gitalk__pathname.length;
-            const __gitalk__pathnameMaxLength = 50;
-            if (__gitalk__pathnameLength > __gitalk__pathnameMaxLength) {
-                __gitalk__pathname = __gitalk__pathname.substring(0, __gitalk__pathnameMaxLength - 3) + '...';
-            }
-
-            try {
-                Gitalk && new Gitalk({
-                    clientID: 'ba2b9bee56bb96f70abe',
-                    clientSecret: 'e60dc9aec07ff594b50f6a99b7d72ac5ecc2553c',
-                    repo: 'BlogComment',
-                    owner: 'liumengkai',
-                    admin: ['liumengkai'],
-                    id: __gitalk__pathname,
-                    language: 'zh-Hans'
-                }).render('gitalk-container');
-
-            } catch (e) {
-                window.Gitalk = null;
-            }
-        }
-
-        if ('false') {
-            const loadGitalkTimeout = setTimeout(() => {
-                loadGitalk();
-                clearTimeout(loadGitalkTimeout);
-            }, 1000);
-        } else {
-            window.addEventListener('DOMContentLoaded', loadGitalk);
-        }
-    </script>
-
-
-
-        
-    
-</div>
-
-            </div>
         
     </div>
 </div>
@@ -400,10 +352,6 @@
 
         <!-- go comment -->
         
-            <li class="go-comment">
-                <i class="fas fa-comment"></i>
-            </li>
-        
     </ul>
 </div>
 
@@ -430,6 +378,15 @@
         </li>
 
         <!-- rss -->
+        
+            <li class="tools-item rss flex-center">
+                <a class="flex-center"
+                   href="/atom.xml"
+                   target="_blank"
+                >
+                    <i class="fas fa-rss"></i>
+                </a>
+            </li>
         
 
         
