@@ -165,7 +165,7 @@
                     <div class="author">
                         <span class="name">刘梦凯</span>
                         
-                            <span class="author-label">Lv2</span>
+                            <span class="author-label">Lv3</span>
                         
                     </div>
                     <div class="meta-info">
@@ -190,12 +190,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>2k Words</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>2.4k Words</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fas fa-clock"></i>&nbsp;<span>7 Mins</span>
+            <i class="fas fa-clock"></i>&nbsp;<span>8 Mins</span>
         </span>
     
     
@@ -276,13 +276,17 @@
 <p>（1）维度列的等值或者范围条件，像 in (…) 这种是不能索引</p>
 <p>（2）条件中的维度列可以构成前缀</p>
 <p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找，或者查询条件是 where code = 4这种也是不能适用范围查找，没有命中。</p>
-<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><h4 id="Rollup"><a href="#Rollup" class="headerlink" title="Rollup"></a>Rollup</h4><p>Rollup意味着在多维分析中“上卷操作”，上卷意味着在数据立方体上进行一个维度的合并，与之对应的还有“钻取”操作(Drill-down)，钻取意味着在某些维度上进一步打开扩展维度，详细可以参考<a class="link"   target="_blank" rel="noopener" href="https://www.zhihu.com/question/19955124" >这个回答<i class="fas fa-external-link-alt"></i></a></p>
+<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><h4 id="Rollup"><a href="#Rollup" class="headerlink" title="Rollup"></a>Rollup</h4><p>Rollup 可以理解为 Table 的一个物化索引结构。<strong>物化</strong> 是因为其数据在<strong>物理上独立存储</strong>，而 <strong>索引</strong> 的意思是，Rollup可以<strong>调整列顺序</strong>以增加前缀索引的命中率，也可以减少key列以增加数据的聚合度。</p>
+<p>数据上Rollup意味着在多维分析中“上卷操作”，上卷意味着在数据立方体上进行一个维度的合并，与之对应的还有“钻取”操作(Drill-down)，钻取意味着在某些维度上进一步打开扩展维度，详细可以参考<a class="link"   target="_blank" rel="noopener" href="https://www.zhihu.com/question/19955124" >这里<i class="fas fa-external-link-alt"></i></a></p>
 <h5 id="Aggregate-Key-amp-Roll-up"><a href="#Aggregate-Key-amp-Roll-up" class="headerlink" title="Aggregate Key &amp; Roll up"></a>Aggregate Key &amp; Roll up</h5><p>Rollup在聚合模型上可以发挥很好地作用，基于Base表创建Rollup可以获得更好的聚合数据效果以及调整key顺序，可以提高Rollup命中率</p>
 <h5 id="Unique-Key-amp-Roll-up"><a href="#Unique-Key-amp-Roll-up" class="headerlink" title="Unique Key &amp; Roll up"></a>Unique Key &amp; Roll up</h5><p>更新模型中的Unique Key相当于聚合模型中聚合函数被固定为Replace，所以每次在Unique上创建Rollup的时候必须选中所有的维度列，即在Unique Key模型上创建Rollup只能调整维度key的顺序，可以获得更高的Rollup命中率，但是因为Rollup数据是需要独立存储的，这样的话数据是否直接全部被存储了两遍？还需要后面验证下。</p>
 <h5 id="Duplicate-Key-amp-Roll-up"><a href="#Duplicate-Key-amp-Roll-up" class="headerlink" title="Duplicate Key &amp; Roll up"></a>Duplicate Key &amp; Roll up</h5><p>Duplicate Key模型和Unique Key模型类似，同样因为 Duplicate 模型没有聚合的语意。所以该模型中的 ROLLUP，已经失去了“上卷”这一层含义。而仅仅是作为调整列顺序，以命中前缀索引的作用。我们将在<a class="link"   target="_blank" rel="noopener" href="https://doris.apache.org/zh-CN/data-table/index/prefix-index.html" >前缀索引<i class="fas fa-external-link-alt"></i></a>详细介绍前缀索引，以及如何使用ROLLUP改变前缀索引，以获得更好的查询效率。</p>
-<h4 id="物化视图"><a href="#物化视图" class="headerlink" title="物化视图"></a>物化视图</h4><p>在没有物化视图功能之前，用户一般都是使用 Rollup 功能通过预聚合方式提升查询效率的。但是 Rollup 具有一定的局限性：</p>
-<p>1.Rollup不能做明细模型的聚合</p>
+<h4 id="物化视图"><a href="#物化视图" class="headerlink" title="物化视图"></a>物化视图</h4><p>说到物化视图就一定要和Rollup做一个区分，物化视图相当于Rollup的一个超集，和物化视图相比Rollup 具有一定的局限性：</p>
+<p>1.Rollup不能做明细模型的聚合，只能起到更改前缀索引顺序来加快查询速度，因为明细模型Duplicate Key表本身就没有聚合的含义</p>
 <p>2.Rollup的聚合函数必须和Base table保持一致，物化视图的聚合函数可以和base表不同</p>
+<p>3.物化视图是不支持Unique Key模型，因为物化视图实际上是预聚合进行计算，比如sum，count，聚合完毕之后我们就丢失了明细信息，这时候如果你去更新明细信息，物化视图就没法知道该如何做出改变，比如两条明细数据分别是1、5，我们建立物化视图求和，这时候这个值是6，然后我们更新数据，将1更改成2，但是rollup手里只有一个6，他知道其中一个值被变成2了，但是仅此而已，所以物化视图是不支持更新模型。</p>
+<h5 id="更新策略"><a href="#更新策略" class="headerlink" title="更新策略"></a>更新策略</h5><p>为保证物化视图表和 Base 表的数据一致性, Doris 会将导入，删除等对 base 表的操作都同步到物化视图表中。并且通过增量更新的方式来提升更新效率。通过事务方式来保证原子性。</p>
+<p>比如如果用户通过 INSERT 命令插入数据到 base 表中，则这条数据会同步插入到物化视图中。当 base 表和物化视图表均写入成功后，INSERT 命令才会成功返回。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
@@ -330,7 +334,7 @@
                            href="/2022/04/14/git-new-repository-hint/"
                         >
                             <span class="title flex-center">
-                                <span class="post-nav-title-item">git new repository hint</span>
+                                <span class="post-nav-title-item">迁移博客注意事项</span>
                                 <span class="post-nav-item">Next posts</span>
                             </span>
                             <span class="right arrow-icon flex-center">
@@ -462,7 +466,7 @@
         <aside class="page-aside">
             <div class="post-toc-wrap">
     <div class="post-toc">
-        <ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFStarRocks"><span class="nav-number">1.</span> <span class="nav-text">什么是StarRocks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E9%80%82%E7%94%A8%E5%93%AA%E4%BA%9B%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">StarRocks适用哪些场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E4%B8%89%E7%A7%8D%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">StarRocks三种数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%BB%86%E6%A8%A1%E5%9E%8B%EF%BC%88Duplicate-Key%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">明细模型（Duplicate Key）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E6%A8%A1%E5%9E%8B%EF%BC%88Aggregate-Key%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">聚合模型（Aggregate Key）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B-Unique-Key-amp-Primary-Key"><span class="nav-number">3.3.</span> <span class="nav-text">更新模型(Unique Key &amp; Primary Key)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E8%A1%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">StarRocks表设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95"><span class="nav-number">4.1.</span> <span class="nav-text">前缀索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RollUp%E4%BB%A5%E5%8F%8A%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE"><span class="nav-number">5.</span> <span class="nav-text">RollUp以及物化视图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Rollup"><span class="nav-number">5.1.</span> <span class="nav-text">Rollup</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Aggregate-Key-amp-Roll-up"><span class="nav-number">5.1.1.</span> <span class="nav-text">Aggregate Key &amp; Roll up</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Unique-Key-amp-Roll-up"><span class="nav-number">5.1.2.</span> <span class="nav-text">Unique Key &amp; Roll up</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Duplicate-Key-amp-Roll-up"><span class="nav-number">5.1.3.</span> <span class="nav-text">Duplicate Key &amp; Roll up</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE"><span class="nav-number">5.2.</span> <span class="nav-text">物化视图</span></a></li></ol></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFStarRocks"><span class="nav-number">1.</span> <span class="nav-text">什么是StarRocks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E9%80%82%E7%94%A8%E5%93%AA%E4%BA%9B%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">StarRocks适用哪些场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E4%B8%89%E7%A7%8D%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">StarRocks三种数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%BB%86%E6%A8%A1%E5%9E%8B%EF%BC%88Duplicate-Key%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">明细模型（Duplicate Key）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E6%A8%A1%E5%9E%8B%EF%BC%88Aggregate-Key%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">聚合模型（Aggregate Key）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B-Unique-Key-amp-Primary-Key"><span class="nav-number">3.3.</span> <span class="nav-text">更新模型(Unique Key &amp; Primary Key)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StarRocks%E8%A1%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">StarRocks表设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95"><span class="nav-number">4.1.</span> <span class="nav-text">前缀索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RollUp%E4%BB%A5%E5%8F%8A%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE"><span class="nav-number">5.</span> <span class="nav-text">RollUp以及物化视图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Rollup"><span class="nav-number">5.1.</span> <span class="nav-text">Rollup</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Aggregate-Key-amp-Roll-up"><span class="nav-number">5.1.1.</span> <span class="nav-text">Aggregate Key &amp; Roll up</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Unique-Key-amp-Roll-up"><span class="nav-number">5.1.2.</span> <span class="nav-text">Unique Key &amp; Roll up</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Duplicate-Key-amp-Roll-up"><span class="nav-number">5.1.3.</span> <span class="nav-text">Duplicate Key &amp; Roll up</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE"><span class="nav-number">5.2.</span> <span class="nav-text">物化视图</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E7%AD%96%E7%95%A5"><span class="nav-number">5.2.1.</span> <span class="nav-text">更新策略</span></a></li></ol></li></ol></li></ol>
     </div>
 </div>
         </aside>

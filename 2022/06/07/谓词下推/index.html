@@ -165,7 +165,7 @@
                     <div class="author">
                         <span class="name">刘梦凯</span>
                         
-                            <span class="author-label">Lv2</span>
+                            <span class="author-label">Lv3</span>
                         
                     </div>
                     <div class="meta-info">
@@ -214,7 +214,7 @@
             <p>学习谓词下推相关笔记</p>
 <span id="more"></span>
 
-<h1 id="谓词下推"><a href="#谓词下推" class="headerlink" title="谓词下推"></a>谓词下推</h1><h2 id="谓词"><a href="#谓词" class="headerlink" title="谓词"></a>谓词</h2><p>​    概念：计算机科学中谓词解释，谓词不是像语言中的某一种词性，比如英语中的动词或者名词，谓词是一个特定的返回True/False/Unknow的函数，一般以元素列表的形式应用于给定的函数，并且根据函数返回值决定是否返回该元素，这个函数就叫做谓词。</p>
+<h1 id="谓词下推"><a href="#谓词下推" class="headerlink" title="谓词下推"></a>谓词下推</h1><h2 id="谓词"><a href="#谓词" class="headerlink" title="谓词"></a>谓词</h2><p>​    概念：计算机科学中谓词解释，谓词不是像语言中的某一种词性，比如英语中的动词或者名词，谓词是一个返回值为真、假、未知(True/False/Unknow)的函数，一般我们以元素列表的形式应用于给定的谓词函数，并且根据函数返回值决定是否返回该元素，这个函数就叫做谓词。</p>
 <p>​    SQL中哪些常见的谓词：Like、Between、Is Null、Is Not Null 等等</p>
 <h2 id="下推"><a href="#下推" class="headerlink" title="下推"></a>下推</h2><p>​    概念：<strong>将过滤表达式尽可能移动至靠近数据源的位置，以使真正执行时能直接跳过无关的数据。</strong></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># A,B 两表进行<span class="keyword">join</span>操作 并且有过滤条件 A.a <span class="operator">&gt;</span> <span class="number">10</span> <span class="keyword">and</span> B.b <span class="operator">&lt;</span> <span class="number">100</span></span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="number">1</span>) <span class="keyword">from</span> A <span class="keyword">Join</span> B <span class="keyword">on</span> A.id <span class="operator">=</span> B.id <span class="keyword">where</span> A.a <span class="operator">&gt;</span> <span class="number">10</span> <span class="keyword">and</span> B.b <span class="operator">&lt;</span> <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
@@ -274,6 +274,21 @@
 
         
             <div class="article-nav">
+                
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2022/06/09/Hive/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">Hive笔记</span>
+                                <span class="post-nav-item">Prev posts</span>
+                            </span>
+                        </a>
+                    </div>
                 
                 
                     <div class="article-next">

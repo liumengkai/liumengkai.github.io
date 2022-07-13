@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="好文章是打磨出来的">
+    <meta name="author" content="刘梦凯">
+    
+    <title>
+        
+            Grafana |
+        
+        安静时刻
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <link rel="shortcut icon" href="/images/logo.svg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-Hans","path":"search.xml"};
+    KEEP.theme_config = {"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.png","favicon":"/images/logo.svg","article_img_align":"center","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":false,"scale":true},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"人生如逆旅，我亦是行人"},"scroll":{"progress_bar":{"enable":true},"percent":{"enable":false}}},"local_search":{"enable":true,"trigger":"auto","preload":false},"code_copy":{"enable":true,"style":"mac"},"pjax":{"enable":false},"lazyload":{"enable":false},"version":"3.4.3"};
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
+  </script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="Liu's blog" type="application/atom+xml">
+</head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+<main class="page-container">
+
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                安静时刻
+            </a>
+        </div>
+
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/about"
+                            >
+                                关于我
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/%E4%B8%80%E4%BA%9B%E8%AF%9D"
+                            >
+                                一些话
+                            </a>
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="fas fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/about">关于我</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/%E4%B8%80%E4%BA%9B%E8%AF%9D">一些话</a>
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">Grafana</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.png">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">刘梦凯</span>
+                        
+                            <span class="author-label">Lv3</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;2022-07-12 20:53:21
+    </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Grafana/">Grafana</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fas fa-file-word"></i>&nbsp;<span>1.4k Words</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fas fa-clock"></i>&nbsp;<span>6 Mins</span>
+        </span>
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <h2 id="配置grafana的免密反向代理"><a href="#配置grafana的免密反向代理" class="headerlink" title="配置grafana的免密反向代理"></a>配置grafana的免密反向代理</h2><p>配置grafana免密访问dashboard &amp; panel</p>
+<span id="more"></span>
+
+<h3 id="grafana免密"><a href="#grafana免密" class="headerlink" title="grafana免密"></a>grafana免密</h3><p>什么叫做免密反向代理？我们在grafana中分享出来的panel的link，是下面样式的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:3000/gf/d/173XYzd7z/clickhouse-performance-monitor?orgId=1&amp;from=1657692410493&amp;to=1657694210493&amp;viewPanel=30</span><br></pre></td></tr></table></figure>
+
+<p>如果我们在别的机器上打开就需要我们输入账号和密码，如果我做了一个监控页面，内嵌了grafana的页面，我点开我的监控，还需要手动输入grafana的账号密码，这就比较难受，有没有什么办法不用输入呢？</p>
+<p>这就需要 grafana 的 <a class="link"   target="_blank" rel="noopener" href="https://grafana.com/docs/grafana/v7.5/http_api/create-api-tokens-for-org/" >API tokens<i class="fas fa-external-link-alt"></i></a>，这个API token 官方给出的使用方法是我们可以通过命令行来操作dashboard 或者 alert预警之类的，但是我们只需要用来认证即可。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 按照文档在本机上生成key的过程</span></span><br><span class="line">curl -X POST -H &quot;Content-Type: application/json&quot; -d &#x27;&#123;&quot;name&quot;:&quot;apiorg&quot;&#125;&#x27; http://admin:admin@localhost:3000/api/orgs</span><br><span class="line">&#123;&quot;message&quot;:&quot;Organization created&quot;,&quot;orgId&quot;:2&#125;%</span><br><span class="line"></span><br><span class="line">curl -X POST -H &quot;Content-Type: application/json&quot; -d &#x27;&#123;&quot;loginOrEmail&quot;:&quot;admin&quot;, &quot;role&quot;: &quot;Admin&quot;&#125;&#x27; http://admin:admin@localhost:3000/api/orgs/2/users</span><br><span class="line"></span><br><span class="line">curl -X POST http://admin:admin@localhost:3000/api/user/using/1</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 上面就是我们生成的key，注意只出现一次，记录下来</span></span><br><span class="line">curl -X POST -H &quot;Content-Type: application/json&quot; -d &#x27;&#123;&quot;name&quot;:&quot;apikeycurl&quot;, &quot;role&quot;: &quot;Admin&quot;&#125;&#x27; http://admin:admin@localhost:3000/api/auth/keys</span><br><span class="line">&#123;&quot;id&quot;:1,&quot;name&quot;:&quot;apikeycurl&quot;,&quot;key&quot;:&quot;eyJrIjoidTJPdm1mbDRBZHlzaVBTNHV1cmZiMjZ6N3l3ZG9VbTQiLCJuIjoiYXBpa2V5Y3VybCIsImlkIjoyfQ==&quot;&#125;%</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 通过key访问我们的share link</span></span><br><span class="line">curl -H &quot;Authorization: Bearer eyJrIjoidTJPdm1mbDRBZHlzaVBTNHV1cmZiMjZ6N3l3ZG9VbTQiLCJuIjoiYXBpa2V5Y3VybCIsImlkIjoyfQ==&quot; http://localhost:3000/gf/d/173XYzd7z/clickhouse-performance-monitor?</span><br></pre></td></tr></table></figure>
+
+<h3 id="grafana打开反向代理配置"><a href="#grafana打开反向代理配置" class="headerlink" title="grafana打开反向代理配置"></a>grafana打开反向代理配置</h3><p>参考 <a class="link"   target="_blank" rel="noopener" href="https://grafana.com/tutorials/run-grafana-behind-a-proxy/" >官方文档<i class="fas fa-external-link-alt"></i></a> 设置我们在grafan中的代理配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> vim conf/defaults.ini</span></span><br><span class="line">domain = localhost</span><br><span class="line">root_url = %(protocol)s://%(domain)s:%(http_port)s/gf/</span><br><span class="line">serve_from_sub_path = true</span><br></pre></td></tr></table></figure>
+
+<h3 id="反向代理的两种方式"><a href="#反向代理的两种方式" class="headerlink" title="反向代理的两种方式"></a>反向代理的两种方式</h3><h5 id="nginx配置反向代理"><a href="#nginx配置反向代理" class="headerlink" title="nginx配置反向代理"></a>nginx配置反向代理</h5><p>安装nginx这里不再赘述，详细可以参考<a class="link"   target="_blank" rel="noopener" href="https://juejin.cn/post/6986190222241464350" >这里<i class="fas fa-external-link-alt"></i></a></p>
+<p>我的nginx使用的homebrew安装，首先查看nginx相关信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">(base) ➜  brew info nginx</span><br><span class="line">nginx: stable 1.21.3 (bottled), HEAD</span><br><span class="line">HTTP(S) server and reverse proxy, and IMAP/POP3 proxy server</span><br><span class="line">https://nginx.org/</span><br><span class="line">/opt/homebrew/Cellar/nginx/1.21.3 (26 files, 2.2MB) *</span><br><span class="line">  Poured from bottle on 2022-06-16 at 17:13:49</span><br><span class="line">From: https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/nginx.rb</span><br><span class="line">License: BSD-2-Clause</span><br><span class="line">==&gt; Dependencies</span><br><span class="line">Required: openssl@1.1 ✔, pcre ✔</span><br><span class="line">==&gt; Options</span><br><span class="line">--HEAD</span><br><span class="line">	Install HEAD version</span><br><span class="line">==&gt; Caveats</span><br><span class="line">Docroot is: /opt/homebrew/var/www</span><br><span class="line"></span><br><span class="line">The default port has been set in /opt/homebrew/etc/nginx/nginx.conf to 8080 so that</span><br><span class="line">nginx can run without sudo.</span><br><span class="line"></span><br><span class="line">nginx will load all files in /opt/homebrew/etc/nginx/servers/.</span><br><span class="line"></span><br><span class="line">To restart nginx after an upgrade:</span><br><span class="line">  brew services restart nginx</span><br><span class="line">Or, if you don&#x27;t want/need a background service you can just run:</span><br><span class="line">  /opt/homebrew/opt/nginx/bin/nginx -g daemon off;</span><br><span class="line">==&gt; Analytics</span><br><span class="line">install: 38,896 (30 days), 91,488 (90 days), 455,183 (365 days)</span><br><span class="line">install-on-request: 38,823 (30 days), 91,297 (90 days), 454,267 (365 days)</span><br><span class="line">build-error: 48 (30 days)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The default port has been set in /opt/homebrew/etc/nginx/nginx.conf to 8080 so that</span><br><span class="line">nginx can run without sudo.</span><br><span class="line">这行我们可以了解到默认nginx配置文件是/opt/homebrew/etc/nginx/nginx.conf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">修改我们的nginx.conf文件</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">user  nobody;</span></span><br><span class="line">worker_processes  1;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">error_log  logs/error.log;</span></span><br><span class="line"><span class="meta">#</span><span class="bash">error_log  logs/error.log  notice;</span></span><br><span class="line"><span class="meta">#</span><span class="bash">error_log  logs/error.log  info;</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">pid        logs/nginx.pid;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen       8080;</span><br><span class="line">        server_name  localhost;</span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    # 主要是下面的配置</span><br><span class="line">    server &#123;</span><br><span class="line">      listen 8888;   # 源端口</span><br><span class="line">      root /opt/homebrew/var/www;  # 根 主页目录 保持默认即可</span><br><span class="line">      location /gf &#123;</span><br><span class="line">        proxy_pass http://localhost:3000; # 目标域名以及端口</span><br><span class="line">        proxy_set_header Authorization &quot;Bearer  eyJrIjoiRWZOVElUTHRwYkt0VVgwVkNpMmppTElsUUgxOXpxZUIiLCJuIjoiYXBpa2V5Y3VybCIsImlkIjoxfQ==&quot;; # 申请的grafana 组的秘钥</span><br><span class="line">       &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    include servers/*;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面就是我们的nginx配置，主要是其中的server配置，注意秘钥配置中间都是空格没有冒号。</p>
+<p>到此为止nginx配置反向代理就完成了，接下来我们看怎么用go语言来实现一个grafana反向代理</p>
+<h5 id="go实现反向代理"><a href="#go实现反向代理" class="headerlink" title="go实现反向代理"></a>go实现反向代理</h5><p>加入你不想在grafana服务器上再部署一个nginx服务器，那么我们尝试用go来实现一个反向代理服务。</p>
+<p>参考<a class="link"   target="_blank" rel="noopener" href="https://h1z3y3.me/posts/simple-and-powerful-reverse-proxy-in-golang/" >这篇文章<i class="fas fa-external-link-alt"></i></a>，我们实现了一个简单的go服务反向代理，下面是主要的代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;net/http&quot;</span></span><br><span class="line">	<span class="string">&quot;net/http/httputil&quot;</span></span><br><span class="line">	<span class="string">&quot;net/url&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewProxy takes target host and creates a reverse proxy</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewProxy</span><span class="params">(targetHost <span class="keyword">string</span>)</span> <span class="params">(*httputil.ReverseProxy, error)</span></span> &#123;</span><br><span class="line">	url, err := url.Parse(targetHost)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	proxy := httputil.NewSingleHostReverseProxy(url)</span><br><span class="line"></span><br><span class="line">	originalDirector := proxy.Director</span><br><span class="line">	proxy.Director = <span class="function"><span class="keyword">func</span><span class="params">(req *http.Request)</span></span> &#123;</span><br><span class="line">		originalDirector(req)</span><br><span class="line">		modifyRequest(req)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//proxy.ModifyResponse = modifyResponse()</span></span><br><span class="line">	proxy.ErrorHandler = errorHandler()</span><br><span class="line">	<span class="keyword">return</span> proxy, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">modifyRequest</span><span class="params">(req *http.Request)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 需要将请求链接中的Host改为grafana的Host</span></span><br><span class="line">	</span><br><span class="line">  req.URL.Host = <span class="string">&quot;localhost:3000&quot;</span></span><br><span class="line">	req.Host = <span class="string">&quot;localhost:3000&quot;</span></span><br><span class="line">	fmt.Printf(<span class="string">&quot;url: %s \n&quot;</span>, req.URL) </span><br><span class="line">	fmt.Printf(<span class="string">&quot;host: %s \n&quot;</span>, req.Host)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将grafana api key 设置进请求的header中</span></span><br><span class="line">	req.Header.Set(<span class="string">&quot;Authorization&quot;</span>, <span class="string">&quot; Bearer eyJrIjoiRWZOVElUTHRwYkt0VVgwVkNpMmppTElsUUgxOXpxZUIiLCJuIjoiYXBpa2V5Y3VybCIsImlkIjoxfQ==&quot;</span>)</span><br><span class="line">	req.Header.Set(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>)</span><br><span class="line">	req.Header.Set(<span class="string">&quot;Access-Control-Allow-Methods&quot;</span>, <span class="string">&quot;*&quot;</span>)</span><br><span class="line">	req.Header.Set(<span class="string">&quot;Access-Control-Allow-Credentials&quot;</span>, <span class="string">&quot;true&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">errorHandler</span><span class="params">()</span> <span class="title">func</span><span class="params">(http.ResponseWriter, *http.Request, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request, err error)</span></span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;Got error while modifying response: %v \n&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ProxyRequestHandler handles the http request using proxy</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ProxyRequestHandler</span><span class="params">(proxy *httputil.ReverseProxy)</span> <span class="title">func</span><span class="params">(http.ResponseWriter, *http.Request)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">		proxy.ServeHTTP(w, r)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// initialize a reverse proxy and pass the actual backend server url here</span></span><br><span class="line">	proxy, err := NewProxy(<span class="string">&quot;http://localhost:3000&quot;</span>)</span><br><span class="line">	<span class="comment">//proxy, err := NewProxy(&quot;http://localhost:3000&quot;)</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// handle all requests to your server using the proxy</span></span><br><span class="line">	http.HandleFunc(<span class="string">&quot;/&quot;</span>, ProxyRequestHandler(proxy))</span><br><span class="line">	log.Fatal(http.ListenAndServe(<span class="string">&quot;:8888&quot;</span>, <span class="literal">nil</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样我们访问localhost:8888的时候就会自动跳转到localhost:3000，到此为止两种免密grafana配置就完成了。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+        </div>
+
+        
+            <div class="post-copyright-info">
+                <div class="article-copyright-info-container">
+    <ul>
+        <li>Post title：Grafana</li>
+        <li>Post author：刘梦凯</li>
+        <li>Create time：2022-07-12 20:53:21</li>
+        <li>
+            Post link：https://liumengkai.github.io/2022/07/12/反向代理Grafana的两种方法/
+        </li>
+        <li>
+            Copyright Notice：All articles in this blog are licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> unless stating additionally.
+        </li>
+    </ul>
+</div>
+
+            </div>
+        
+
+        
+            <div class="article-nav">
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2022/06/12/%E5%A4%A7%E6%95%B0%E6%8D%AE%E6%80%9D%E6%83%B3/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">大数据思想</span>
+                                <span class="post-nav-item">Next posts</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
+
+        
+    </div>
+</div>
+
+
+                
+            </div>
+
+        </div>
+
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2020</span>&nbsp;-&nbsp;
+            
+            2022&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">刘梦凯</a>
+        </div>
+        
+            <script async  src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <div class="website-count info-item">
+                
+                    <span id="busuanzi_container_site_uv">
+                        Visitor Count&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv">
+                        Totalview&nbsp;<span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="theme-info info-item">
+            Powered by <a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;|&nbsp;Theme&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+            <li class="tools-item page-aside-toggle">
+                <i class="fas fa-outdent"></i>
+            </li>
+        
+
+        <!-- go comment -->
+        
+    </ul>
+</div>
+
+        </div>
+    
+
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+            <li class="tools-item rss flex-center">
+                <a class="flex-center"
+                   href="/atom.xml"
+                   target="_blank"
+                >
+                    <i class="fas fa-rss"></i>
+                </a>
+            </li>
+        
+
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="fas fa-arrow-up"></i>
+            </li>
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+    </ul>
+</div>
+
+    </div>
+
+    
+        <aside class="page-aside">
+            <div class="post-toc-wrap">
+    <div class="post-toc">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEgrafana%E7%9A%84%E5%85%8D%E5%AF%86%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">配置grafana的免密反向代理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#grafana%E5%85%8D%E5%AF%86"><span class="nav-number">1.1.</span> <span class="nav-text">grafana免密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#grafana%E6%89%93%E5%BC%80%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">grafana打开反向代理配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">反向代理的两种方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#nginx%E9%85%8D%E7%BD%AE%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">nginx配置反向代理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#go%E5%AE%9E%E7%8E%B0%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">go实现反向代理</span></a></li></ol></li></ol></li></ol></li></ol>
+    </div>
+</div>
+        </aside>
+    
+
+    <div class="image-viewer-container">
+    <img src="">
+</div>
+
+
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="Search..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="popup-btn-close">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+</main>
+
+
+
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/dark-light-toggle.js"></script>
+
+
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+
+    
+<script src="/js/code-copy.js"></script>
+
+
+
+
+
+<div class="post-scripts">
+    
+        
+<script src="/js/left-side-toggle.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+<script src="/js/toc.js"></script>
+
+    
+</div>
+
+
+
+</body>
+</html>

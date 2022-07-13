@@ -9,7 +9,7 @@
     
     <title>
         
-            git new repository hint |
+            迁移博客注意事项 |
         
         安静时刻
     </title>
@@ -153,7 +153,7 @@
     <div class="article-content-container">
 
         <div class="article-title">
-            <span class="title-hover-animation">git new repository hint</span>
+            <span class="title-hover-animation">迁移博客注意事项</span>
         </div>
 
         
@@ -165,7 +165,7 @@
                     <div class="author">
                         <span class="name">刘梦凯</span>
                         
-                            <span class="author-label">Lv2</span>
+                            <span class="author-label">Lv3</span>
                         
                     </div>
                     <div class="meta-info">
@@ -180,7 +180,7 @@
             <ul>
                 
                     <li>
-                        <a href="/tags/git/">git</a>&nbsp;
+                        <a href="/tags/%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB/">博客迁移</a>&nbsp;
                     </li>
                 
             </ul>
@@ -190,7 +190,7 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>105 Words</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>405 Words</span>
         </span>
     
     
@@ -211,7 +211,21 @@
         
 
         <div class="article-content markdown-body">
-            <p>when you new a github repository,this is what github will show you,a single back up </p>
+            <p>博客迁移注意事项</p>
+<span id="more"></span>
+
+<h2 id="如何进行博客的备份"><a href="#如何进行博客的备份" class="headerlink" title="如何进行博客的备份"></a>如何进行博客的备份</h2><p>我建立的是github的博客，所以一个目录就是一整个博客内容，方法就是在github中再建立一个项目，和你的这个目录进行一个绑定，将目录内容同步上去，需要注意的是主题<strong>theme文件夹下不同主题是一个个的git项目</strong>，<strong>会被当成子项目不会被同步</strong>，这时候只需要将theme下的git相关的.git相关目录或者文件删除重新同步即可。</p>
+<h2 id="如何提交修改备份"><a href="#如何提交修改备份" class="headerlink" title="如何提交修改备份"></a>如何提交修改备份</h2><p>我们完成博客内容修改或者新的编写之后，如何进行同步呢？这时候就是git提交即可</p>
+<ol>
+<li><p>git add .</p>
+</li>
+<li><p>git commit -m ‘comment’</p>
+</li>
+<li><p>git push origin master</p>
+</li>
+</ol>
+<p>注意事项：我们在hexo下创建一个新文章的时候会同步创建一个空文件夹，其中用于放置我们的照片等文件，但是如果其中没有内容，是一个空文件夹的时候，git是不会同步上去的，这时候我们可以在该空目录中创建一个.gitgrone文件或者任意一个空文件即可。</p>
+<p>when you new a github repository,this is what github will show you,a single back up </p>
 <h3 id="create-a-new-repository-on-the-command-line"><a href="#create-a-new-repository-on-the-command-line" class="headerlink" title="create a new repository on the command line"></a>create a new repository on the command line</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">create a new repository on the command line</span><br><span class="line"></span><br><span class="line">echo &quot;# -&quot; &gt;&gt; README.md</span><br><span class="line">git init</span><br><span class="line">git add README.md</span><br><span class="line">git commit -m &quot;first commit&quot;</span><br><span class="line">git branch -M main</span><br><span class="line">git remote add origin git@github.com:liumengkai/-.git</span><br><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
 
 <h3 id="push-an-existing-repository-from-the-command-line"><a href="#push-an-existing-repository-from-the-command-line" class="headerlink" title="push an existing repository from the command line"></a>push an existing repository from the command line</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git remote add origin git@github.com:liumengkai/-.git</span><br><span class="line">git branch -M main</span><br><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
@@ -224,7 +238,7 @@
             <div class="post-copyright-info">
                 <div class="article-copyright-info-container">
     <ul>
-        <li>Post title：git new repository hint</li>
+        <li>Post title：迁移博客注意事项</li>
         <li>Post author：刘梦凯</li>
         <li>Create time：2022-04-14 22:48:06</li>
         <li>
@@ -396,7 +410,7 @@
         <aside class="page-aside">
             <div class="post-toc-wrap">
     <div class="post-toc">
-        <ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#create-a-new-repository-on-the-command-line"><span class="nav-number">1.</span> <span class="nav-text">create a new repository on the command line</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#push-an-existing-repository-from-the-command-line"><span class="nav-number">2.</span> <span class="nav-text">push an existing repository from the command line</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#import-code-from-another-repository"><span class="nav-number">3.</span> <span class="nav-text">import code from another repository</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%A4%87%E4%BB%BD"><span class="nav-number">1.</span> <span class="nav-text">如何进行博客的备份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%8F%90%E4%BA%A4%E4%BF%AE%E6%94%B9%E5%A4%87%E4%BB%BD"><span class="nav-number">2.</span> <span class="nav-text">如何提交修改备份</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#create-a-new-repository-on-the-command-line"><span class="nav-number">2.1.</span> <span class="nav-text">create a new repository on the command line</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#push-an-existing-repository-from-the-command-line"><span class="nav-number">2.2.</span> <span class="nav-text">push an existing repository from the command line</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#import-code-from-another-repository"><span class="nav-number">2.3.</span> <span class="nav-text">import code from another repository</span></a></li></ol></li></ol>
     </div>
 </div>
         </aside>
