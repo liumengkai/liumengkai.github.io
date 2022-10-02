@@ -285,6 +285,45 @@
       </tags>
   </entry>
   <entry>
+    <title>Hadoop相关源码</title>
+    <url>/2022/10/02/Hadoop%E7%9B%B8%E5%85%B3%E6%BA%90%E7%A0%81/</url>
+    <content><![CDATA[<h1 id="Hadoop-向-yarn-提交任务整体流程"><a href="#Hadoop-向-yarn-提交任务整体流程" class="headerlink" title="Hadoop 向 yarn 提交任务整体流程"></a>Hadoop 向 yarn 提交任务整体流程</h1><p>总体流程：</p>
+<p>1）作业提交</p>
+<p>第 1 步：Client 调用 job.waitForCompletion 方法，向整个集群提交 MapReduce 作业。</p>
+<p>第 2 步：Client 向 RM 申请一个作业 id。</p>
+<p>第 3 步：RM 给 Client 返回该 job 资源的提交路径和作业 id。</p>
+<p>第 4 步：Client 提交 jar 包、切片信息和配置文件到指定的资源提交路径。</p>
+<p>第 5 步：Client 提交完资源后，向 RM 申请运行 MrAppMaster。</p>
+<p>2）作业初始化</p>
+<p>第 6 步：当 RM 收到 Client 的请求后，将该 job 添加到容量调度器中。</p>
+<p>第 7 步：某一个空闲的 NM 领取到该 Job。</p>
+<p>第 8 步：该 NM 创建 Container，并产生 MRAppmaster。</p>
+<p>第 9 步：下载Client 提交的资源到本地。</p>
+<p>3）任务分配</p>
+<p>第 10 步：MrAppMaster 向 RM 申请运行多个 MapTask 任务资源。</p>
+<p>第 11 步：RM 将运行 MapTask 任务分配给另外两个NodeManager，另两个 NodeManager分别领取任务并</p>
+<p>创建容器。</p>
+<p>4）任务运行</p>
+<p>第 12 步：MR向两个接收到任务的NodeManager发送程序启动脚本，这两个NodeManager分别启动</p>
+<p>MapTask，MapTask 对数据分区排序。</p>
+<p>第13 步：MrAppMaster 等待所有MapTask 运行完毕后，向RM 申请容器，运行ReduceTask。</p>
+<p>第 14 步：ReduceTask 向 MapTask 获取相应分区的数据。</p>
+<p>第 15 步：程序运行完毕后，MR 会向 RM 申请注销自己。</p>
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><p>(1)</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 首先调用waitForCompletion启动任务</span></span><br><span class="line">JobClient.java:</span><br><span class="line"></span><br><span class="line">JobClient.waitForCompletion()</span><br></pre></td></tr></table></figure>
+
+<p>(2)</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// waitForCompletion方法中调用submit</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">waitForCompletion</span><span class="params">(<span class="keyword">boolean</span> verbose</span></span></span><br><span class="line"><span class="params"><span class="function">                                   )</span> <span class="keyword">throws</span> IOException, InterruptedException,</span></span><br><span class="line"><span class="function">                                            ClassNotFoundException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (state == JobState.DEFINE) &#123;</span><br><span class="line">      submit();</span><br><span class="line">...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Submit the job to the cluster and return immediately.</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">submit</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">         <span class="keyword">throws</span> IOException, InterruptedException, ClassNotFoundException </span>&#123;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">//getJobSubmitter方法传入了(fileSystem,submitClient)参数，会将参数传递给JobSubmitter.submitClient变量</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//然后由submitClient对象调用submitJobInternal</span></span><br><span class="line">    <span class="keyword">final</span> JobSubmitter submitter = </span><br><span class="line">        getJobSubmitter(cluster.getFileSystem(), cluster.getClient());</span><br><span class="line">    status = ugi.doAs(<span class="keyword">new</span> PrivilegedExceptionAction&lt;JobStatus&gt;() &#123;</span><br><span class="line">      </span><br><span class="line">      <span class="function"><span class="keyword">public</span> JobStatus <span class="title">run</span><span class="params">()</span> <span class="keyword">throws</span> IOException, InterruptedException,ClassNotFoundException </span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">          <span class="comment">//submitJobInternal这个方法需要注意</span></span><br><span class="line">        <span class="keyword">return</span> submitter.submitJobInternal(Job.<span class="keyword">this</span>, cluster);</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">    &#125;);</span><br><span class="line">    state = JobState.RUNNING;</span><br><span class="line">    LOG.info(<span class="string">&quot;The url to track the job: &quot;</span> + getTrackingURL());</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将jobid和client应该上传资源的路径，队列等信息设置进conf</span></span><br><span class="line"><span class="comment">// copyAndConfigureFiles方法 将jar包上传到集群中 </span></span><br><span class="line"><span class="comment">// writeSplits 将切片信息上传</span></span><br><span class="line"><span class="comment">// writeConf 将配置文件上传</span></span><br><span class="line"><span class="comment">// submitClient.submitJob 申请向resourcemanager中提交一个任务，这是一个接口方法，具体由实现类中重写的方法来实现，</span></span><br><span class="line"><span class="comment">// 这里用的是YarnRunner中的submitJob 除此之外还有LocalJobRunner</span></span><br><span class="line"><span class="function">JobStatus <span class="title">submitJobInternal</span><span class="params">(Job job, Cluster cluster)</span>  <span class="keyword">throws</span> ClassNotFoundException, </span></span><br><span class="line"><span class="function">InterruptedException, IOException </span>&#123;</span><br><span class="line">...</span><br><span class="line">  <span class="comment">//获取jobid</span></span><br><span class="line">  JobID jobId = submitClient.getNewJobID();</span><br><span class="line">  job.setJobID(jobId);</span><br><span class="line">  Path submitJobDir = <span class="keyword">new</span> Path(jobStagingArea, jobId.toString());</span><br><span class="line">  JobStatus status = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line"><span class="comment">// ResourceManager给client返回job资源应该提交的路径</span></span><br><span class="line">    conf.set(MRJobConfig.USER_NAME,</span><br><span class="line">        UserGroupInformation.getCurrentUser().getShortUserName());</span><br><span class="line">    conf.set(<span class="string">&quot;hadoop.http.filter.initializers&quot;</span>, </span><br><span class="line">        <span class="string">&quot;org.apache.hadoop.yarn.server.webproxy.amfilter.AmFilterInitializer&quot;</span>);</span><br><span class="line">    conf.set(MRJobConfig.MAPREDUCE_JOB_DIR, submitJobDir.toString());</span><br><span class="line">    LOG.debug(<span class="string">&quot;Configuring job &quot;</span> + jobId + <span class="string">&quot; with &quot;</span> + submitJobDir </span><br><span class="line">        + <span class="string">&quot; as the submit dir&quot;</span>);</span><br><span class="line">...</span><br><span class="line">copyAndConfigureFiles(job, submitJobDir);</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"><span class="comment">// Create the splits for the job</span></span><br><span class="line">LOG.debug(<span class="string">&quot;Creating splits at &quot;</span> + jtFs.makeQualified(submitJobDir));</span><br><span class="line"><span class="keyword">int</span> maps = writeSplits(job, submitJobDir);</span><br><span class="line">conf.setInt(MRJobConfig.NUM_MAPS, maps);</span><br><span class="line">LOG.info(<span class="string">&quot;number of splits:&quot;</span> + maps);</span><br><span class="line">...</span><br><span class="line">status = submitClient.submitJob(</span><br><span class="line">      jobId, submitJobDir.toString(), job.getCredentials());</span><br><span class="line">  <span class="keyword">if</span> (status != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> status;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">&quot;Could not launch job&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (status == <span class="keyword">null</span>) &#123;</span><br><span class="line">    LOG.info(<span class="string">&quot;Cleaning up the staging area &quot;</span> + submitJobDir);</span><br><span class="line">    <span class="keyword">if</span> (jtFs != <span class="keyword">null</span> &amp;&amp; submitJobDir != <span class="keyword">null</span>)</span><br><span class="line">      jtFs.delete(submitJobDir, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Client提交完资源之后向RM申请MRAppMaster 这里是YarnRunner中submitJob方法</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> JobStatus <span class="title">submitJob</span><span class="params">(JobID jobId, String jobSubmitDir, Credentials ts)</span></span></span><br><span class="line"><span class="function"><span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">  </span><br><span class="line">  addHistoryToken(ts);</span><br><span class="line">  </span><br><span class="line"><span class="comment">// createApplicationSubmissionContext 准备好所有创建一个MR AM所需的配置等信息，eg:创建applicationId等操作</span></span><br><span class="line">  ApplicationSubmissionContext appContext =</span><br><span class="line">    createApplicationSubmissionContext(conf, jobSubmitDir, ts);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Submit to ResourceManager</span></span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    ApplicationId applicationId =</span><br><span class="line">        resMgrDelegate.submitApplication(appContext);</span><br><span class="line"></span><br><span class="line">    ApplicationReport appMaster = resMgrDelegate</span><br><span class="line">        .getApplicationReport(applicationId);</span><br><span class="line">    String diagnostics =</span><br><span class="line">        (appMaster == <span class="keyword">null</span> ?</span><br><span class="line">            <span class="string">&quot;application report is null&quot;</span> : appMaster.getDiagnostics());</span><br><span class="line">    <span class="keyword">if</span> (appMaster == <span class="keyword">null</span></span><br><span class="line">        || appMaster.getYarnApplicationState() == YarnApplicationState.FAILED</span><br><span class="line">        || appMaster.getYarnApplicationState() == YarnApplicationState.KILLED) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">&quot;Failed to run job : &quot;</span> +</span><br><span class="line">          diagnostics);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> clientCache.getClient(jobId).getJobStatus(jobId);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (YarnException e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(e);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+  </entry>
+  <entry>
     <title>Hive笔记</title>
     <url>/2022/06/09/Hive/</url>
     <content><![CDATA[<p>Hive相关笔记</p>
@@ -449,6 +488,90 @@
       </tags>
   </entry>
   <entry>
+    <title>StarRocks笔记</title>
+    <url>/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<p>好记性不如烂笔头</p>
+<span id="more"></span>
+
+<h3 id="什么是StarRocks"><a href="#什么是StarRocks" class="headerlink" title="什么是StarRocks"></a>什么是StarRocks</h3><p>StarRocks 是<strong>新一代极速全场景MPP数据库</strong>。StarRocks 的愿景是能够让用户的<strong>数据分析变得更加简单和敏捷</strong>。用户无需经过复杂的预处理，就可以用 StarRocks 来支持多种数据分析场景的极速分析。</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
+
+<h3 id="StarRocks适用哪些场景"><a href="#StarRocks适用哪些场景" class="headerlink" title="StarRocks适用哪些场景"></a>StarRocks适用哪些场景</h3><p>StarRocks 可以满足企业级用户的多种分析需求，包括 OLAP 多维分析、定制报表、实时数据分析和 Ad-hoc 数据分析等。</p>
+<h3 id="StarRocks三种数据模型"><a href="#StarRocks三种数据模型" class="headerlink" title="StarRocks三种数据模型"></a>StarRocks三种数据模型</h3><p>StarRocks根据数据摄入时候的映射关系，分为了三种数据关系，分别是明细、聚合、以及更新数据关系，三种数据关系在StarRocks中分别对应着不同的数据模型:</p>
+<p>明细表对应明细模型（Duplicate Key）</p>
+<p>聚合表对应聚合模型（Aggregate Key）</p>
+<p>更新表对应更新模型（Unique Key）和主键模型（Primary Key）</p>
+<h4 id="明细模型（Duplicate-Key）"><a href="#明细模型（Duplicate-Key）" class="headerlink" title="明细模型（Duplicate Key）"></a>明细模型（Duplicate Key）</h4><ol>
+<li><p>需要保留原始的数据（例如原始日志，原始操作记录等）来进行分析；</p>
+</li>
+<li><p>查询方式灵活, 不局限于预先定义的分析方式, 传统的预聚合方式难以命中;</p>
+</li>
+<li><p>数据更新不频繁。导入数据的来源一般为日志数据或者是时序数据,  以追加写为主要特点, 数据产生后就不会发生太多变化。</p>
+<p><strong>注意：</strong>明细模型不会根据设置的主键覆盖数据，导入完全相同的两行数据也会认为是不同的两行插入进来，比如我们日志中经常出现含义相同的信息，但是我们一般不会希望存在覆盖的情况。</p>
+</li>
+</ol>
+<h4 id="聚合模型（Aggregate-Key）"><a href="#聚合模型（Aggregate-Key）" class="headerlink" title="聚合模型（Aggregate Key）"></a>聚合模型（Aggregate Key）</h4><ul>
+<li><p>分析网站或APP访问流量，统计用户的访问总时长、访问总次数;</p>
+</li>
+<li><p>广告厂商为广告主提供的广告点击总量、展示总量、消费统计等;</p>
+</li>
+<li><p>分析电商的全年的交易数据, 获得某指定季度或者月份的, 各人口分类(geographic)的爆款商品。</p>
+<p><strong>注意：</strong></p>
+<p>1.只要是指定聚合函数的字段即视为指标列，表即视为聚合表，聚合表中不带聚合函数的列即为维度列</p>
+<p>2.建表语句中维度列必须在指标列前面</p>
+<p>3.聚合模型是根据按照相同的指标列进行聚合，多条数据具有相同的维度列的时候，会按照聚合函数将指标列数据进行聚合，这样可以减少数据量</p>
+<p>4.触发数据聚合有三种方式 : </p>
+<p>(1)数据导入时，数据落盘前的聚合 </p>
+<p>(2) 数据落盘后，后台的多版本异步聚合 </p>
+<p>(3)数据查询时，多版本多路归并聚合</p>
+</li>
+</ul>
+<h4 id="更新模型-Unique-Key-amp-Primary-Key"><a href="#更新模型-Unique-Key-amp-Primary-Key" class="headerlink" title="更新模型(Unique Key &amp; Primary Key)"></a>更新模型(Unique Key &amp; Primary Key)</h4><p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B" >Unique Key 官网讲解<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E4%B8%BB%E9%94%AE%E6%A8%A1%E5%9E%8B" >Primary Key官网讲解<i class="fas fa-external-link-alt"></i></a></p>
+<p><strong>注意:</strong></p>
+<p>即 Unique 模型完全可以用聚合模型中的 REPLACE 方式替代。</p>
+<p>Primary Key模型是starrocks全新设计模型，主键模型的表要求有唯一的主键，支持对表中的行按主键进行更新和删除操作。相较更新模型，主键模型可以更好地支持<strong>实时和频繁更新</strong>等场景。</p>
+<h3 id="StarRocks表设计"><a href="#StarRocks表设计" class="headerlink" title="StarRocks表设计"></a>StarRocks表设计</h3><p>StarRocks和其他OLAP数据库存储设计类似，采用的列式存储，可以提高数据查询效率，每一列的数据类型一致，这样可以提高数据的压缩率，</p>
+<p>StarRocks的数据列可以分为两种，分别是维度列以及指标列，维度列用于分组和排序，指标列通过聚合函数在维度列基础上进行SUM，COUNT，BITMAP_UNION等操作。</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/SR%E8%A1%A8%E7%BB%93%E6%9E%84.png" class="" title="中二是最后的热血">
+
+<h4 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h4><p>Doris 不支持在任意列上创建索引，本质上，Doris 的数据存储在类似 SSTable（Sorted String Table）的数据结构中。该结构是一种有序的数据结构，可以按照指定的列进行排序存储。在这种数据结构上，以排序列作为条件进行查找，会非常的高效。</p>
+<p>比如我们建立的前缀索引为(user_id,age,message)，那么下面第一种查询要比第二种快得多</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># 命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> user_id<span class="operator">=</span><span class="number">1829239</span> <span class="keyword">and</span> age<span class="operator">=</span><span class="number">20</span>；</span><br><span class="line"># 没有命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> age<span class="operator">=</span><span class="number">20</span>；</span><br></pre></td></tr></table></figure>
+
+<p>下面我们看一下索引文件的结构</p>
+<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/StarRocks%E8%A1%A8%E7%B4%A2%E5%BC%95.png" class="" title="中二是最后的热血">
+
+<p>每个部分的描述与详细功能：</p>
+<p><strong>short key index表:</strong></p>
+<p>稀疏索引和行号之间的对应关系，首先表中数据会按照排序键进行排序，然后每1024行会构成一个逻辑块，并且获得一个shortkey index，这个key是由排序键进行拼接而成，不会超过36个字节，我们在查询的时候首先会根据要查询的排序键值来确定所属的数据块的行号，这个行号就是数据在第多少行。</p>
+<p> <strong>Per-column cardinal index:</strong> </p>
+<p>列式存储，列与列之间是独立存储，所以每列都会有一个自己的行号和块号的对应关系，划分块是通过每块大概是64kb来进行划分，根据前面找到的行号找到对应的数据块地址</p>
+<p><strong>Per-column data blocks:</strong></p>
+<p>表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
+<p><strong>注意:</strong></p>
+<p>这种使用范围查找的需要有前提条件，就是查询时, 如果指定了维度列的<strong>等值条件</strong>或者<strong>范围条件</strong>, 并且这些条件中维度列<strong>可构成表维度列的前缀</strong>, 则可以利用数据的有序性</p>
+<p>使用索引范围查找的条件:</p>
+<p>（1）维度列的等值或者范围条件，像 in (…) 这种是不能索引</p>
+<p>（2）条件中的维度列可以构成前缀</p>
+<p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找，或者查询条件是 where code = 4这种也是不能适用范围查找，没有命中。</p>
+<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><h4 id="Rollup"><a href="#Rollup" class="headerlink" title="Rollup"></a>Rollup</h4><p>Rollup 可以理解为 Table 的一个物化索引结构。<strong>物化</strong> 是因为其数据在<strong>物理上独立存储</strong>，而 <strong>索引</strong> 的意思是，Rollup可以<strong>调整列顺序</strong>以增加前缀索引的命中率，也可以减少key列以增加数据的聚合度。</p>
+<p>数据上Rollup意味着在多维分析中“上卷操作”，上卷意味着在数据立方体上进行一个维度的合并，与之对应的还有“钻取”操作(Drill-down)，钻取意味着在某些维度上进一步打开扩展维度，详细可以参考<a class="link"   href="https://www.zhihu.com/question/19955124" >这里<i class="fas fa-external-link-alt"></i></a></p>
+<h5 id="Aggregate-Key-amp-Roll-up"><a href="#Aggregate-Key-amp-Roll-up" class="headerlink" title="Aggregate Key &amp; Roll up"></a>Aggregate Key &amp; Roll up</h5><p>Rollup在聚合模型上可以发挥很好地作用，基于Base表创建Rollup可以获得更好的聚合数据效果以及调整key顺序，可以提高Rollup命中率</p>
+<h5 id="Unique-Key-amp-Roll-up"><a href="#Unique-Key-amp-Roll-up" class="headerlink" title="Unique Key &amp; Roll up"></a>Unique Key &amp; Roll up</h5><p>更新模型中的Unique Key相当于聚合模型中聚合函数被固定为Replace，所以每次在Unique上创建Rollup的时候必须选中所有的维度列，即在Unique Key模型上创建Rollup只能调整维度key的顺序，可以获得更高的Rollup命中率，但是因为Rollup数据是需要独立存储的，这样的话数据是否直接全部被存储了两遍？还需要后面验证下。</p>
+<h5 id="Duplicate-Key-amp-Roll-up"><a href="#Duplicate-Key-amp-Roll-up" class="headerlink" title="Duplicate Key &amp; Roll up"></a>Duplicate Key &amp; Roll up</h5><p>Duplicate Key模型和Unique Key模型类似，同样因为 Duplicate 模型没有聚合的语意。所以该模型中的 ROLLUP，已经失去了“上卷”这一层含义。而仅仅是作为调整列顺序，以命中前缀索引的作用。我们将在<a class="link"   href="https://doris.apache.org/zh-CN/data-table/index/prefix-index.html" >前缀索引<i class="fas fa-external-link-alt"></i></a>详细介绍前缀索引，以及如何使用ROLLUP改变前缀索引，以获得更好的查询效率。</p>
+<h4 id="物化视图"><a href="#物化视图" class="headerlink" title="物化视图"></a>物化视图</h4><p>说到物化视图就一定要和Rollup做一个区分，物化视图相当于Rollup的一个超集，和物化视图相比Rollup 具有一定的局限性：</p>
+<p>1.Rollup不能做明细模型的聚合，只能起到更改前缀索引顺序来加快查询速度，因为明细模型Duplicate Key表本身就没有聚合的含义</p>
+<p>2.Rollup的聚合函数必须和Base table保持一致，物化视图的聚合函数可以和base表不同</p>
+<p>3.物化视图是不支持Unique Key模型，因为物化视图实际上是预聚合进行计算，比如sum，count，聚合完毕之后我们就丢失了明细信息，这时候如果你去更新明细信息，物化视图就没法知道该如何做出改变，比如两条明细数据分别是1、5，我们建立物化视图求和，这时候这个值是6，然后我们更新数据，将1更改成2，但是rollup手里只有一个6，他知道其中一个值被变成2了，但是仅此而已，所以物化视图是不支持更新模型。</p>
+<h5 id="更新策略"><a href="#更新策略" class="headerlink" title="更新策略"></a>更新策略</h5><p>为保证物化视图表和 Base 表的数据一致性, Doris 会将导入，删除等对 base 表的操作都同步到物化视图表中。并且通过增量更新的方式来提升更新效率。通过事务方式来保证原子性。</p>
+<p>比如如果用户通过 INSERT 命令插入数据到 base 表中，则这条数据会同步插入到物化视图中。当 base 表和物化视图表均写入成功后，INSERT 命令才会成功返回。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      <tags>
+        <tag>StarRocks</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Superset查询会丢数据问题排查</title>
     <url>/2021/10/18/Superset%E6%9F%A5%E8%AF%A2%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</url>
     <content><![CDATA[<p>Superset版本 1.3.0</p>
@@ -546,90 +669,6 @@
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
       <tags>
         <tag>Grafana</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>StarRocks笔记</title>
-    <url>/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<p>好记性不如烂笔头</p>
-<span id="more"></span>
-
-<h3 id="什么是StarRocks"><a href="#什么是StarRocks" class="headerlink" title="什么是StarRocks"></a>什么是StarRocks</h3><p>StarRocks 是<strong>新一代极速全场景MPP数据库</strong>。StarRocks 的愿景是能够让用户的<strong>数据分析变得更加简单和敏捷</strong>。用户无需经过复杂的预处理，就可以用 StarRocks 来支持多种数据分析场景的极速分析。</p>
-<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/%E6%9E%B6%E6%9E%84.png" class="" title="中二是最后的热血">
-
-<h3 id="StarRocks适用哪些场景"><a href="#StarRocks适用哪些场景" class="headerlink" title="StarRocks适用哪些场景"></a>StarRocks适用哪些场景</h3><p>StarRocks 可以满足企业级用户的多种分析需求，包括 OLAP 多维分析、定制报表、实时数据分析和 Ad-hoc 数据分析等。</p>
-<h3 id="StarRocks三种数据模型"><a href="#StarRocks三种数据模型" class="headerlink" title="StarRocks三种数据模型"></a>StarRocks三种数据模型</h3><p>StarRocks根据数据摄入时候的映射关系，分为了三种数据关系，分别是明细、聚合、以及更新数据关系，三种数据关系在StarRocks中分别对应着不同的数据模型:</p>
-<p>明细表对应明细模型（Duplicate Key）</p>
-<p>聚合表对应聚合模型（Aggregate Key）</p>
-<p>更新表对应更新模型（Unique Key）和主键模型（Primary Key）</p>
-<h4 id="明细模型（Duplicate-Key）"><a href="#明细模型（Duplicate-Key）" class="headerlink" title="明细模型（Duplicate Key）"></a>明细模型（Duplicate Key）</h4><ol>
-<li><p>需要保留原始的数据（例如原始日志，原始操作记录等）来进行分析；</p>
-</li>
-<li><p>查询方式灵活, 不局限于预先定义的分析方式, 传统的预聚合方式难以命中;</p>
-</li>
-<li><p>数据更新不频繁。导入数据的来源一般为日志数据或者是时序数据,  以追加写为主要特点, 数据产生后就不会发生太多变化。</p>
-<p><strong>注意：</strong>明细模型不会根据设置的主键覆盖数据，导入完全相同的两行数据也会认为是不同的两行插入进来，比如我们日志中经常出现含义相同的信息，但是我们一般不会希望存在覆盖的情况。</p>
-</li>
-</ol>
-<h4 id="聚合模型（Aggregate-Key）"><a href="#聚合模型（Aggregate-Key）" class="headerlink" title="聚合模型（Aggregate Key）"></a>聚合模型（Aggregate Key）</h4><ul>
-<li><p>分析网站或APP访问流量，统计用户的访问总时长、访问总次数;</p>
-</li>
-<li><p>广告厂商为广告主提供的广告点击总量、展示总量、消费统计等;</p>
-</li>
-<li><p>分析电商的全年的交易数据, 获得某指定季度或者月份的, 各人口分类(geographic)的爆款商品。</p>
-<p><strong>注意：</strong></p>
-<p>1.只要是指定聚合函数的字段即视为指标列，表即视为聚合表，聚合表中不带聚合函数的列即为维度列</p>
-<p>2.建表语句中维度列必须在指标列前面</p>
-<p>3.聚合模型是根据按照相同的指标列进行聚合，多条数据具有相同的维度列的时候，会按照聚合函数将指标列数据进行聚合，这样可以减少数据量</p>
-<p>4.触发数据聚合有三种方式 : </p>
-<p>(1)数据导入时，数据落盘前的聚合 </p>
-<p>(2) 数据落盘后，后台的多版本异步聚合 </p>
-<p>(3)数据查询时，多版本多路归并聚合</p>
-</li>
-</ul>
-<h4 id="更新模型-Unique-Key-amp-Primary-Key"><a href="#更新模型-Unique-Key-amp-Primary-Key" class="headerlink" title="更新模型(Unique Key &amp; Primary Key)"></a>更新模型(Unique Key &amp; Primary Key)</h4><p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B" >Unique Key 官网讲解<i class="fas fa-external-link-alt"></i></a></p>
-<p><a class="link"   href="https://docs.starrocks.com/zh-cn/main/table_design/Data_model#%E4%B8%BB%E9%94%AE%E6%A8%A1%E5%9E%8B" >Primary Key官网讲解<i class="fas fa-external-link-alt"></i></a></p>
-<p><strong>注意:</strong></p>
-<p>即 Unique 模型完全可以用聚合模型中的 REPLACE 方式替代。</p>
-<p>Primary Key模型是starrocks全新设计模型，主键模型的表要求有唯一的主键，支持对表中的行按主键进行更新和删除操作。相较更新模型，主键模型可以更好地支持<strong>实时和频繁更新</strong>等场景。</p>
-<h3 id="StarRocks表设计"><a href="#StarRocks表设计" class="headerlink" title="StarRocks表设计"></a>StarRocks表设计</h3><p>StarRocks和其他OLAP数据库存储设计类似，采用的列式存储，可以提高数据查询效率，每一列的数据类型一致，这样可以提高数据的压缩率，</p>
-<p>StarRocks的数据列可以分为两种，分别是维度列以及指标列，维度列用于分组和排序，指标列通过聚合函数在维度列基础上进行SUM，COUNT，BITMAP_UNION等操作。</p>
-<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/SR%E8%A1%A8%E7%BB%93%E6%9E%84.png" class="" title="中二是最后的热血">
-
-<h4 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h4><p>Doris 不支持在任意列上创建索引，本质上，Doris 的数据存储在类似 SSTable（Sorted String Table）的数据结构中。该结构是一种有序的数据结构，可以按照指定的列进行排序存储。在这种数据结构上，以排序列作为条件进行查找，会非常的高效。</p>
-<p>比如我们建立的前缀索引为(user_id,age,message)，那么下面第一种查询要比第二种快得多</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># 命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> user_id<span class="operator">=</span><span class="number">1829239</span> <span class="keyword">and</span> age<span class="operator">=</span><span class="number">20</span>；</span><br><span class="line"># 没有命中索引</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> age<span class="operator">=</span><span class="number">20</span>；</span><br></pre></td></tr></table></figure>
-
-<p>下面我们看一下索引文件的结构</p>
-<img src="/2022/05/24/StarRocks%E7%AC%94%E8%AE%B0/StarRocks%E8%A1%A8%E7%B4%A2%E5%BC%95.png" class="" title="中二是最后的热血">
-
-<p>每个部分的描述与详细功能：</p>
-<p><strong>short key index表:</strong></p>
-<p>稀疏索引和行号之间的对应关系，首先表中数据会按照排序键进行排序，然后每1024行会构成一个逻辑块，并且获得一个shortkey index，这个key是由排序键进行拼接而成，不会超过36个字节，我们在查询的时候首先会根据要查询的排序键值来确定所属的数据块的行号，这个行号就是数据在第多少行。</p>
-<p> <strong>Per-column cardinal index:</strong> </p>
-<p>列式存储，列与列之间是独立存储，所以每列都会有一个自己的行号和块号的对应关系，划分块是通过每块大概是64kb来进行划分，根据前面找到的行号找到对应的数据块地址</p>
-<p><strong>Per-column data blocks:</strong></p>
-<p>表中每一列数据按64KB分块存储，根据前面找到的数据块地址就可以找到对应的块内容了。</p>
-<p><strong>注意:</strong></p>
-<p>这种使用范围查找的需要有前提条件，就是查询时, 如果指定了维度列的<strong>等值条件</strong>或者<strong>范围条件</strong>, 并且这些条件中维度列<strong>可构成表维度列的前缀</strong>, 则可以利用数据的有序性</p>
-<p>使用索引范围查找的条件:</p>
-<p>（1）维度列的等值或者范围条件，像 in (…) 这种是不能索引</p>
-<p>（2）条件中的维度列可以构成前缀</p>
-<p>Eg: 对于表table1: (event_day, siteid, citycode, username)➜(pv); 当查询条件为event_day &gt; 2020-09-18 and siteid = 2, 则可以使用范围查找; 如果指定条件为citycode = 4 and username in [“Andy”, “Boby”, “Christian”, “StarRocks”], 则无法使用范围查找，或者查询条件是 where code = 4这种也是不能适用范围查找，没有命中。</p>
-<h3 id="RollUp以及物化视图"><a href="#RollUp以及物化视图" class="headerlink" title="RollUp以及物化视图"></a>RollUp以及物化视图</h3><h4 id="Rollup"><a href="#Rollup" class="headerlink" title="Rollup"></a>Rollup</h4><p>Rollup 可以理解为 Table 的一个物化索引结构。<strong>物化</strong> 是因为其数据在<strong>物理上独立存储</strong>，而 <strong>索引</strong> 的意思是，Rollup可以<strong>调整列顺序</strong>以增加前缀索引的命中率，也可以减少key列以增加数据的聚合度。</p>
-<p>数据上Rollup意味着在多维分析中“上卷操作”，上卷意味着在数据立方体上进行一个维度的合并，与之对应的还有“钻取”操作(Drill-down)，钻取意味着在某些维度上进一步打开扩展维度，详细可以参考<a class="link"   href="https://www.zhihu.com/question/19955124" >这里<i class="fas fa-external-link-alt"></i></a></p>
-<h5 id="Aggregate-Key-amp-Roll-up"><a href="#Aggregate-Key-amp-Roll-up" class="headerlink" title="Aggregate Key &amp; Roll up"></a>Aggregate Key &amp; Roll up</h5><p>Rollup在聚合模型上可以发挥很好地作用，基于Base表创建Rollup可以获得更好的聚合数据效果以及调整key顺序，可以提高Rollup命中率</p>
-<h5 id="Unique-Key-amp-Roll-up"><a href="#Unique-Key-amp-Roll-up" class="headerlink" title="Unique Key &amp; Roll up"></a>Unique Key &amp; Roll up</h5><p>更新模型中的Unique Key相当于聚合模型中聚合函数被固定为Replace，所以每次在Unique上创建Rollup的时候必须选中所有的维度列，即在Unique Key模型上创建Rollup只能调整维度key的顺序，可以获得更高的Rollup命中率，但是因为Rollup数据是需要独立存储的，这样的话数据是否直接全部被存储了两遍？还需要后面验证下。</p>
-<h5 id="Duplicate-Key-amp-Roll-up"><a href="#Duplicate-Key-amp-Roll-up" class="headerlink" title="Duplicate Key &amp; Roll up"></a>Duplicate Key &amp; Roll up</h5><p>Duplicate Key模型和Unique Key模型类似，同样因为 Duplicate 模型没有聚合的语意。所以该模型中的 ROLLUP，已经失去了“上卷”这一层含义。而仅仅是作为调整列顺序，以命中前缀索引的作用。我们将在<a class="link"   href="https://doris.apache.org/zh-CN/data-table/index/prefix-index.html" >前缀索引<i class="fas fa-external-link-alt"></i></a>详细介绍前缀索引，以及如何使用ROLLUP改变前缀索引，以获得更好的查询效率。</p>
-<h4 id="物化视图"><a href="#物化视图" class="headerlink" title="物化视图"></a>物化视图</h4><p>说到物化视图就一定要和Rollup做一个区分，物化视图相当于Rollup的一个超集，和物化视图相比Rollup 具有一定的局限性：</p>
-<p>1.Rollup不能做明细模型的聚合，只能起到更改前缀索引顺序来加快查询速度，因为明细模型Duplicate Key表本身就没有聚合的含义</p>
-<p>2.Rollup的聚合函数必须和Base table保持一致，物化视图的聚合函数可以和base表不同</p>
-<p>3.物化视图是不支持Unique Key模型，因为物化视图实际上是预聚合进行计算，比如sum，count，聚合完毕之后我们就丢失了明细信息，这时候如果你去更新明细信息，物化视图就没法知道该如何做出改变，比如两条明细数据分别是1、5，我们建立物化视图求和，这时候这个值是6，然后我们更新数据，将1更改成2，但是rollup手里只有一个6，他知道其中一个值被变成2了，但是仅此而已，所以物化视图是不支持更新模型。</p>
-<h5 id="更新策略"><a href="#更新策略" class="headerlink" title="更新策略"></a>更新策略</h5><p>为保证物化视图表和 Base 表的数据一致性, Doris 会将导入，删除等对 base 表的操作都同步到物化视图表中。并且通过增量更新的方式来提升更新效率。通过事务方式来保证原子性。</p>
-<p>比如如果用户通过 INSERT 命令插入数据到 base 表中，则这条数据会同步插入到物化视图中。当 base 表和物化视图表均写入成功后，INSERT 命令才会成功返回。</p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
-      <tags>
-        <tag>StarRocks</tag>
       </tags>
   </entry>
   <entry>
