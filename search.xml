@@ -287,7 +287,7 @@
   <entry>
     <title>Hadoop相关源码</title>
     <url>/2022/10/02/Hadoop%E7%9B%B8%E5%85%B3%E6%BA%90%E7%A0%81/</url>
-    <content><![CDATA[<p>有一天背八股觉得无趣了，就想看看源码。。。</p>
+    <content><![CDATA[<p>Talk is cheap show me the code!</p>
 <span id="more"></span>
 
 <h1 id="Hadoop-向-yarn-提交任务整体流程"><a href="#Hadoop-向-yarn-提交任务整体流程" class="headerlink" title="Hadoop 向 yarn 提交任务整体流程"></a>Hadoop 向 yarn 提交任务整体流程</h1><p>总体流程：</p>
