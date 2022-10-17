@@ -190,12 +190,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>2.2k Words</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>3.2k 字</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fas fa-clock"></i>&nbsp;<span>10 Mins</span>
+            <i class="fas fa-clock"></i>&nbsp;<span>13 分钟</span>
         </span>
     
     
@@ -248,6 +248,21 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Fsimage.rollEditLog(): nn 滚动生成一个新的edit文件</span></span><br><span class="line"><span class="function">CheckpointSignature <span class="title">rollEditLog</span><span class="params">(<span class="keyword">int</span> layoutVersion)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    </span><br><span class="line">  	<span class="comment">// nn 滚动生成一个新的edits文件 并且txid+1 赋值给curSegmentTxId</span></span><br><span class="line">    </span><br><span class="line">  	getEditLog().rollEditLog(layoutVersion);</span><br><span class="line">    <span class="comment">// Record this log segment ID in all of the storage directories, so</span></span><br><span class="line">    <span class="comment">// we won&#x27;t miss this log segment on a restart if the edits directories</span></span><br><span class="line">    <span class="comment">// go missing.</span></span><br><span class="line">    storage.writeTransactionIdFileToStorage(getEditLog().getCurSegmentTxId());</span><br><span class="line">    <span class="comment">//Update NameDirSize Metric</span></span><br><span class="line">    getStorage().updateNameDirSize();</span><br><span class="line">  </span><br><span class="line">	  <span class="comment">//创建并返回一个CheckpointSignature 其中包含了curSegmentTxId和mostRecentCheckpointTxId等信息</span></span><br><span class="line">  	<span class="comment">//curSegmentTxId是滚动生成的新文件的起始txid</span></span><br><span class="line">    <span class="comment">//mostRecentCheckpointTxId是nn上的fsimage最后的txid</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> CheckpointSignature(<span class="keyword">this</span>);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// secondary namenode从namenode上下载edits文件和fsimage方法</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">downloadCheckpointFiles</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">final</span> URL nnHostPort,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">final</span> FSImage dstImage,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">final</span> CheckpointSignature sig,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">final</span> RemoteEditLogManifest manifest</span></span></span><br><span class="line"><span class="params"><span class="function">)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Sanity check manifest - these could happen if, eg, someone on the</span></span><br><span class="line">  <span class="comment">// NN side accidentally rmed the storage directories</span></span><br><span class="line">  <span class="keyword">if</span> (manifest.getLogs().isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">&quot;Found no edit logs to download on NN since txid &quot;</span></span><br><span class="line">        + sig.mostRecentCheckpointTxId);</span><br><span class="line">  &#125;</span><br><span class="line"><span class="comment">// nn中的fsimage中最新的txid+1是我们想开始拉取的id</span></span><br><span class="line">  <span class="keyword">long</span> expectedTxId = sig.mostRecentCheckpointTxId + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 检查nn中的第一个edit文件的开始的txId和我们想拉取的expectedTxId是否相匹配</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (manifest.getLogs().get(<span class="number">0</span>).getStartTxId() != expectedTxId) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">&quot;Bad edit log manifest (expected txid = &quot;</span> +</span><br><span class="line">        expectedTxId + <span class="string">&quot;: &quot;</span> + manifest);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">      Boolean b = UserGroupInformation.getCurrentUser().doAs(</span><br><span class="line">          <span class="keyword">new</span> PrivilegedExceptionAction&lt;Boolean&gt;() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Boolean <span class="title">run</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">          dstImage.getStorage().cTime = sig.cTime;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 检查nn上fsimage的txid和2nn上fsimage的txid是否相等，相等的话2nn就不用从nn上拉取fsimage文件</span></span><br><span class="line"></span><br><span class="line">          <span class="keyword">if</span> (sig.mostRecentCheckpointTxId ==</span><br><span class="line">              dstImage.getStorage().getMostRecentCheckpointTxId()) &#123;</span><br><span class="line">            LOG.info(<span class="string">&quot;Image has not changed. Will not download image.&quot;</span>);</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            LOG.info(<span class="string">&quot;Image has changed. Downloading updated image from NN.&quot;</span>);</span><br><span class="line">            MD5Hash downloadedHash = TransferFsImage.downloadImageToStorage(</span><br><span class="line">                nnHostPort, sig.mostRecentCheckpointTxId,</span><br><span class="line">                dstImage.getStorage(), <span class="keyword">true</span>, <span class="keyword">false</span>);</span><br><span class="line">            dstImage.saveDigestAndRenameCheckpointImage(NameNodeFile.IMAGE,</span><br><span class="line">                sig.mostRecentCheckpointTxId, downloadedHash);</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// get edits file</span></span><br><span class="line">          <span class="comment">// 将所有edits文件下载下来</span></span><br><span class="line">          <span class="keyword">for</span> (RemoteEditLog log : manifest.getLogs()) &#123;</span><br><span class="line">            TransferFsImage.downloadEditsToStorage(</span><br><span class="line">                nnHostPort, log, dstImage.getStorage());</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// true if we haven&#x27;t loaded all the transactions represented by the</span></span><br><span class="line">          <span class="comment">// downloaded fsimage.</span></span><br><span class="line">          <span class="comment">// lastAppliedTxId 这个指标是2nn查看自己最新的txid，包括了fsimage和edit文件中最新的</span></span><br><span class="line">          <span class="comment">// 上面拉取完成之后2nn上最新的txid和nn上的fsimage中最新的id相比较肯定是要大的 如果是小的话就是文件没有拉下来</span></span><br><span class="line">          <span class="keyword">return</span> dstImage.getLastAppliedTxId() &lt; sig.mostRecentCheckpointTxId;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="keyword">return</span> b.booleanValue();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="HA开启的情况下HDFS的checkpoint流程"><a href="#HA开启的情况下HDFS的checkpoint流程" class="headerlink" title="HA开启的情况下HDFS的checkpoint流程"></a>HA开启的情况下HDFS的checkpoint流程</h2><p>如果开启了HA，那么我们的NameNode就分为Active和standby两种情况，如果active nn出现问题那么就需要及时的切换为standby模式下的nn，这就需要active和standby的namenode节点元数据信息完全一致，那么是如何保证一致性的呢？</p>
+<p>NameNode存储的元数据有两种，一种是由hdfs client提交命令生成的元数据，比如创建文件夹等操作，另一种是datanode的block信息，<strong>而为了保证快速切换，datanode会将自己所有的块信息发送给active namenode 和 standby namenodes</strong>，这样需要同步的信息就只剩下了由HDFS client产生的元数据变化，那么这个如何操作呢？下面我们来分析一下有几种方案。</p>
+<p>1.<strong>同步阻塞式</strong></p>
+<p>HDFS client同步提交操作给active namenode之后再由其同步给standby namenode，这样确实可以保证两边的元数据完全一致，但是带来的影响也非常明显，如果standby namenode节点出现问题导致同步没有完成一直等待，超时后告诉用户是因为备用节点出现问题，**备用节点出现问题导致可用性降低这个肯定是我们不能接受的现象，那么另一种情况呢？</p>
+<p>2.<strong>异步阻塞式</strong></p>
+<p>HDFS client同步提交操作给active namenode再由其同步给standby namenode，但是stand by nn接收到命令之后直接返回一个成功，这样确实不会影响用户体验性，但是如果处理过成功一些问题导致失败，那么就不能保证active namenode和stanyby namenode之间的数据一致性。</p>
+<p>一个不能保证一致性，一个不能保证可用性，还有什么办法呢？还真的有，那就是引入一个<strong>中间层</strong>，由这个中间层来进行和nn之间的交互，这个中间层就是**JournalNode Cluster，active nn向JournalNode中同步元数据信息，然后standby nn从JournalNode中同步过来元数据即可，这样就算standby nn出现问题也可以恢复后继续从JournalNode中拉取元数据，听起来和直接由active nn向stand by nn同步数据类似，那如果JournalNode出现问题应该怎么办呢？JournalNode是存在奇数个(3,5,7)的，只要active nn成功向 <code>(JournalNode数-1)/2</code>数量的JournalNode写入之后，JournalNode就会返回一个成功信息给active nn，具体可以参考<a class="link"   target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1812781#:~:text=Paxos%20%E5%8D%8F%E8%AE%AE%E6%98%AF%E5%B0%91%E6%95%B0%E5%9C%A8,Chubby%E3%80%81Megastore%20%E4%BB%A5%E5%8F%8ASpanner%20%E7%AD%89%E3%80%82" >Paxos协议<i class="fas fa-external-link-alt"></i></a>，如果某一个JournalNode挂掉，那么马上JournalNode集群会选举一个新的<code>leader</code>出来，非常类似kafka副本机制，这个机制被称为QJM(HA using Quorum Journal Manager)架构，也是当前Hadoop默认的HA架构。</p>
+<blockquote>
+<p>Hadoop HA QJM 架构</p>
+<p>Active NameNode（ANN）：在HDFS集群中，对外提供读写服务的唯一Master节点。ANN将客户端请求过来的写操作通过EditLog写入共享存储系统（即JournalNode Cluster），为Standby NameNode及时同步数据提供支持；</p>
+<p>Standby NameNode（SBN）：与ANN相互形成热备，SBN及时从共享存储系统中读取EditLog数据并更新内存，以保证当前状态尽可能与ANN同步。当前在整个HDFS集群中最多一台处于Active状态，最多一台处于Standby状态；</p>
+<p>JournalNode Cluster（JNs）：ANN与SBN之间共享Editlog的一致性存储系统，是HDFS NameNode高可用的核心组件。借助JournalNode集群ANN可以尽可能及时同步元数据到SBN。其中ANN采用Push模式将EditLog写入JN，SBN通过Pull模式从JN拉取数据，整个过程中JN不主动进行数据交换；</p>
+<p>ZKFailoverController（ZKFC）：ZKFailoverController以独立进程运行，对NameNode主备切换进行控制，正常情况ANN和SBN分别对应各自ZKFC进程。ZKFC主要功能：NameNode健康状况检测；借助Zookeeper实现NameNode自动选主；操作NameNode进行主从切换；</p>
+</blockquote>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
@@ -255,14 +270,14 @@
             <div class="post-copyright-info">
                 <div class="article-copyright-info-container">
     <ul>
-        <li>Post title：HDFS CheckPoint 流程源码分析</li>
-        <li>Post author：刘梦凯</li>
-        <li>Create time：2022-10-11 10:14:42</li>
+        <li>本文标题：HDFS CheckPoint 流程源码分析</li>
+        <li>本文作者：刘梦凯</li>
+        <li>创建时间：2022-10-11 10:14:42</li>
         <li>
-            Post link：https://liumengkai.github.io/2022/10/11/HDFS-CheckPoint-流程源码分析/
+            本文链接：https://liumengkai.github.io/2022/10/11/HDFS-CheckPoint-流程源码分析/
         </li>
         <li>
-            Copyright Notice：All articles in this blog are licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> unless stating additionally.
+            版权声明：本博客所有文章除特别声明外，均采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> 许可协议。转载请注明出处！
         </li>
     </ul>
 </div>
@@ -281,7 +296,7 @@
                         >
                             <span class="title flex-center">
                                 <span class="post-nav-title-item">Hadoop提交任务到Yarn流程源码学习分析</span>
-                                <span class="post-nav-item">Next posts</span>
+                                <span class="post-nav-item">下一篇</span>
                             </span>
                             <span class="right arrow-icon flex-center">
                               <i class="fas fa-chevron-right"></i>
@@ -317,18 +332,18 @@
             <div class="website-count info-item">
                 
                     <span id="busuanzi_container_site_uv">
-                        Visitor Count&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
+                        访问人数&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
                     </span>
                 
                 
                     <span id="busuanzi_container_site_pv">
-                        Totalview&nbsp;<span id="busuanzi_value_site_pv"></span>
+                        总访问量&nbsp;<span id="busuanzi_value_site_pv"></span>
                     </span>
                 
             </div>
         
         <div class="theme-info info-item">
-            Powered by <a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;|&nbsp;Theme&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
         </div>
         
     </div>
@@ -412,7 +427,7 @@
         <aside class="page-aside">
             <div class="post-toc-wrap">
     <div class="post-toc">
-        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HA%E5%85%B3%E9%97%AD%E6%83%85%E5%86%B5%E4%B8%8BHDFS-Checkpoint%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">HA关闭情况下HDFS Checkpoint流程</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HA%E5%85%B3%E9%97%AD%E6%83%85%E5%86%B5%E4%B8%8BHDFS-Checkpoint%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">HA关闭情况下HDFS Checkpoint流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HA%E5%BC%80%E5%90%AF%E7%9A%84%E6%83%85%E5%86%B5%E4%B8%8BHDFS%E7%9A%84checkpoint%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">HA开启的情况下HDFS的checkpoint流程</span></a></li></ol>
     </div>
 </div>
         </aside>
@@ -434,7 +449,7 @@
                 <input autocomplete="off"
                        autocorrect="off"
                        autocapitalize="off"
-                       placeholder="Search..."
+                       placeholder="搜索..."
                        spellcheck="false"
                        type="search"
                        class="search-input"
