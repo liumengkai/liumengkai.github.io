@@ -190,12 +190,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fas fa-file-word"></i>&nbsp;<span>2.2k Words</span>
+            <i class="fas fa-file-word"></i>&nbsp;<span>1.4k 字</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fas fa-clock"></i>&nbsp;<span>8 Mins</span>
+            <i class="fas fa-clock"></i>&nbsp;<span>5 分钟</span>
         </span>
     
     
@@ -227,7 +227,6 @@
 <p><strong>注意：</strong>CTE默认在每次调用的时候都会重新计算一遍，设置hive.optimize.cte.materialize.threshold指标来强制物化CTE结果，当CTE被使用的次数大于该指标值的时候将被存储到磁盘中。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 下面<span class="keyword">SQL</span>可以检测是否物化到磁盘，设置hive.optimize.cte.materialize.threshold <span class="operator">=</span> <span class="number">1</span> </span><br><span class="line"># 如果两个随机数是相等的，证明被物化了，如果是不等的，证明计算了两次</span><br><span class="line"><span class="keyword">with</span> temp <span class="keyword">as</span> (<span class="keyword">select</span> rand())</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> temp </span><br><span class="line"><span class="keyword">union</span> <span class="keyword">all</span> </span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> temp</span><br></pre></td></tr></table></figure>
 
-<p>CTE还有一个主要功能是递归查询，但是没找到Hive对这方面的是否有支持 <a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/ljhdo/p/4580347.html" >CTE递归查询<i class="fas fa-external-link-alt"></i></a></p>
 <h3 id="View"><a href="#View" class="headerlink" title="View"></a>View</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 视图是保存了逻辑结构，没有真正的存储数据，所以如果逻辑复杂 需要重复计算多次 不建议使用视图</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">VIEW</span> [IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] view_name [(column_name [COMMENT column_comment], ...) ]</span><br><span class="line">[COMMENT table_comment]</span><br><span class="line"><span class="keyword">AS</span> <span class="keyword">SELECT</span> ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">VIEW</span> view_name</span><br></pre></td></tr></table></figure>
 
 <p>视图作用：</p>
@@ -243,7 +242,7 @@
 <li>hive优先解析视图，比如，如果使用视图的查询语句和视图均包含limit子句，那么用户最终获取的数据条数将首先考虑视图中限制的输出记录数</li>
 </ol>
 <h3 id="Partitioned-View"><a href="#Partitioned-View" class="headerlink" title="Partitioned View"></a>Partitioned View</h3><p>Hive还可以建立分区视图，有人可能疑惑分区视图这个业务场景在哪里？</p>
-<p>需要对分区表中的数据进行一些预处理之后再<strong>按照天数据</strong>供查询，我们就需要分区视图，总不能针对每一个分区都建立一张视图。</p>
+<p>需要对每天的分区表中的数据进行一些<strong>预处理 比如去重</strong> 之后再按照天数据供查询，我们就需要分区视图，总不能针对每一个分区都建立一张视图。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 先创建表</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> if <span class="keyword">not</span> <span class="keyword">exists</span> kantlin (</span><br><span class="line">id <span class="type">int</span>,</span><br><span class="line">name string,</span><br><span class="line">age <span class="type">int</span></span><br><span class="line">)</span><br><span class="line">PARTITIONED <span class="keyword">BY</span> (date_id string)</span><br><span class="line"><span class="type">row</span> format delimited fields terminated <span class="keyword">by</span> <span class="string">&#x27;,&#x27;</span></span><br><span class="line">stored <span class="keyword">as</span> textfile;</span><br><span class="line">#插入两条相同的数据</span><br><span class="line"> <span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">table</span> kantlin <span class="keyword">partition</span>(date_id<span class="operator">=</span><span class="string">&#x27;20210618&#x27;</span>)   <span class="keyword">values</span> (<span class="number">1</span>,<span class="string">&#x27;kantlin&#x27;</span>,<span class="number">3</span>);</span><br><span class="line"> <span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">table</span> kantlin <span class="keyword">partition</span>(date_id<span class="operator">=</span><span class="string">&#x27;20210618&#x27;</span>)   <span class="keyword">values</span> (<span class="number">1</span>,<span class="string">&#x27;kantlin&#x27;</span>,<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">#创建分区视图</span><br><span class="line">#注意 PARTITIONED <span class="keyword">ON</span>后面跟的是分区字段，而且这个字段必须是<span class="keyword">select</span>和<span class="keyword">group</span> <span class="keyword">by</span>的最后一个元素！</span><br><span class="line"><span class="keyword">create</span> <span class="keyword">view</span> kantlin PARTITIONED <span class="keyword">ON</span>(date_id) <span class="keyword">AS</span> <span class="keyword">SELECT</span> id,name,age,<span class="type">time</span>,date_id  <span class="keyword">from</span> kantlin <span class="keyword">GROUP</span> <span class="keyword">BY</span> id,name,age,<span class="type">time</span>,date_id ;</span><br></pre></td></tr></table></figure>
 
 <h3 id="Materialized-views"><a href="#Materialized-views" class="headerlink" title="Materialized views"></a>Materialized views</h3><p>Hive3.0.0引入了对物化视图的支持，需要注意的是<strong>引入物化视图的目的是为了优化数据访问的效率</strong>，物化视图相比视图来说修改要更加贴近底层，他会重新我们的查询SQL，自动优化我们的查询流程，可能我们两张表join的情况，存在满足我们结果的物化视图，那么他会直接从物化视图表拿数据。</p>
@@ -259,20 +258,6 @@
 <p>Hive 支持增量视图维护，即仅刷新受原始源表中的更改影响的数据。增量视图维护将减少重建步骤的执行时间。此外，它将为物化视图中的现有数据保留 LLAP 缓存。</p>
 <p>默认情况下，Hive 将尝试以增量方式重建实例化视图，如果不可能的话，将退回到完全重建。当前实现仅在源表上执行<code>INSERT</code>操作时支持增量重建，而<code>UPDATE</code>和<code>DELETE</code>操作将强制对物化视图进行完全重建。</p>
 <h2 id="SQL"><a href="#SQL" class="headerlink" title="SQL"></a>SQL</h2><h3 id="How-to-write-SQL"><a href="#How-to-write-SQL" class="headerlink" title="How to write SQL?"></a>How to write SQL?</h3><p>本章节记录写在开发过程中遇到一些SQL书写方法或者技巧。</p>
-<h4 id="用Union替代Join"><a href="#用Union替代Join" class="headerlink" title="用Union替代Join"></a>用Union替代Join</h4><p>两种投放，一种是人工，一种是算法，每种投放针对同一个APP都会有多个campaign活动，所有的campaign之间都存在互相抢占的情况，算法和算法活动之间，人工和人工活动之间，算法和人工活动之间。</p>
-<p>需求：</p>
-<ol>
-<li>两种投放各自的点击量（不去重）和安装的设备数量（去重）</li>
-<li>算法抢占人工投放的设备去充数，人工投放抢占算法的（注：抢占的含义是 算法投放的被某一个设备id点击过，但是安装归因到了人工投放上，这是因为广告行业的Last one click原则）</li>
-<li>人工不同投放活动之间的抢占</li>
-<li>人工不同投放活动和算法之间的抢占</li>
-</ol>
-<p>基准表两张，分别是click以及callback表，其中click表包含了算法人工所有的点击数据，callback表包含了所有的安装数据，判断是算法还是安装是通过两张表的算法包相关信息判断。</p>
-<p>刚开始我想的比较简单，先建立两张临时表，算法点击和安装的数据union起来是一张算法表，人工投放的点击和安装数据union之后是人工表，接下来需要的数据就从这两张表进行Join就行了。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"># 算法表</span><br><span class="line"><span class="keyword">WITH</span> ml <span class="keyword">AS</span> (</span><br><span class="line"><span class="comment">-- 算法点击</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           <span class="number">1</span> <span class="keyword">AS</span> type</span><br><span class="line">    <span class="keyword">FROM</span> dwd.click</span><br><span class="line">    <span class="keyword">WHERE</span> ml_id <span class="keyword">IS</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">UNION</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 算法安装</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           <span class="number">2</span> <span class="keyword">AS</span> type</span><br><span class="line">    <span class="keyword">FROM</span> dwd.callback</span><br><span class="line">    <span class="keyword">WHERE</span> ml_id <span class="keyword">IS</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>),</span><br><span class="line"># 人工投放表</span><br><span class="line">    <span class="keyword">per</span> <span class="keyword">AS</span> (</span><br><span class="line"><span class="comment">-- 人工点击   </span></span><br><span class="line">         <span class="keyword">SELECT</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">                <span class="number">3</span> <span class="keyword">AS</span> type</span><br><span class="line">         <span class="keyword">FROM</span> dwd.click</span><br><span class="line">         <span class="keyword">WHERE</span> ml_id <span class="keyword">IS</span> <span class="keyword">NULL</span></span><br><span class="line">      </span><br><span class="line">         <span class="keyword">UNION</span></span><br><span class="line"><span class="comment">-- 人工安装</span></span><br><span class="line">         <span class="keyword">SELECT</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">                <span class="number">4</span> <span class="keyword">AS</span> type</span><br><span class="line">         <span class="keyword">FROM</span> dwd.callback</span><br><span class="line">         <span class="keyword">WHERE</span> ml_id <span class="keyword">IS</span> <span class="keyword">NULL</span>)</span><br></pre></td></tr></table></figure>
-
-<p>比如我想要计算 算法投放的被人工抢占的数据，那么我需要计算人工的install的device_id和算法的click中的device_id进行join求交集，这些设备就相当于是安装归因到人工，但是算法是投放并被点击过的设备，而且算法或者人工表中type不同的时候代表的数据是不同的，这样我还需要将其拆开成两列，分别是点击数据和安装数据，无形中还增加了很多额外的工作。</p>
-<p>技术leader后来给我提供思路是我们刚开始的时候就想办法做成一个大宽表，然后再进行一些操作，简单示例之后令人豁然开朗。其实我的思想还停留在关系型数据表进行表关联，leader的思想更贴近于数仓中宽表的思想，具体的操作就是我们在刚开始的时候就把所有的指标和维度放到一张表中，如果你from的这张表中没有这个指标值，那就先给他0这种不影响我们最终聚合的默认值。这样所有的指标都被我们结合到一张表中了，之后我们再进行sum，将不同的指标进行求和，这样指标就是在所有维度下进行的。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
         </div>
 
@@ -280,14 +265,14 @@
             <div class="post-copyright-info">
                 <div class="article-copyright-info-container">
     <ul>
-        <li>Post title：Hive笔记</li>
-        <li>Post author：刘梦凯</li>
-        <li>Create time：2022-06-09 23:10:10</li>
+        <li>本文标题：Hive笔记</li>
+        <li>本文作者：刘梦凯</li>
+        <li>创建时间：2022-06-09 23:10:10</li>
         <li>
-            Post link：https://liumengkai.github.io/2022/06/09/Hive/
+            本文链接：https://liumengkai.github.io/2022/06/09/Hive/
         </li>
         <li>
-            Copyright Notice：All articles in this blog are licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> unless stating additionally.
+            版权声明：本博客所有文章除特别声明外，均采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> 许可协议。转载请注明出处！
         </li>
     </ul>
 </div>
@@ -308,7 +293,7 @@
                             </span>
                             <span class="title flex-center">
                                 <span class="post-nav-title-item">Grafana</span>
-                                <span class="post-nav-item">Prev posts</span>
+                                <span class="post-nav-item">上一篇</span>
                             </span>
                         </a>
                     </div>
@@ -321,7 +306,7 @@
                         >
                             <span class="title flex-center">
                                 <span class="post-nav-title-item">谓词下推</span>
-                                <span class="post-nav-item">Next posts</span>
+                                <span class="post-nav-item">下一篇</span>
                             </span>
                             <span class="right arrow-icon flex-center">
                               <i class="fas fa-chevron-right"></i>
@@ -350,25 +335,25 @@
             
               <span>2020</span>&nbsp;-&nbsp;
             
-            2022&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">刘梦凯</a>
+            2024&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">刘梦凯</a>
         </div>
         
             <script async  src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
             <div class="website-count info-item">
                 
                     <span id="busuanzi_container_site_uv">
-                        Visitor Count&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
+                        访问人数&nbsp;<span id="busuanzi_value_site_uv"></span>&ensp;
                     </span>
                 
                 
                     <span id="busuanzi_container_site_pv">
-                        Totalview&nbsp;<span id="busuanzi_value_site_pv"></span>
+                        总访问量&nbsp;<span id="busuanzi_value_site_pv"></span>
                     </span>
                 
             </div>
         
         <div class="theme-info info-item">
-            Powered by <a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;|&nbsp;Theme&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.3</a>
         </div>
         
     </div>
@@ -452,7 +437,7 @@
         <aside class="page-aside">
             <div class="post-toc-wrap">
     <div class="post-toc">
-        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CTE-amp-Temporary-tables-amp-View-amp-Materialized-view"><span class="nav-number">1.</span> <span class="nav-text">CTE &amp; Temporary tables &amp; View &amp; Materialized view</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CTE"><span class="nav-number">1.1.</span> <span class="nav-text">CTE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#View"><span class="nav-number">1.2.</span> <span class="nav-text">View</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Partitioned-View"><span class="nav-number">1.3.</span> <span class="nav-text">Partitioned View</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Materialized-views"><span class="nav-number">1.4.</span> <span class="nav-text">Materialized views</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL"><span class="nav-number">2.</span> <span class="nav-text">SQL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#How-to-write-SQL"><span class="nav-number">2.1.</span> <span class="nav-text">How to write SQL?</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8Union%E6%9B%BF%E4%BB%A3Join"><span class="nav-number">2.1.1.</span> <span class="nav-text">用Union替代Join</span></a></li></ol></li></ol></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CTE-amp-Temporary-tables-amp-View-amp-Materialized-view"><span class="nav-number">1.</span> <span class="nav-text">CTE &amp; Temporary tables &amp; View &amp; Materialized view</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CTE"><span class="nav-number">1.1.</span> <span class="nav-text">CTE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#View"><span class="nav-number">1.2.</span> <span class="nav-text">View</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Partitioned-View"><span class="nav-number">1.3.</span> <span class="nav-text">Partitioned View</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Materialized-views"><span class="nav-number">1.4.</span> <span class="nav-text">Materialized views</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL"><span class="nav-number">2.</span> <span class="nav-text">SQL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#How-to-write-SQL"><span class="nav-number">2.1.</span> <span class="nav-text">How to write SQL?</span></a></li></ol></li></ol>
     </div>
 </div>
         </aside>
@@ -474,7 +459,7 @@
                 <input autocomplete="off"
                        autocorrect="off"
                        autocapitalize="off"
-                       placeholder="Search..."
+                       placeholder="搜索..."
                        spellcheck="false"
                        type="search"
                        class="search-input"
