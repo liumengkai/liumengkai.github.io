@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-11-18T06:48:20.126Z</updated>
+  <updated>2025-11-06T15:22:01.841Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,50 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>20251106随笔</title>
+    <link href="http://example.com/2025/11/06/20251106%E9%9A%8F%E7%AC%94/"/>
+    <id>http://example.com/2025/11/06/20251106%E9%9A%8F%E7%AC%94/</id>
+    <published>2025-11-06T15:17:36.000Z</published>
+    <updated>2025-11-06T15:22:01.841Z</updated>
+    
+    <content type="html"><![CDATA[<p>现在是20251106 23:17:36，我正在写一篇随笔。</p><p>完蛋 不知道写什么 睡觉了先</p><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;现在是20251106 23:17:36，我正在写一篇随笔。&lt;/p&gt;
+&lt;p&gt;完蛋 不知道写什么 睡觉了先&lt;/p&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;/css/spoiler.css&quot; type=&quot;text/css&quot;&gt;&lt;script src=&quot;/js/</summary>
+      
+    
+    
+    
+    
+    <category term="随笔" scheme="http://example.com/tags/%E9%9A%8F%E7%AC%94/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>2024 Happy Loong Year</title>
+    <link href="http://example.com/2024/02/13/2024-Happy-Loong-Year/"/>
+    <id>http://example.com/2024/02/13/2024-Happy-Loong-Year/</id>
+    <published>2024-02-13T15:08:26.000Z</published>
+    <updated>2024-02-13T15:08:26.230Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; href=&quot;/css/spoiler.css&quot; type=&quot;text/css&quot;&gt;&lt;script src=&quot;/js/spoiler.js&quot; type=&quot;text/javascript&quot; async&gt;&lt;/script&gt;</summary>
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>HDFS CheckPoint 流程源码分析</title>
